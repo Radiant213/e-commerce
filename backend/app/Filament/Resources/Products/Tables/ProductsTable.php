@@ -5,6 +5,11 @@ namespace App\Filament\Resources\Products\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 class ProductsTable
@@ -12,49 +17,77 @@ class ProductsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with(['category', 'primaryImage', 'images']))
             ->columns([
-                \Filament\Tables\Columns\TextColumn::make('name')
+                ImageColumn::make('thumbnail_url')
+                    ->label('Foto')
+                    ->circular()
+                    ->defaultImageUrl('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=150&q=80'),
+
+                TextColumn::make('name')
                     ->searchable()
                     ->sortable()
-                    ->weight('bold'),
-                \Filament\Tables\Columns\TextColumn::make('category.name')
+                    ->weight('bold')
+                    ->description(fn ($record) => $record->sku ? 'SKU: ' . $record->sku : null)
+                    ->label('Nama Produk'),
+
+                TextColumn::make('category.name')
                     ->badge()
                     ->color('info')
-                    ->sortable(),
-                \Filament\Tables\Columns\TextColumn::make('price')
+                    ->sortable()
+                    ->label('Kategori'),
+
+                TextColumn::make('price')
                     ->money('IDR')
-                    ->sortable(),
-                \Filament\Tables\Columns\TextColumn::make('sale_price')
+                    ->sortable()
+                    ->label('Harga Normal'),
+
+                TextColumn::make('sale_price')
                     ->money('IDR')
                     ->placeholder('-')
-                    ->sortable(),
-                \Filament\Tables\Columns\TextColumn::make('stock')
+                    ->sortable()
+                    ->label('Harga Promo'),
+
+                TextColumn::make('stock')
                     ->numeric()
-                    ->sortable(),
-                \Filament\Tables\Columns\IconColumn::make('is_active')
-                    ->boolean()
+                    ->sortable()
+                    ->badge()
+                    ->color(fn (int $state): string => match (true) {
+                        $state === 0 => 'danger',
+                        $state < 10 => 'warning',
+                        default => 'success',
+                    })
+                    ->label('Sisa Stok'),
+
+                ToggleColumn::make('is_active')
                     ->label('Aktif'),
-                \Filament\Tables\Columns\IconColumn::make('is_featured')
-                    ->boolean()
+
+                ToggleColumn::make('is_featured')
                     ->label('Unggulan'),
-                \Filament\Tables\Columns\TextColumn::make('avg_rating')
+
+                TextColumn::make('avg_rating')
                     ->numeric(decimalPlaces: 1)
                     ->label('Rating')
                     ->sortable(),
-                \Filament\Tables\Columns\TextColumn::make('total_sold')
+
+                TextColumn::make('total_sold')
                     ->numeric()
                     ->label('Terjual')
                     ->sortable(),
-                \Filament\Tables\Columns\TextColumn::make('created_at')
+
+                TextColumn::make('created_at')
                     ->dateTime('d M Y')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->label('Dibuat'),
             ])
             ->filters([
-                \Filament\Tables\Filters\SelectFilter::make('category_id')
+                SelectFilter::make('category_id')
                     ->relationship('category', 'name')
                     ->label('Kategori'),
-                \Filament\Tables\Filters\TernaryFilter::make('is_active')
+                TernaryFilter::make('is_active')
                     ->label('Status Aktif'),
+                TernaryFilter::make('is_featured')
+                    ->label('Produk Unggulan'),
             ])
             ->recordActions([
                 EditAction::make(),

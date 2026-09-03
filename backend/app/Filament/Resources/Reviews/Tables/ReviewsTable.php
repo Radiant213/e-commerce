@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Reviews\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class ReviewsTable
@@ -12,35 +14,39 @@ class ReviewsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with(['product', 'user']))
             ->columns([
-                \Filament\Tables\Columns\TextColumn::make('product.name')
+                TextColumn::make('product.name')
                     ->searchable()
                     ->sortable()
                     ->label('Produk')
                     ->weight('bold'),
-                \Filament\Tables\Columns\TextColumn::make('user.name')
+                TextColumn::make('user.name')
                     ->searchable()
-                    ->label('Pengguna'),
-                \Filament\Tables\Columns\TextColumn::make('rating')
+                    ->label('Pelanggan'),
+                TextColumn::make('rating')
                     ->badge()
+                    ->icon('heroicon-m-star')
                     ->color(fn (int $state): string => match ($state) {
                         5 => 'success',
                         4 => 'info',
                         3 => 'warning',
                         default => 'danger',
                     })
-                    ->label('Bintang')
+                    ->label('Rating Bintang')
                     ->sortable(),
-                \Filament\Tables\Columns\TextColumn::make('comment')
-                    ->limit(50)
-                    ->label('Komentar'),
-                \Filament\Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime('d M Y')
+                TextColumn::make('comment')
+                    ->limit(60)
+                    ->tooltip(fn ($record) => $record->comment)
+                    ->label('Komentar Pembeli'),
+                TextColumn::make('created_at')
+                    ->dateTime('d M Y H:i')
                     ->sortable()
-                    ->label('Tanggal'),
+                    ->label('Waktu'),
             ])
             ->filters([
-                \Filament\Tables\Filters\SelectFilter::make('rating')
+                SelectFilter::make('rating')
+                    ->label('Filter Rating')
                     ->options([
                         5 => '5 Bintang',
                         4 => '4 Bintang',

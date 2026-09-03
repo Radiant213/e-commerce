@@ -36,7 +36,15 @@ class Product extends Model
             if (empty($product->slug)) {
                 $product->slug = Str::slug($product->name) . '-' . Str::random(5);
             }
+            if (empty($product->sku)) {
+                $product->sku = 'PRD-' . strtoupper(Str::random(6));
+            }
         });
+    }
+
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        return $this->primaryImage?->image_path ?? $this->images->first()?->image_path;
     }
 
     // Relationships

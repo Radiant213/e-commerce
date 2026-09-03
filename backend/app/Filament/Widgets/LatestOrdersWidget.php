@@ -11,13 +11,14 @@ class LatestOrdersWidget extends BaseWidget
 {
     protected int | string | array $columnSpan = 'full';
 
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 3;
 
     public function table(Table $table): Table
     {
         return $table
+            ->heading('Pesanan Terbaru Memerlukan Perhatian')
             ->query(
-                Order::query()->latest()->limit(5)
+                Order::query()->with(['user', 'payment'])->latest()->limit(5)
             )
             ->columns([
                 Tables\Columns\TextColumn::make('order_number')
