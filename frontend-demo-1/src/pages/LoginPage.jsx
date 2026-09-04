@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Lock, Mail, UserCheck, ArrowRight } from 'lucide-react';
 import { useAuth } from '@shared/context/AuthContext';
 import { useLanguage } from '@shared/context/LanguageContext';
+import GoogleLoginButton from '../components/GoogleLoginButton';
 
 const LoginPage = () => {
   const { t } = useLanguage();
@@ -16,6 +17,20 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    const token = searchParams.get('token');
+    const error = searchParams.get('error');
+
+    if (error) {
+      setErrorMessage(decodeURIComponent(error));
+    }
+
+    if (token) {
+      localStorage.setItem('auth_token', token);
+      window.location.href = redirect;
+    }
+  }, [searchParams]);
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -48,28 +63,40 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-[75vh] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
-      <div className="max-w-md w-full space-y-8 bg-white border border-slate-200 rounded-2xl p-8 shadow-xs text-left">
+      <div className="max-w-md w-full space-y-6 bg-white border border-slate-200 rounded-3xl p-8 shadow-xs text-left">
         {/* Header */}
         <div className="text-center">
-          <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-lg mx-auto mb-3">
+          <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-extrabold text-xl mx-auto mb-3 shadow-md">
             R
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{t('auth_login_title')}</h2>
+          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('auth_login_title')}</h2>
           <p className="text-xs text-slate-500 mt-1">
             {t('auth_login_desc')}
           </p>
         </div>
 
+        {/* Google OAuth Login Button */}
+        <div className="space-y-4 pt-2">
+          <GoogleLoginButton onError={(msg) => setErrorMessage(msg)} />
+
+          <div className="relative flex items-center justify-center">
+            <div className="border-t border-slate-200 w-full" />
+            <span className="bg-white px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider relative z-10 whitespace-nowrap">
+              {t('auth_or_divider')}
+            </span>
+          </div>
+        </div>
+
         {/* Demo Fast Login Buttons */}
-        <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-4 space-y-2.5">
-          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 space-y-2">
+          <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">
             {t('auth_demo_title')}
           </span>
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={() => fillDemoAccount('budi@example.com', 'password123')}
-              className="px-2.5 py-1.5 bg-white border border-slate-200 hover:border-slate-400 rounded-lg text-xs font-semibold text-slate-800 text-left transition-colors flex items-center gap-1.5"
+              className="px-2.5 py-1.5 bg-white border border-slate-200 hover:border-slate-400 rounded-xl text-xs font-bold text-slate-800 text-left transition-colors flex items-center gap-1.5 shadow-2xs"
             >
               <UserCheck size={14} className="text-emerald-700" />
               <span>Customer</span>
@@ -77,7 +104,7 @@ const LoginPage = () => {
             <button
               type="button"
               onClick={() => fillDemoAccount('admin@radiantcode.web.id', 'password123')}
-              className="px-2.5 py-1.5 bg-white border border-slate-200 hover:border-slate-400 rounded-lg text-xs font-semibold text-slate-800 text-left transition-colors flex items-center gap-1.5"
+              className="px-2.5 py-1.5 bg-white border border-slate-200 hover:border-slate-400 rounded-xl text-xs font-bold text-slate-800 text-left transition-colors flex items-center gap-1.5 shadow-2xs"
             >
               <UserCheck size={14} className="text-indigo-700" />
               <span>Admin Studio</span>
@@ -86,13 +113,14 @@ const LoginPage = () => {
         </div>
 
         {errorMessage && (
-          <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg">
+          <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl">
             {errorMessage}
           </div>
         )}
 
         {/* Form */}
         <form onSubmit={handleLoginSubmit} className="space-y-4">
+
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">{t('auth_email')}</label>
             <div className="relative">

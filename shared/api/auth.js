@@ -11,6 +11,19 @@ export const authApi = {
     return response.data;
   },
 
+  loginWithGoogle: async ({ credential, access_token }) => {
+    const response = await apiClient.post('/auth/google/token', {
+      credential,
+      access_token,
+    });
+    return response.data;
+  },
+
+  getGoogleRedirectUrl: async () => {
+    const response = await apiClient.get('/auth/google/redirect');
+    return response.data.url;
+  },
+
   logout: async () => {
     const response = await apiClient.post('/auth/logout');
     return response.data;
@@ -22,8 +35,25 @@ export const authApi = {
   },
 
   updateProfile: async (data) => {
-    const response = await apiClient.put('/auth/profile', data);
+    const isFormData = data instanceof FormData;
+    const response = await apiClient.post('/auth/profile', data, {
+      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined,
+    });
     return response.data;
+  },
+
+  updateAvatar: async (fileOrUrl) => {
+    if (fileOrUrl instanceof File) {
+      const formData = new FormData();
+      formData.append('avatar_file', fileOrUrl);
+      const response = await apiClient.post('/auth/profile', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return response.data;
+    } else {
+      const response = await apiClient.post('/auth/profile', { avatar: fileOrUrl });
+      return response.data;
+    }
   },
 
   updatePassword: async (data) => {
@@ -33,3 +63,4 @@ export const authApi = {
 };
 
 export default authApi;
+

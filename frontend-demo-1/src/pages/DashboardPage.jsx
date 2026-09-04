@@ -26,6 +26,10 @@ import {
   Home,
   Building2,
   MapPinned,
+  Camera,
+  UploadCloud,
+  Image as ImageIcon,
+  RefreshCw,
 } from 'lucide-react';
 import { useAuth } from '@shared/context/AuthContext';
 import { useCart } from '@shared/context/CartContext';
@@ -41,14 +45,28 @@ import { formatDate } from '@shared/utils/formatDate';
 import { payWithSnap } from '@shared/utils/midtransSnap';
 import ProductCard from '../components/ProductCard';
 
+const PRESET_AVATARS = [
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
+  'https://api.dicebear.com/7.x/bottts/svg?seed=RadiantHero',
+  'https://api.dicebear.com/7.x/bottts/svg?seed=RadiantCyber',
+  'https://api.dicebear.com/7.x/personas/svg?seed=RadiantPro',
+  'https://api.dicebear.com/7.x/adventurer/svg?seed=RadiantGamer',
+];
+
 const DashboardPage = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { user, isAuthenticated, logout, updateProfile } = useAuth();
+  const { user, isAuthenticated, logout, updateProfile, updateAvatar } = useAuth();
   const { totalItems, setIsDrawerOpen } = useCart();
   const { wishlistItems } = useWishlist();
   const { addToast } = useToast();
+
+  const fileInputRef = React.useRef(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   const activeTab = searchParams.get('tab') || 'orders';
   const setActiveTab = (tab) => {
@@ -210,6 +228,68 @@ const DashboardPage = () => {
     }
   };
 
+  const handleAvatarFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      addToast({
+        title: 'Format File Tidak Sesuai',
+        message: 'Harap pilih file gambar (JPG, PNG, WEBP, GIF).',
+        type: 'error',
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      addToast({
+        title: 'Ukuran Terlalu Besar',
+        message: 'Maksimal ukuran foto adalah 5MB.',
+        type: 'error',
+      });
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    try {
+      await updateAvatar(file);
+      addToast({
+        title: 'Foto Profil Diperbarui',
+        message: 'Foto profil akun Anda berhasil diunggah.',
+        type: 'success',
+      });
+    } catch (err) {
+      addToast({
+        title: 'Gagal Mengunggah Foto',
+        message: err.response?.data?.message || err.message || 'Terjadi kesalahan saat unggah.',
+        type: 'error',
+      });
+    } finally {
+      setIsUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleSelectPresetAvatar = async (url) => {
+    setIsUploadingAvatar(true);
+    try {
+      await updateAvatar(url);
+      addToast({
+        title: 'Avatar Diperbarui',
+        message: 'Avatar baru Anda telah aktif.',
+        type: 'success',
+      });
+    } catch (err) {
+      addToast({
+        title: 'Gagal Memperbarui Avatar',
+        message: err.message || 'Terjadi kesalahan.',
+        type: 'error',
+      });
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     if (passwordForm.password !== passwordForm.password_confirmation) {
@@ -361,10 +441,17 @@ const DashboardPage = () => {
 
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="flex items-center gap-4 sm:gap-6">
-            <div className="relative group">
-              {user?.avatar ? (
+            <div
+              className="relative group cursor-pointer"
+              onClick={() => {
+                setActiveTab('profile');
+                if (fileInputRef.current) fileInputRef.current.click();
+              }}
+              title="Klik untuk ubah foto profil"
+            >
+              {user?.avatar_url || user?.avatar ? (
                 <img
-                  src={user.avatar}
+                  src={user.avatar_url || user.avatar}
                   alt={user.name}
                   className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-emerald-500/60 shadow-lg group-hover:scale-105 transition-transform"
                 />
@@ -373,6 +460,10 @@ const DashboardPage = () => {
                   {user?.name?.charAt(0) || 'U'}
                 </div>
               )}
+              <div className="absolute inset-0 bg-black/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-bold">
+                <Camera size={18} className="mb-0.5" />
+                <span>Ubah</span>
+              </div>
               <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-400 border-2 border-slate-950 rounded-full animate-pulse" title="Akun Aktif" />
             </div>
 
@@ -834,15 +925,111 @@ const DashboardPage = () => {
         {/* TAB 4: PROFILE & SECURITY SETTINGS */}
         {/* ========================================================================= */}
         {activeTab === 'profile' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Card 1: Biodata Akun */}
+          <div className="space-y-8">
+            {/* Card 0: Avatar Customizer Card */}
             <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-              <div>
-                <h3 className="text-base font-extrabold text-slate-900">Biodata & Kontak Diri</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Informasi dasar akun pengguna Radiant Studio Anda.
-                </p>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                    <Camera size={18} className="text-emerald-700" />
+                    <span>{t('dash_avatar_title')}</span>
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Unggah foto dari perangkat atau pilih avatar karakter sesuai gaya Anda.
+                  </p>
+                </div>
+                {isUploadingAvatar && (
+                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 animate-pulse">
+                    <RefreshCw size={14} className="animate-spin" />
+                    <span>Memperbarui Avatar...</span>
+                  </div>
+                )}
               </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                {/* Current Avatar Large Preview & Upload Trigger */}
+                <div className="md:col-span-4 flex flex-col items-center text-center p-5 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-3">
+                  <div className="relative group">
+                    {user?.avatar_url || user?.avatar ? (
+                      <img
+                        src={user.avatar_url || user.avatar}
+                        alt={user.name}
+                        className="w-24 h-24 rounded-2xl object-cover border-4 border-white shadow-md group-hover:scale-105 transition-transform"
+                      />
+                    ) : (
+                      <div className="w-24 h-24 rounded-2xl bg-slate-900 text-white flex items-center justify-center text-3xl font-extrabold shadow-md">
+                        {user?.name?.charAt(0) || 'U'}
+                      </div>
+                    )}
+                  </div>
+
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleAvatarFileUpload}
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    className="hidden"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingAvatar}
+                    className="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2"
+                  >
+                    <UploadCloud size={15} />
+                    <span>{t('dash_avatar_upload_btn')}</span>
+                  </button>
+                  <span className="text-[10px] text-slate-400">JPG, PNG, WEBP maks 5MB</span>
+                </div>
+
+                {/* Preset Avatars Grid */}
+                <div className="md:col-span-8 space-y-3">
+                  <span className="text-xs font-bold text-slate-700 block">
+                    {t('dash_avatar_preset_title')}
+                  </span>
+                  <div className="grid grid-cols-4 sm:grid-cols-4 gap-3">
+                    {PRESET_AVATARS.map((avatarUrl, idx) => {
+                      const isSelected = (user?.avatar_url === avatarUrl) || (user?.avatar === avatarUrl);
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleSelectPresetAvatar(avatarUrl)}
+                          disabled={isUploadingAvatar}
+                          className={`relative aspect-square rounded-2xl p-1 border-2 transition-all hover:scale-105 active:scale-95 group overflow-hidden bg-slate-50 ${
+                            isSelected
+                              ? 'border-emerald-700 ring-2 ring-emerald-700/30 bg-emerald-50/30 shadow-md'
+                              : 'border-slate-200 hover:border-slate-400'
+                          }`}
+                        >
+                          <img
+                            src={avatarUrl}
+                            alt={`Preset ${idx + 1}`}
+                            className="w-full h-full object-cover rounded-xl"
+                          />
+                          {isSelected && (
+                            <div className="absolute top-1 right-1 w-4 h-4 bg-emerald-700 text-white rounded-full flex items-center justify-center shadow-xs">
+                              <Check size={10} strokeWidth={3} />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Card 1: Biodata Akun */}
+              <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900">Biodata & Kontak Diri</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Informasi dasar akun pengguna Radiant Studio Anda.
+                  </p>
+                </div>
 
               <form onSubmit={handleProfileSubmit} className="space-y-4">
                 <div>
@@ -949,8 +1136,9 @@ const DashboardPage = () => {
               </form>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+    </div>
 
       {/* ========================================================================= */}
       {/* MODAL DIALOG: TAMBAH / EDIT ALAMAT */}

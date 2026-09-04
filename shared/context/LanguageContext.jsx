@@ -168,6 +168,9 @@ export const translations = {
     // Auth (Login / Register)
     auth_login_title: 'Selamat Datang Kembali',
     auth_login_desc: 'Masuk ke akun Radiant Studio Anda untuk melanjutkan transaksi.',
+    auth_google_btn: 'Lanjutkan dengan Google',
+    auth_google_loading: 'Menghubungkan ke akun Google...',
+    auth_or_divider: 'atau lanjutkan dengan email',
     auth_demo_title: '1 Click Akun Demo:',
     auth_email: 'Alamat Email',
     auth_password: 'Kata Sandi',
@@ -181,6 +184,12 @@ export const translations = {
     auth_password_confirm: 'Konfirmasi Kata Sandi',
     auth_reg_btn: 'Daftar Sekarang',
     auth_has_account: 'Sudah punya akun?',
+
+    // Avatar Management
+    dash_avatar_title: 'Ubah Foto Profil & Avatar',
+    dash_avatar_upload_btn: 'Pilih Foto dari Perangkat',
+    dash_avatar_preset_title: 'Atau Pilih Avatar Favorit:',
+    dash_avatar_save_btn: 'Gunakan Avatar Ini',
 
     // Brand Story
     story_badge: 'STANDAR RADIANT',
@@ -400,6 +409,9 @@ export const translations = {
     // Auth (Login / Register)
     auth_login_title: 'Welcome Back',
     auth_login_desc: 'Sign in to your Radiant Studio account to manage your orders.',
+    auth_google_btn: 'Continue with Google',
+    auth_google_loading: 'Connecting to Google...',
+    auth_or_divider: 'or continue with email',
     auth_demo_title: '1-Click Demo Accounts:',
     auth_email: 'Email Address',
     auth_password: 'Password',
@@ -413,6 +425,12 @@ export const translations = {
     auth_password_confirm: 'Confirm Password',
     auth_reg_btn: 'Register Now',
     auth_has_account: 'Already have an account?',
+
+    // Avatar Management
+    dash_avatar_title: 'Change Profile Picture & Avatar',
+    dash_avatar_upload_btn: 'Choose Photo from Device',
+    dash_avatar_preset_title: 'Or Pick a Favorite Avatar:',
+    dash_avatar_save_btn: 'Use This Avatar',
 
     // Brand Story
     story_badge: 'RADIANT STANDARD',

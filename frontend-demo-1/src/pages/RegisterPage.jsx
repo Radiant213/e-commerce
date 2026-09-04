@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Lock, Mail, User, Phone, ArrowRight } from 'lucide-react';
 import { useAuth } from '@shared/context/AuthContext';
 import { useLanguage } from '@shared/context/LanguageContext';
+import GoogleLoginButton from '../components/GoogleLoginButton';
 
 const RegisterPage = () => {
   const { t } = useLanguage();
@@ -46,25 +47,38 @@ const RegisterPage = () => {
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
-      <div className="max-w-md w-full space-y-8 bg-white border border-slate-200 rounded-2xl p-8 shadow-xs text-left">
+      <div className="max-w-md w-full space-y-6 bg-white border border-slate-200 rounded-3xl p-8 shadow-xs text-left">
         {/* Header */}
         <div className="text-center">
-          <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-lg mx-auto mb-3">
+          <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-extrabold text-xl mx-auto mb-3 shadow-md">
             R
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{t('auth_reg_title')}</h2>
+          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">{t('auth_reg_title')}</h2>
           <p className="text-xs text-slate-500 mt-1">
             {t('auth_reg_desc')}
           </p>
         </div>
 
+        {/* Google OAuth Login Button */}
+        <div className="space-y-4 pt-2">
+          <GoogleLoginButton onError={(msg) => setErrorMessage(msg)} />
+
+          <div className="relative flex items-center justify-center">
+            <div className="border-t border-slate-200 w-full" />
+            <span className="bg-white px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider relative z-10 whitespace-nowrap">
+              {t('auth_or_divider')}
+            </span>
+          </div>
+        </div>
+
         {errorMessage && (
-          <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg">
+          <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl">
             {errorMessage}
           </div>
         )}
 
         <form onSubmit={handleRegisterSubmit} className="space-y-4">
+
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">{t('auth_name')}</label>
             <div className="relative">

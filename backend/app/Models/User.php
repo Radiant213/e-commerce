@@ -14,12 +14,27 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password', 'phone', 'address', 'avatar', 'role'])]
+#[Fillable(['name', 'email', 'password', 'phone', 'address', 'avatar', 'role', 'google_id', 'email_verified_at'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasApiTokens;
+
+    protected $appends = ['avatar_url'];
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if (!$this->avatar) {
+            return null;
+        }
+
+        if (str_starts_with($this->avatar, 'http://') || str_starts_with($this->avatar, 'https://')) {
+            return $this->avatar;
+        }
+
+        return url('storage/' . ltrim($this->avatar, '/'));
+    }
 
     public function canAccessPanel(Panel $panel): bool
     {

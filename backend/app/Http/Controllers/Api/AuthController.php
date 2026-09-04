@@ -82,13 +82,26 @@ class AuthController extends Controller
             'name' => 'sometimes|string|max:255',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:1000',
+            'avatar' => 'nullable|string|max:1000',
+            'avatar_file' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:5120', // 5MB max
         ]);
 
-        $request->user()->update($validated);
+        $user = $request->user();
+
+        // Handle file upload if provided
+        if ($request->hasFile('avatar_file')) {
+            $file = $request->file('avatar_file');
+            $filename = 'avatar_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('avatars', $filename, 'public');
+            $validated['avatar'] = $path;
+            unset($validated['avatar_file']);
+        }
+
+        $user->update($validated);
 
         return response()->json([
-            'message' => 'Profil berhasil diperbarui.',
-            'user' => $request->user()->fresh(),
+            'message' => 'Profil dan avatar berhasil diperbarui.',
+            'user' => $user->fresh(),
         ]);
     }
 

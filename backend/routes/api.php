@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\SocialAuthController;
 use App\Http\Controllers\Api\WishlistController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,10 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+
+    // Google OAuth
+    Route::get('/google/redirect', [SocialAuthController::class, 'redirectToGoogle']);
+    Route::post('/google/token', [SocialAuthController::class, 'handleGoogleToken']);
 });
 
 // Products
@@ -50,7 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::get('/user', [AuthController::class, 'user']);
         Route::post('/logout', [AuthController::class, 'logout']);
-        Route::put('/profile', [AuthController::class, 'updateProfile']);
+        Route::match(['put', 'post'], '/profile', [AuthController::class, 'updateProfile']);
         Route::put('/password', [AuthController::class, 'updatePassword']);
     });
 
