@@ -39,7 +39,7 @@ class OrderService
 
             // Calculate totals
             $subtotal = $cart->items->sum(function ($item) {
-                return $item->product->effective_price * $item->quantity;
+                return $item->subtotal;
             });
             $shippingCost = $shippingData['shipping_cost'] ?? 0;
             $total = $subtotal + $shippingCost;
@@ -61,16 +61,22 @@ class OrderService
 
             // Create order items & reduce stock
             foreach ($cart->items as $item) {
+                $unitPrice = $item->variant?->effective_price ?? $item->product->effective_price;
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item->product_id,
+                    'variant_id' => $item->variant_id,
                     'product_name' => $item->product->name,
-                    'product_price' => $item->product->effective_price,
+                    'variant_name' => $item->variant?->name,
+                    'product_price' => $unitPrice,
                     'quantity' => $item->quantity,
-                    'subtotal' => $item->product->effective_price * $item->quantity,
+                    'subtotal' => $unitPrice * $item->quantity,
                 ]);
 
                 // Reduce stock
+                if ($item->variant) {
+                    $item->variant->decrement('stock', $item->quantity);
+                }
                 $item->product->decrement('stock', $item->quantity);
                 $item->product->increment('total_sold', $item->quantity);
             }

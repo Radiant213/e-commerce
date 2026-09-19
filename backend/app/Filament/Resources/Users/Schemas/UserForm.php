@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -71,12 +73,93 @@ class UserForm
                                     ])
                                     ->required()
                                     ->default('customer')
+                                    ->native(false)
                                     ->label('Peran Akun'),
 
-                                TextInput::make('avatar')
-                                    ->label('URL Foto Profil (Avatar)')
-                                    ->placeholder('https://images.unsplash.com/... atau storage/...')
-                                    ->helperText('Bisa berupa URL gambar online atau path'),
+                                Select::make('avatar_source')
+                                    ->label('Metode Foto Profil')
+                                    ->options([
+                                        'upload' => 'Upload File Foto',
+                                        'url' => 'URL Foto Online',
+                                    ])
+                                    ->default('upload')
+                                    ->selectablePlaceholder(false)
+                                    ->dehydrated(false)
+                                    ->live()
+                                    ->afterStateHydrated(function ($component, $state, $record) {
+                                         if ($record && $record->avatar) {
+                                             $raw = $record->getRawOriginal('avatar') ?? $record->avatar;
+                                             if (str_starts_with($raw, 'http://') || str_starts_with($raw, 'https://')) {
+                                                 $component->state('url');
+                                             } else {
+                                                 $component->state('upload');
+                                             }
+                                         }
+                                     }),
+
+                                FileUpload::make('avatar_upload')
+                                    ->label('Pilih Foto Profil')
+                                    ->helperText('Format: JPG, PNG, WEBP. Maksimal: 40 MB. Kosongkan untuk menghapus foto profil.')
+                                    ->image()
+                                    ->maxSize(40960) // 40 MB
+                                    ->disk('public')
+                                    ->directory('avatars')
+                                    ->visibility('public')
+                                    ->avatar()
+                                    ->openable()
+                                    ->downloadable()
+                                    ->previewable(true)
+                                    ->dehydrated(false)
+                                    ->visible(fn ($get) => $get('avatar_source') !== 'url')
+                                    ->afterStateHydrated(function ($component, $state, $record) {
+                                         if ($record && $record->avatar) {
+                                             $raw = $record->getRawOriginal('avatar') ?? $record->avatar;
+                                             if (!str_starts_with($raw, 'http://') && !str_starts_with($raw, 'https://')) {
+                                                 $clean = preg_replace('#^/?storage/#', '', $raw);
+                                                 $component->state($clean);
+                                             }
+                                         }
+                                     })
+                                     ->afterStateUpdated(function ($state, callable $set) {
+                                         if ($state) {
+                                             $path = is_array($state) ? reset($state) : $state;
+                                             $set('avatar', $path);
+                                         } else {
+                                             $set('avatar', null);
+                                         }
+                                     }),
+
+                                TextInput::make('avatar_url')
+                                    ->label('URL Foto Profil Online')
+                                    ->placeholder('https://images.unsplash.com/...')
+                                    ->helperText('Masukkan URL foto profil online berawalan https://. Kosongkan untuk menghapus foto profil.')
+                                    ->dehydrated(false)
+                                    ->visible(fn ($get) => $get('avatar_source') === 'url')
+                                    ->afterStateHydrated(function ($component, $state, $record) {
+                                        if ($record && $record->avatar) {
+                                            $raw = $record->getRawOriginal('avatar') ?? $record->avatar;
+                                            if (str_starts_with($raw, 'http://') || str_starts_with($raw, 'https://')) {
+                                                $component->state($raw);
+                                            }
+                                        }
+                                    })
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        $set('avatar', $state ?: null);
+                                    }),
+
+                                Hidden::make('avatar')
+                                    ->default(null)
+                                    ->nullable()
+                                    ->dehydrateStateUsing(function ($state, $get) {
+                                        if ($get('avatar_source') === 'url') {
+                                            return $get('avatar_url') ?: null;
+                                        }
+                                        $uploaded = $get('avatar_upload');
+                                        if (is_array($uploaded)) {
+                                            $uploaded = reset($uploaded);
+                                        }
+                                        return $uploaded ?: null;
+                                    }),
                             ])
                             ->columnSpan(1),
                     ]),

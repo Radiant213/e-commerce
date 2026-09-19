@@ -10,13 +10,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 #[Fillable([
-    'category_id', 'name', 'slug', 'description', 'short_description',
+    'category_id', 'name', 'slug', 'description', 'short_description', 'specifications',
+    'video_path', 'video_source_type',
     'price', 'sale_price', 'stock', 'sku', 'weight',
     'is_active', 'is_featured', 'avg_rating', 'total_reviews', 'total_sold',
 ])]
 class Product extends Model
 {
     use HasFactory;
+
+    protected $appends = ['thumbnail_url', 'video_url'];
 
     protected function casts(): array
     {
@@ -25,6 +28,7 @@ class Product extends Model
             'sale_price' => 'decimal:2',
             'avg_rating' => 'decimal:2',
             'weight' => 'decimal:2',
+            'specifications' => 'array',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
         ];
@@ -39,12 +43,39 @@ class Product extends Model
             if (empty($product->sku)) {
                 $product->sku = 'PRD-' . strtoupper(Str::random(6));
             }
+            if (empty($product->video_source_type)) {
+                $product->video_source_type = 'upload';
+            }
         });
+
+        static::saving(function (Product $product) {
+            if (empty($product->video_source_type)) {
+                $product->video_source_type = 'upload';
+            }
+        });
+    }
+
+    public function setVideoSourceTypeAttribute($value): void
+    {
+        $this->attributes['video_source_type'] = !empty($value) ? $value : 'upload';
     }
 
     public function getThumbnailUrlAttribute(): ?string
     {
         return $this->primaryImage?->image_path ?? $this->images->first()?->image_path;
+    }
+
+    public function getVideoUrlAttribute(): ?string
+    {
+        if (empty($this->video_path)) {
+            return null;
+        }
+
+        if (str_starts_with($this->video_path, 'http://') || str_starts_with($this->video_path, 'https://')) {
+            return $this->video_path;
+        }
+
+        return url('storage/' . ltrim($this->video_path, '/'));
     }
 
     // Relationships
@@ -56,6 +87,11 @@ class Product extends Model
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class)->orderBy('sort_order');
+    }
+
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class)->orderBy('sort_order');
     }
 
     public function primaryImage()
@@ -76,7 +112,7 @@ class Product extends Model
     // Accessors
     public function getEffectivePriceAttribute(): float
     {
-        return $this->sale_price ?? $this->price;
+        return (float) ($this->sale_price ?? $this->price);
     }
 
     public function getDiscountPercentAttribute(): ?int

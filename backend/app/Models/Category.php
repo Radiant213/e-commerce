@@ -20,6 +20,19 @@ class Category extends Model
         ];
     }
 
+    public function getImageAttribute($value): ?string
+    {
+        if (blank($value)) {
+            return null;
+        }
+
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            return $value;
+        }
+
+        return url('storage/' . ltrim($value, '/'));
+    }
+
     protected static function booted(): void
     {
         static::creating(function (Category $category) {

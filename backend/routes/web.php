@@ -51,3 +51,9 @@ Route::get('/auth/google/callback', function () {
         return redirect("{$frontendUrl}/login?error=" . urlencode($e->getMessage()));
     }
 });
+
+Route::middleware(['web'])->group(function () {
+    Route::get('/admin/orders/{order}/invoice', [\App\Http\Controllers\Admin\ReportPrintController::class, 'invoice'])->name('admin.orders.invoice');
+    Route::get('/admin/reports/print/sales', [\App\Http\Controllers\Admin\ReportPrintController::class, 'salesReport'])->name('admin.reports.print.sales');
+    Route::get('/admin/reports/print/inventory', [\App\Http\Controllers\Admin\ReportPrintController::class, 'inventoryReport'])->name('admin.reports.print.inventory');
+});

@@ -2,9 +2,13 @@
 
 namespace App\Filament\Resources\Products\Tables;
 
+use App\Services\ProductImportService;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\FileUpload;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -88,6 +92,50 @@ class ProductsTable
                     ->label('Status Aktif'),
                 TernaryFilter::make('is_featured')
                     ->label('Produk Unggulan'),
+            ])
+            ->headerActions([
+                Action::make('download_template')
+                    ->label('Format CSV')
+                    ->icon('heroicon-m-arrow-down-tray')
+                    ->color('gray')
+                    ->action(fn (ProductImportService $service) => $service->downloadTemplate()),
+
+                Action::make('import_csv')
+                    ->label('Import CSV')
+                    ->icon('heroicon-m-arrow-up-tray')
+                    ->color('success')
+                    ->modalHeading('Import Data Produk dari File CSV')
+                    ->modalDescription('Unggah file CSV sesuai format template. Produk dengan SKU yang sama akan otomatis diperbarui (Upsert).')
+                    ->form([
+                        FileUpload::make('csv_file')
+                            ->label('Pilih File CSV')
+                            ->disk('local')
+                            ->directory('temp-imports')
+                            ->acceptedFileTypes(['text/csv', 'text/plain', 'application/csv', 'text/comma-separated-values'])
+                            ->required()
+                            ->preserveFilenames(),
+                    ])
+                    ->action(function (array $data, ProductImportService $service) {
+                        $filePath = storage_path('app/' . $data['csv_file']);
+                        $result = $service->importFromCsv($filePath);
+                        if (file_exists($filePath)) {
+                            @unlink($filePath);
+                        }
+
+                        if ($result['success']) {
+                            Notification::make()
+                                ->title('Import Produk Selesai')
+                                ->body("Berhasil mengimpor {$result['created']} produk baru dan memperbarui {$result['updated']} produk.")
+                                ->success()
+                                ->send();
+                        } else {
+                            Notification::make()
+                                ->title('Import Gagal')
+                                ->body($result['message'] ?? 'Periksa format file CSV Anda.')
+                                ->danger()
+                                ->send();
+                        }
+                    }),
             ])
             ->recordActions([
                 EditAction::make(),

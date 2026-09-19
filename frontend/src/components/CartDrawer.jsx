@@ -121,7 +121,8 @@ const CartDrawer = () => {
             ) : (
               items.map((item) => {
                 const prod = item.product;
-                const img = prod?.primary_image?.image_path || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=300&q=80';
+                const img = item.variant?.image_url || prod?.primary_image?.image_path || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=300&q=80';
+                const unitPrice = item.variant?.effective_price ?? prod?.effective_price ?? prod?.sale_price ?? prod?.price;
 
                 return (
                   <div key={item.id} className="py-4 first:pt-0 last:pb-0 flex gap-4 text-left group">
@@ -136,9 +137,16 @@ const CartDrawer = () => {
                     <div className="flex-1 flex flex-col justify-between">
                       <div>
                         <div className="flex justify-between items-start gap-2">
-                          <h4 className="text-xs font-bold text-slate-900 line-clamp-2 leading-snug">
-                            {prod?.name}
-                          </h4>
+                          <div>
+                            <h4 className="text-xs font-bold text-slate-900 line-clamp-2 leading-snug">
+                              {prod?.name}
+                            </h4>
+                            {item.variant && (
+                              <span className="inline-block mt-1 text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+                                {item.variant.name}
+                              </span>
+                            )}
+                          </div>
                           <button
                             onClick={() => removeItem(item.id)}
                             className="text-slate-400 hover:text-red-600 p-1 rounded-lg hover:bg-red-50 transition-colors"
@@ -148,7 +156,7 @@ const CartDrawer = () => {
                           </button>
                         </div>
                         <p className="text-xs font-extrabold text-slate-900 mt-1">
-                          {formatCurrency(prod?.effective_price || prod?.sale_price || prod?.price)}
+                          {formatCurrency(unitPrice)}
                         </p>
                       </div>
 
@@ -198,10 +206,10 @@ const CartDrawer = () => {
               </p>
               <button
                 onClick={handleCheckoutClick}
-                className="w-full py-4 px-4 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-sm rounded-2xl flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95"
+                className="w-full py-4 px-4 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-sm rounded-2xl flex items-center justify-center gap-2 shadow-xl hover-pop-lift cursor-pointer group"
               >
                 <span>{t('cart_checkout_btn')}</span>
-                <ArrowRight size={16} />
+                <ArrowRight size={16} className="group-hover:translate-x-1.5 transition-transform duration-200" />
               </button>
             </div>
           )}

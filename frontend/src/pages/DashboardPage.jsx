@@ -571,11 +571,10 @@ const DashboardPage = () => {
       <div className="bg-white border border-slate-200/90 rounded-2xl p-1.5 shadow-xs flex items-center gap-1.5 overflow-x-auto">
         <button
           onClick={() => setActiveTab('orders')}
-          className={`flex-1 min-w-[130px] py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide transition-all flex items-center justify-center gap-2 ${
-            activeTab === 'orders'
+          className={`flex-1 min-w-[130px] py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide transition-all flex items-center justify-center gap-2 ${activeTab === 'orders'
               ? 'bg-slate-900 text-white shadow-md'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
-          }`}
+            }`}
         >
           <Package size={15} />
           <span>{t('dash_tab_orders')} ({orders.length})</span>
@@ -583,11 +582,10 @@ const DashboardPage = () => {
 
         <button
           onClick={() => setActiveTab('addresses')}
-          className={`flex-1 min-w-[140px] py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide transition-all flex items-center justify-center gap-2 ${
-            activeTab === 'addresses'
+          className={`flex-1 min-w-[140px] py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide transition-all flex items-center justify-center gap-2 ${activeTab === 'addresses'
               ? 'bg-slate-900 text-white shadow-md'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
-          }`}
+            }`}
         >
           <MapPin size={15} />
           <span>{t('dash_tab_addresses')} ({addresses.length})</span>
@@ -595,11 +593,10 @@ const DashboardPage = () => {
 
         <button
           onClick={() => setActiveTab('wishlist')}
-          className={`flex-1 min-w-[130px] py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide transition-all flex items-center justify-center gap-2 ${
-            activeTab === 'wishlist'
+          className={`flex-1 min-w-[130px] py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide transition-all flex items-center justify-center gap-2 ${activeTab === 'wishlist'
               ? 'bg-slate-900 text-white shadow-md'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
-          }`}
+            }`}
         >
           <Heart size={15} />
           <span>{t('dash_tab_wishlist')} ({wishlistItems.length})</span>
@@ -607,11 +604,10 @@ const DashboardPage = () => {
 
         <button
           onClick={() => setActiveTab('profile')}
-          className={`flex-1 min-w-[140px] py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide transition-all flex items-center justify-center gap-2 ${
-            activeTab === 'profile'
+          className={`flex-1 min-w-[140px] py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide transition-all flex items-center justify-center gap-2 ${activeTab === 'profile'
               ? 'bg-slate-900 text-white shadow-md'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
-          }`}
+            }`}
         >
           <User size={15} />
           <span>{t('dash_tab_profile')}</span>
@@ -821,9 +817,8 @@ const DashboardPage = () => {
                 {addresses.map((addr) => (
                   <div
                     key={addr.id}
-                    className={`relative bg-white rounded-3xl p-6 border-2 transition-all duration-300 flex flex-col justify-between shadow-xs hover:shadow-lg ${
-                      addr.is_primary ? 'border-emerald-700 bg-emerald-50/10' : 'border-slate-200 hover:border-slate-400'
-                    }`}
+                    className={`relative bg-white rounded-3xl p-6 border-2 transition-all duration-300 flex flex-col justify-between shadow-xs hover:shadow-lg ${addr.is_primary ? 'border-emerald-700 bg-emerald-50/10' : 'border-slate-200 hover:border-slate-400'
+                      }`}
                   >
                     <div>
                       {/* Address Header */}
@@ -997,11 +992,10 @@ const DashboardPage = () => {
                           type="button"
                           onClick={() => handleSelectPresetAvatar(avatarUrl)}
                           disabled={isUploadingAvatar}
-                          className={`relative aspect-square rounded-2xl p-1 border-2 transition-all hover:scale-105 active:scale-95 group overflow-hidden bg-slate-50 ${
-                            isSelected
+                          className={`relative aspect-square rounded-2xl p-1 border-2 transition-all hover:scale-105 active:scale-95 group overflow-hidden bg-slate-50 ${isSelected
                               ? 'border-emerald-700 ring-2 ring-emerald-700/30 bg-emerald-50/30 shadow-md'
                               : 'border-slate-200 hover:border-slate-400'
-                          }`}
+                            }`}
                         >
                           <img
                             src={avatarUrl}
@@ -1031,114 +1025,114 @@ const DashboardPage = () => {
                   </p>
                 </div>
 
-              <form onSubmit={handleProfileSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Nama Lengkap</label>
-                  <input
-                    type="text"
-                    required
-                    value={profileForm.name}
-                    onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:outline-none focus:border-slate-900 transition-colors"
-                  />
-                </div>
+                <form onSubmit={handleProfileSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Nama Lengkap</label>
+                    <input
+                      type="text"
+                      required
+                      value={profileForm.name}
+                      onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:outline-none focus:border-slate-900 transition-colors"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Email Akun (Permanen)</label>
-                  <input
-                    type="email"
-                    disabled
-                    value={user?.email || ''}
-                    className="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-500 cursor-not-allowed font-mono"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Email Akun (Permanen)</label>
+                    <input
+                      type="email"
+                      disabled
+                      value={user?.email || ''}
+                      className="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-500 cursor-not-allowed font-mono"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Nomor WhatsApp / HP</label>
-                  <input
-                    type="tel"
-                    value={profileForm.phone}
-                    onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
-                    placeholder="081234567890"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:outline-none focus:border-slate-900 transition-colors"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Nomor WhatsApp / HP</label>
+                    <input
+                      type="tel"
+                      value={profileForm.phone}
+                      onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                      placeholder="081234567890"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:outline-none focus:border-slate-900 transition-colors"
+                    />
+                  </div>
 
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    disabled={isUpdatingProfile}
-                    className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95"
-                  >
-                    {isUpdatingProfile ? 'Menyimpan...' : 'Simpan Data Diri'}
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            {/* Card 2: Ubah Kata Sandi */}
-            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-              <div>
-                <h3 className="text-base font-extrabold text-slate-900">Keamanan & Sandi</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Perbarui kata sandi Anda secara berkala demi keamanan akun.
-                </p>
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      disabled={isUpdatingProfile}
+                      className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95"
+                    >
+                      {isUpdatingProfile ? 'Menyimpan...' : 'Simpan Data Diri'}
+                    </button>
+                  </div>
+                </form>
               </div>
 
-              <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              {/* Card 2: Ubah Kata Sandi */}
+              <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Kata Sandi Saat Ini</label>
-                  <input
-                    type="password"
-                    required
-                    value={passwordForm.current_password}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
-                    placeholder="••••••••"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:outline-none focus:border-slate-900 transition-colors"
-                  />
+                  <h3 className="text-base font-extrabold text-slate-900">Keamanan & Sandi</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Perbarui kata sandi Anda secara berkala demi keamanan akun.
+                  </p>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Kata Sandi Baru (Min. 8 Karakter)</label>
-                  <input
-                    type="password"
-                    required
-                    minLength={8}
-                    value={passwordForm.password}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, password: e.target.value })}
-                    placeholder="••••••••"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:outline-none focus:border-slate-900 transition-colors"
-                  />
-                </div>
+                <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Kata Sandi Saat Ini</label>
+                    <input
+                      type="password"
+                      required
+                      value={passwordForm.current_password}
+                      onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
+                      placeholder="••••••••"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:outline-none focus:border-slate-900 transition-colors"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Konfirmasi Kata Sandi Baru</label>
-                  <input
-                    type="password"
-                    required
-                    minLength={8}
-                    value={passwordForm.password_confirmation}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, password_confirmation: e.target.value })}
-                    placeholder="••••••••"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:outline-none focus:border-slate-900 transition-colors"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Kata Sandi Baru (Min. 8 Karakter)</label>
+                    <input
+                      type="password"
+                      required
+                      minLength={8}
+                      value={passwordForm.password}
+                      onChange={(e) => setPasswordForm({ ...passwordForm, password: e.target.value })}
+                      placeholder="••••••••"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:outline-none focus:border-slate-900 transition-colors"
+                    />
+                  </div>
 
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    disabled={isUpdatingPassword}
-                    className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95"
-                  >
-                    {isUpdatingPassword ? 'Memperbarui Sandi...' : 'Perbarui Kata Sandi'}
-                  </button>
-                </div>
-              </form>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Konfirmasi Kata Sandi Baru</label>
+                    <input
+                      type="password"
+                      required
+                      minLength={8}
+                      value={passwordForm.password_confirmation}
+                      onChange={(e) => setPasswordForm({ ...passwordForm, password_confirmation: e.target.value })}
+                      placeholder="••••••••"
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:outline-none focus:border-slate-900 transition-colors"
+                    />
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      disabled={isUpdatingPassword}
+                      className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95"
+                    >
+                      {isUpdatingPassword ? 'Memperbarui Sandi...' : 'Perbarui Kata Sandi'}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
 
       {/* ========================================================================= */}
       {/* MODAL DIALOG: TAMBAH / EDIT ALAMAT */}
@@ -1174,11 +1168,10 @@ const DashboardPage = () => {
                         type="button"
                         key={lbl}
                         onClick={() => setAddressForm({ ...addressForm, label: lbl })}
-                        className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-1.5 ${
-                          isSelected
+                        className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-1.5 ${isSelected
                             ? 'bg-slate-900 text-white shadow-xs'
                             : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                        }`}
+                          }`}
                       >
                         {lbl === 'Kantor' ? <Building2 size={12} /> : <Home size={12} />}
                         <span>{lbl}</span>

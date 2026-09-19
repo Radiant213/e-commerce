@@ -25,15 +25,20 @@ class User extends Authenticatable implements FilamentUser
 
     public function getAvatarUrlAttribute(): ?string
     {
-        if (!$this->avatar) {
+        return $this->avatar;
+    }
+
+    public function getAvatarAttribute($value): ?string
+    {
+        if (blank($value)) {
             return null;
         }
 
-        if (str_starts_with($this->avatar, 'http://') || str_starts_with($this->avatar, 'https://')) {
-            return $this->avatar;
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            return $value;
         }
 
-        return url('storage/' . ltrim($this->avatar, '/'));
+        return url('storage/' . ltrim($value, '/'));
     }
 
     public function canAccessPanel(Panel $panel): bool

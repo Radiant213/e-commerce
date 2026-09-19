@@ -537,7 +537,7 @@ class DatabaseSeeder extends Seeder
                     'product_id' => $product->id,
                     'image_path' => $imgUrl,
                     'is_primary' => $idx === 0,
-                    'sort_order' => $idx,
+                    'sort_order' => $idx + 1,
                 ]);
             }
 

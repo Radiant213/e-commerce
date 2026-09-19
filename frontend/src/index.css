@@ -17,7 +17,12 @@
     overflow-x: hidden;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-heading);
     letter-spacing: -0.02em;
   }
@@ -43,29 +48,113 @@
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideInRight {
-  from { opacity: 0; transform: translateX(20px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes pulseSubtle {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.03); }
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.85;
+    transform: scale(1.03);
+  }
 }
 
 @keyframes pop {
-  0% { transform: scale(0.9); }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(0.9);
+  }
+
+  50% {
+    transform: scale(1.15);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes wiggle {
+
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(-8deg);
+  }
+
+  75% {
+    transform: rotate(8deg);
+  }
+}
+
+@keyframes floatSubtle {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes heartbeat {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  25% {
+    transform: scale(1.18);
+  }
+
+  50% {
+    transform: scale(0.95);
+  }
+
+  75% {
+    transform: scale(1.12);
+  }
 }
 
 .animate-fade-in {
@@ -86,6 +175,78 @@
   animation: shimmer 1.5s infinite;
 }
 
+.animate-wiggle {
+  animation: wiggle 0.5s ease-in-out;
+}
+
+.animate-heartbeat {
+  animation: heartbeat 0.6s ease-in-out;
+}
+
+.animate-float {
+  animation: floatSubtle 3s ease-in-out infinite;
+}
+
+@keyframes cartBounce {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-14deg) scale(1.18); }
+  50% { transform: rotate(10deg) scale(1.15); }
+  75% { transform: rotate(-5deg) scale(1.08); }
+}
+
+@keyframes spinSearch {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(40deg) scale(1.2); }
+  100% { transform: rotate(12deg) scale(1.1); }
+}
+
+@keyframes heartThrob {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.28); }
+  50% { transform: scale(1.06); }
+  75% { transform: scale(1.22); }
+}
+
+.hover-cart-bounce:hover svg,
+.group:hover .group-hover-cart-bounce {
+  animation: cartBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.hover-spin-search:hover svg,
+.group:hover .group-hover-spin-search {
+  animation: spinSearch 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.hover-heart-throb:hover svg,
+.group:hover .group-hover-heart-throb {
+  animation: heartThrob 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Spring bounce utilities for playful pop-up micro-interactions */
+.hover-pop-bounce {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, color 0.15s ease, background-color 0.15s ease !important;
+}
+
+.hover-pop-bounce:hover {
+  transform: translateY(-2px) scale(1.08) !important;
+}
+
+.hover-pop-bounce:active {
+  transform: translateY(0) scale(0.95) !important;
+}
+
+.hover-pop-lift {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease !important;
+}
+
+.hover-pop-lift:hover {
+  transform: translateY(-3px) scale(1.05) !important;
+}
+
+.hover-pop-lift:active {
+  transform: translateY(0) scale(0.95) !important;
+}
+
 /* Smooth custom transitions */
 .transition-all-custom {
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -96,13 +257,16 @@
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: #F8FAFC;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #CBD5E1;
   border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
@@ -140,4 +304,63 @@
 
 .product-card:hover .product-overlay-glow {
   opacity: 1 !important;
+}
+
+/* Rich Description / HTML styling */
+.rich-description {
+  color: #334155;
+  font-size: 0.875rem;
+  line-height: 1.75;
+}
+
+.rich-description h1,
+.rich-description h2,
+.rich-description h3,
+.rich-description h4 {
+  color: #0f172a;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.rich-description p {
+  margin-bottom: 1rem;
+}
+
+.rich-description ul,
+.rich-description ol {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.rich-description ul {
+  list-style-type: disc;
+}
+
+.rich-description ol {
+  list-style-type: decimal;
+}
+
+.rich-description img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 1rem;
+  margin: 1.5rem auto;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.rich-description a {
+  color: #065f46;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.rich-description blockquote {
+  border-left: 4px solid #10b981;
+  padding-left: 1rem;
+  font-style: italic;
+  color: #475569;
+  margin: 1rem 0;
 }

@@ -40,14 +40,14 @@ export const CartProvider = ({ children }) => {
     fetchCart();
   }, [fetchCart]);
 
-  const addToCart = async (productId, quantity = 1) => {
+  const addToCart = async (productId, quantity = 1, variantId = null) => {
     if (!isAuthenticated) {
       throw new Error('Silakan login terlebih dahulu untuk menambahkan produk ke keranjang.');
     }
 
     try {
       setIsLoading(true);
-      const res = await cartApi.addItem(productId, quantity);
+      const res = await cartApi.addItem(productId, quantity, variantId);
       await fetchCart();
       setIsDrawerOpen(true);
       return res;

@@ -27,6 +27,7 @@ class ReviewForm
                                             ->required()
                                             ->searchable()
                                             ->preload()
+                                            ->native(false)
                                             ->label('Produk yang Diulas'),
 
                                         Select::make('user_id')
@@ -34,6 +35,7 @@ class ReviewForm
                                             ->required()
                                             ->searchable()
                                             ->preload()
+                                            ->native(false)
                                             ->label('Nama Pengulas (Customer)'),
                                     ]),
 
@@ -47,6 +49,7 @@ class ReviewForm
                                     ])
                                     ->required()
                                     ->default(5)
+                                    ->native(false)
                                     ->label('Rating Bintang'),
 
                                 Textarea::make('comment')

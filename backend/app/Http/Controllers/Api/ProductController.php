@@ -71,6 +71,7 @@ class ProductController extends Controller
             ->active()
             ->with([
                 'images',
+                'variants' => fn($q) => $q->where('is_active', true)->orderBy('sort_order'),
                 'category',
                 'reviews' => fn($q) => $q->with('user')->latest()->take(10),
             ])

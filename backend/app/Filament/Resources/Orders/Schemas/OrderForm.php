@@ -44,19 +44,20 @@ class OrderForm
                                         'cancelled' => 'Cancelled (Dibatalkan)',
                                     ])
                                     ->required()
+                                    ->native(false)
                                     ->label('Status Pesanan'),
 
                                 Placeholder::make('payment_details')
                                     ->label('Info Gateway Midtrans')
                                     ->content(function ($record) {
                                         if (!$record || !$record->payment) {
-                                            return new HtmlString('<div style="padding: 12px; background: #fffbeb; color: #92400e; border: 1px solid #fef3c7; border-radius: 8px; font-size: 0.875rem;">⚠️ Belum ada data transaksi Midtrans tercatat.</div>');
+                                            return new HtmlString('<div style="padding: 12px; background: rgba(245, 158, 11, 0.1); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 10px; font-size: 0.875rem;">⚠️ Belum ada data transaksi Midtrans tercatat.</div>');
                                         }
                                         $p = $record->payment;
                                         $isPaid = in_array(strtolower($p->status ?? ''), ['settlement', 'capture', 'paid']);
-                                        $statusBg = $isPaid ? '#ecfdf5' : '#fffbeb';
-                                        $statusColor = $isPaid ? '#065f46' : '#92400e';
-                                        $statusBorder = $isPaid ? '#a7f3d0' : '#fde68a';
+                                        $statusBg = $isPaid ? 'rgba(16, 185, 129, 0.12)' : 'rgba(245, 158, 11, 0.12)';
+                                        $statusColor = $isPaid ? '#10B981' : '#F59E0B';
+                                        $statusBorder = $isPaid ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)';
                                         $statusLabel = strtoupper($p->status ?? 'PENDING');
                                         $type = strtoupper($p->payment_type ?? 'ONLINE');
                                         $trx = $p->midtrans_transaction_id ?? '-';
@@ -64,14 +65,14 @@ class OrderForm
 
                                         return new HtmlString("
                                             <div style='display: flex; flex-direction: column; gap: 10px; font-size: 0.875rem;'>
-                                                <div style='display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: {$statusBg}; color: {$statusColor}; border: 1px solid {$statusBorder}; border-radius: 8px;'>
+                                                <div style='display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: {$statusBg}; color: {$statusColor}; border: 1px solid {$statusBorder}; border-radius: 10px;'>
                                                     <span style='font-weight: 600;'>Status Settlement</span>
-                                                    <span style='padding: 2px 10px; background: #ffffff; border: 1px solid {$statusBorder}; border-radius: 9999px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase;'>{$statusLabel}</span>
+                                                    <span style='padding: 3px 12px; background: var(--rc-surface, #ffffff); color: {$statusColor}; border: 1px solid {$statusBorder}; border-radius: 9999px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase;'>{$statusLabel}</span>
                                                 </div>
-                                                <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.8rem;'>
-                                                    <div><span style='color: #94a3b8; display: block;'>Metode Bayar:</span> <strong style='color: #0f172a; font-size: 0.875rem;'>{$type}</strong></div>
-                                                    <div><span style='color: #94a3b8; display: block;'>Nominal Bayar:</span> <strong style='color: #0f172a; font-size: 0.875rem;'>Rp {$gross}</strong></div>
-                                                    <div style='grid-column: span 2; border-top: 1px solid #e2e8f0; padding-top: 8px;'><span style='color: #94a3b8; display: block;'>ID Transaksi Midtrans:</span> <code style='font-family: monospace; background: #ffffff; padding: 3px 8px; border-radius: 4px; border: 1px solid #e2e8f0; color: #334155; font-size: 0.75rem; display: inline-block; margin-top: 2px;'>{$trx}</code></div>
+                                                <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: var(--rc-surface-2, #f8fafc); padding: 14px; border-radius: 10px; border: 1px solid var(--rc-border, #e2e8f0); font-size: 0.8rem;'>
+                                                    <div><span style='color: var(--rc-text-muted, #94a3b8); display: block;'>Metode Bayar:</span> <strong style='color: var(--rc-text, #0f172a); font-size: 0.875rem;'>{$type}</strong></div>
+                                                    <div><span style='color: var(--rc-text-muted, #94a3b8); display: block;'>Nominal Bayar:</span> <strong style='color: var(--rc-emerald, #10b981); font-size: 0.875rem;'>Rp {$gross}</strong></div>
+                                                    <div style='grid-column: span 2; border-top: 1px solid var(--rc-border, #e2e8f0); padding-top: 10px;'><span style='color: var(--rc-text-muted, #94a3b8); display: block;'>ID Transaksi Midtrans:</span> <code style='font-family: monospace; background: var(--rc-surface, #ffffff); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--rc-border, #e2e8f0); color: var(--rc-text, #334155); font-size: 0.75rem; display: inline-block; margin-top: 4px;'>{$trx}</code></div>
                                                 </div>
                                             </div>
                                         ");

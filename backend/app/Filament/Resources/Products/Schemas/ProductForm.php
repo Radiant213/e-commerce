@@ -2,7 +2,11 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -58,9 +62,22 @@ class ProductForm
                                     ->rows(2)
                                     ->label('Deskripsi Singkat (Ringkasan)'),
 
-                                Textarea::make('description')
-                                    ->rows(5)
-                                    ->label('Deskripsi Lengkap & Spesifikasi'),
+                                RichEditor::make('description')
+                                    ->label('Deskripsi Lengkap Produk (Mendukung Teks & Gambar)')
+                                    ->fileAttachmentsDisk('public')
+                                    ->fileAttachmentsDirectory('products/descriptions')
+                                    ->fileAttachmentsVisibility('public')
+                                    ->helperText('Anda dapat menyisipkan foto/banner di antara paragraf teks dengan tombol upload gambar di editor.')
+                                    ->columnSpanFull(),
+
+                                KeyValue::make('specifications')
+                                    ->label('Spesifikasi Teknis Produk (Tabel Atribut Terstruktur)')
+                                    ->keyLabel('Parameter / Atribut')
+                                    ->valueLabel('Nilai / Keterangan')
+                                    ->keyPlaceholder('Misal: Merek, Masa Garansi, Koneksi, Bahan')
+                                    ->valuePlaceholder('Misal: Anker, 18 Bulan, Bluetooth 5.3, ABS')
+                                    ->helperText('Spesifikasi akan otomatis tampil dalam bentuk tabel 2-kolom yang rapi di halaman produk.')
+                                    ->columnSpanFull(),
                             ])
                             ->columnSpan(2),
 
@@ -111,35 +128,368 @@ class ProductForm
                             ->columnSpan(1),
                     ]),
 
-                // Full-Width Bottom Section: Product Gallery
-                Section::make('Galeri & Foto Produk')
-                    ->description('Kelola foto produk yang akan ditampilkan kepada pembeli')
+                // Full-Width Section 1: Main Product Showcase Video
+                Section::make('Video Showcase Produk (Utama)')
+                    ->description('Sertakan 1 video showcase utama yang akan disorot pertama kali oleh pembeli saat membuka produk (Mendukung MP4, MOV, WEBM hingga 100 MB).')
+                    ->collapsible()
+                    ->schema([
+                        Grid::make(3)
+                            ->schema([
+                                Select::make('video_source_type')
+                                    ->label('Metode Video Showcase')
+                                    ->options([
+                                        'upload' => 'Upload File Video',
+                                        'url' => 'URL Video Online',
+                                    ])
+                                    ->default('upload')
+                                    ->selectablePlaceholder(false)
+                                    ->dehydrateStateUsing(fn ($state) => $state ?: 'upload')
+                                    ->live()
+                                    ->afterStateHydrated(function ($component, $state, $record) {
+                                        if ($record && $record->video_path) {
+                                            $raw = $record->video_path;
+                                            if (str_starts_with($raw, 'http://') || str_starts_with($raw, 'https://')) {
+                                                $component->state('url');
+                                            } else {
+                                                $component->state('upload');
+                                            }
+                                        } else {
+                                            $component->state($record->video_source_type ?? 'upload');
+                                        }
+                                    })
+                                    ->columnSpan(1),
+
+                                FileUpload::make('video_upload')
+                                    ->label('Pilih File Video Showcase')
+                                    ->helperText('Format didukung: MP4, MOV, WEBM. Ukuran maksimal: 100 MB. Kosongkan untuk menghapus video.')
+                                    ->acceptedFileTypes(['video/mp4', 'video/quicktime', 'video/webm', 'video/ogg'])
+                                    ->maxSize(102400) // 100 MB
+                                    ->disk('public')
+                                    ->directory('products/videos')
+                                    ->visibility('public')
+                                    ->openable()
+                                    ->downloadable()
+                                    ->dehydrated(false)
+                                    ->columnSpan(2)
+                                    ->visible(fn ($get) => $get('video_source_type') !== 'url')
+                                    ->afterStateHydrated(function ($component, $state, $record) {
+                                        if ($record && $record->video_path) {
+                                            $raw = $record->video_path;
+                                            if (!str_starts_with($raw, 'http://') && !str_starts_with($raw, 'https://')) {
+                                                $clean = preg_replace('#^/?storage/#', '', $raw);
+                                                $component->state($clean);
+                                            }
+                                        }
+                                    })
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        if ($state) {
+                                            $path = is_array($state) ? reset($state) : $state;
+                                            $set('video_path', $path);
+                                        } else {
+                                            $set('video_path', null);
+                                        }
+                                    }),
+
+                                TextInput::make('video_url_input')
+                                    ->label('URL Video Online / Web Link')
+                                    ->placeholder('https://.../video.mp4')
+                                    ->helperText('Masukkan URL video langsung (diawali dengan https://). Kosongkan untuk menghapus video.')
+                                    ->dehydrated(false)
+                                    ->columnSpan(2)
+                                    ->visible(fn ($get) => $get('video_source_type') === 'url')
+                                    ->afterStateHydrated(function ($component, $state, $record) {
+                                        if ($record && $record->video_path) {
+                                            $raw = $record->video_path;
+                                            if (str_starts_with($raw, 'http://') || str_starts_with($raw, 'https://')) {
+                                                $component->state($raw);
+                                            }
+                                        }
+                                    })
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        $set('video_path', $state ?: null);
+                                    }),
+
+                                Hidden::make('video_path')
+                                    ->default(null)
+                                    ->nullable()
+                                    ->dehydrateStateUsing(function ($state, $get) {
+                                        if ($get('video_source_type') === 'url') {
+                                            return $get('video_url_input') ?: null;
+                                        }
+                                        $uploaded = $get('video_upload');
+                                        if (is_array($uploaded)) {
+                                            $uploaded = reset($uploaded);
+                                        }
+                                        return $uploaded ?: null;
+                                    }),
+                            ]),
+                    ])
+                    ->columnSpanFull(),
+
+                // Full-Width Section 2: Product Gallery & Additional Media (Photos & Videos)
+                Section::make('Galeri Media Produk (Foto & Video Tambahan)')
+                    ->description('Kelola foto dan video tambahan yang akan ditampilkan pada galeri. Anda dapat menyisipkan video pada urutan tampilan (slot) mana pun.')
                     ->schema([
                         Repeater::make('images')
                             ->relationship('images')
                             ->schema([
-                                TextInput::make('image_path')
-                                    ->label('URL Gambar atau Path')
-                                    ->required()
-                                    ->placeholder('https://images.unsplash.com/... atau storage/products/...')
-                                    ->columnSpan(3),
+                                Grid::make(3)
+                                    ->schema([
+                                        Select::make('source_type')
+                                            ->label('Tipe Media')
+                                            ->options([
+                                                'upload' => 'Upload File Foto (JPG/PNG/WEBP)',
+                                                'url' => 'URL Foto Online',
+                                                'video_upload' => 'Upload File Video (MP4/MOV/WEBM)',
+                                                'video_url' => 'URL Video Online',
+                                            ])
+                                            ->default('upload')
+                                            ->selectablePlaceholder(false)
+                                            ->dehydrated(false)
+                                            ->live()
+                                            ->afterStateHydrated(function ($component, $state, $record) {
+                                                if ($record && $record->image_path) {
+                                                    $raw = $record->getRawOriginal('image_path') ?? $record->image_path;
+                                                    $isUrl = str_starts_with($raw, 'http://') || str_starts_with($raw, 'https://');
+                                                    $ext = strtolower(pathinfo(parse_url($raw, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
+                                                    $isVideo = ($record->media_type === 'video') || in_array($ext, ['mp4', 'mov', 'webm', 'ogg']);
 
-                                Toggle::make('is_primary')
-                                    ->label('Gambar Utama')
-                                    ->default(false)
-                                    ->columnSpan(1),
+                                                    if ($isVideo) {
+                                                        $component->state($isUrl ? 'video_url' : 'video_upload');
+                                                    } else {
+                                                        $component->state($isUrl ? 'url' : 'upload');
+                                                    }
+                                                }
+                                            })
+                                            ->columnSpan(1),
 
-                                TextInput::make('sort_order')
-                                    ->label('Urutan')
-                                    ->numeric()
-                                    ->default(0)
-                                    ->columnSpan(1),
+                                        Toggle::make('is_primary')
+                                            ->label('Gambar Utama (Thumbnail)')
+                                            ->helperText('Foto cover pada etalase toko')
+                                            ->default(false)
+                                            ->visible(fn ($get) => in_array($get('source_type'), ['upload', 'url']))
+                                            ->columnSpan(1),
+
+                                        TextInput::make('sort_order')
+                                            ->label('Urutan Tampilan')
+                                            ->numeric()
+                                            ->default(1)
+                                            ->minValue(1)
+                                            ->helperText('Urutan ke-1, 2, 3, dst.')
+                                            ->columnSpan(1),
+                                    ]),
+
+                                // Image Upload
+                                FileUpload::make('image_upload')
+                                    ->label('Pilih File Foto Produk')
+                                    ->helperText('Format didukung: JPG, PNG, WEBP, GIF, SVG. Ukuran maksimal: 40 MB. Kosongkan untuk menghapus.')
+                                    ->image()
+                                    ->maxSize(40960) // 40 MB
+                                    ->disk('public')
+                                    ->directory('products')
+                                    ->visibility('public')
+                                    ->imageEditor()
+                                    ->openable()
+                                    ->downloadable()
+                                    ->previewable(true)
+                                    ->dehydrated(false)
+                                    ->visible(fn ($get) => $get('source_type') === 'upload')
+                                    ->afterStateHydrated(function ($component, $state, $record) {
+                                        if ($record && $record->image_path && $record->media_type !== 'video') {
+                                            $raw = $record->getRawOriginal('image_path') ?? $record->image_path;
+                                            if (!str_starts_with($raw, 'http://') && !str_starts_with($raw, 'https://')) {
+                                                $clean = preg_replace('#^/?storage/#', '', $raw);
+                                                $component->state($clean);
+                                            }
+                                        }
+                                    })
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        if ($state) {
+                                            $path = is_array($state) ? reset($state) : $state;
+                                            $set('image_path', $path);
+                                        } else {
+                                            $set('image_path', null);
+                                        }
+                                    }),
+
+                                // Image URL
+                                TextInput::make('image_url')
+                                    ->label('URL Foto Online / Web Link')
+                                    ->placeholder('https://images.unsplash.com/... atau link foto publik')
+                                    ->helperText('Masukkan URL foto lengkap (diawali https://). Kosongkan untuk menghapus.')
+                                    ->dehydrated(false)
+                                    ->visible(fn ($get) => $get('source_type') === 'url')
+                                    ->afterStateHydrated(function ($component, $state, $record) {
+                                        if ($record && $record->image_path && $record->media_type !== 'video') {
+                                            $raw = $record->getRawOriginal('image_path') ?? $record->image_path;
+                                            if (str_starts_with($raw, 'http://') || str_starts_with($raw, 'https://')) {
+                                                $component->state($raw);
+                                            }
+                                        }
+                                    })
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        $set('image_path', $state ?: null);
+                                    }),
+
+                                // Video Upload
+                                FileUpload::make('video_item_upload')
+                                    ->label('Pilih File Video Produk')
+                                    ->helperText('Format didukung: MP4, MOV, WEBM. Ukuran maksimal: 100 MB. Kosongkan untuk menghapus.')
+                                    ->acceptedFileTypes(['video/mp4', 'video/quicktime', 'video/webm', 'video/ogg'])
+                                    ->maxSize(102400) // 100 MB
+                                    ->disk('public')
+                                    ->directory('products/videos')
+                                    ->visibility('public')
+                                    ->openable()
+                                    ->downloadable()
+                                    ->dehydrated(false)
+                                    ->visible(fn ($get) => $get('source_type') === 'video_upload')
+                                    ->afterStateHydrated(function ($component, $state, $record) {
+                                        if ($record && $record->image_path) {
+                                            $raw = $record->getRawOriginal('image_path') ?? $record->image_path;
+                                            if (!str_starts_with($raw, 'http://') && !str_starts_with($raw, 'https://')) {
+                                                $clean = preg_replace('#^/?storage/#', '', $raw);
+                                                $component->state($clean);
+                                            }
+                                        }
+                                    })
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        if ($state) {
+                                            $path = is_array($state) ? reset($state) : $state;
+                                            $set('image_path', $path);
+                                        } else {
+                                            $set('image_path', null);
+                                        }
+                                    }),
+
+                                // Video URL
+                                TextInput::make('video_item_url')
+                                    ->label('URL Video Online / Web Link')
+                                    ->placeholder('https://.../video.mp4')
+                                    ->helperText('Masukkan URL video langsung (diawali https://). Kosongkan untuk menghapus.')
+                                    ->dehydrated(false)
+                                    ->visible(fn ($get) => $get('source_type') === 'video_url')
+                                    ->afterStateHydrated(function ($component, $state, $record) {
+                                        if ($record && $record->image_path) {
+                                            $raw = $record->getRawOriginal('image_path') ?? $record->image_path;
+                                            if (str_starts_with($raw, 'http://') || str_starts_with($raw, 'https://')) {
+                                                $component->state($raw);
+                                            }
+                                        }
+                                    })
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        $set('image_path', $state ?: null);
+                                    }),
+
+                                Hidden::make('media_type')
+                                    ->default('image')
+                                    ->dehydrateStateUsing(function ($state, $get) {
+                                        return in_array($get('source_type'), ['video_upload', 'video_url']) ? 'video' : 'image';
+                                    }),
+
+                                Hidden::make('image_path')
+                                    ->default(null)
+                                    ->nullable()
+                                    ->dehydrateStateUsing(function ($state, $get) {
+                                        $src = $get('source_type');
+                                        if ($src === 'url') {
+                                            return $get('image_url') ?: null;
+                                        }
+                                        if ($src === 'video_url') {
+                                            return $get('video_item_url') ?: null;
+                                        }
+                                        if ($src === 'video_upload') {
+                                            $v = $get('video_item_upload');
+                                            if (is_array($v)) $v = reset($v);
+                                            return $v ?: null;
+                                        }
+                                        $uploaded = $get('image_upload');
+                                        if (is_array($uploaded)) {
+                                            $uploaded = reset($uploaded);
+                                        }
+                                        return $uploaded ?: null;
+                                    }),
                             ])
-                            ->columns(5)
                             ->defaultItems(1)
-                            ->reorderable('sort_order')
+                            ->reorderable(true)
+                            ->orderColumn('sort_order')
                             ->collapsible()
-                            ->itemLabel(fn (array $state): ?string => $state['image_path'] ?? 'Foto Produk'),
+                            ->itemLabel(function (array $state): ?string {
+                                $src = $state['source_type'] ?? 'upload';
+                                $isVideo = in_array($src, ['video_upload', 'video_url']);
+                                $prefix = $isVideo ? '🎬 Video' : '🖼️ Foto';
+                                $path = $state['image_upload'] ?? $state['image_url'] ?? $state['video_item_upload'] ?? $state['video_item_url'] ?? $state['image_path'] ?? null;
+                                if (is_array($path)) $path = reset($path);
+                                if ($path) {
+                                    $short = strlen($path) > 35 ? substr($path, 0, 32) . '...' : $path;
+                                    return "{$prefix} ({$short})";
+                                }
+                                return "{$prefix} Produk";
+                            }),
+                    ])
+                    ->columnSpanFull(),
+
+                // Full-Width Section 3: Product Variants
+                Section::make('Variasi Produk (Pilihan Warna / Ukuran / Model)')
+                    ->description('Kelola variasi produk seperti pilihan warna, kapasitas, atau model lengkap dengan thumbnail foto dan stok masing-masing (opsional, jika produk memiliki variasi).')
+                    ->schema([
+                        Repeater::make('variants')
+                            ->relationship('variants')
+                            ->schema([
+                                Grid::make(3)
+                                    ->schema([
+                                        TextInput::make('name')
+                                            ->label('Nama Variasi')
+                                            ->placeholder('Contoh: R60iNC Blue atau Hitam - Size XL')
+                                            ->required()
+                                            ->columnSpan(1),
+
+                                        TextInput::make('stock')
+                                            ->label('Stok Variasi')
+                                            ->numeric()
+                                            ->default(10)
+                                            ->required()
+                                            ->columnSpan(1),
+
+                                        TextInput::make('sku')
+                                            ->label('SKU Variasi (Opsional)')
+                                            ->placeholder('Contoh: ANK-R60-BLU')
+                                            ->columnSpan(1),
+                                    ]),
+
+                                Grid::make(3)
+                                    ->schema([
+                                        TextInput::make('price')
+                                            ->label('Harga Khusus Variasi (Opsional)')
+                                            ->numeric()
+                                            ->prefix('Rp')
+                                            ->helperText('Kosongkan jika sama dengan harga normal produk')
+                                            ->columnSpan(1),
+
+                                        FileUpload::make('image_path')
+                                            ->label('Foto Thumbnail Mini Variasi')
+                                            ->image()
+                                            ->disk('public')
+                                            ->directory('products/variants')
+                                            ->visibility('public')
+                                            ->columnSpan(1),
+
+                                        Toggle::make('is_active')
+                                            ->label('Variasi Aktif')
+                                            ->default(true)
+                                            ->inline(false)
+                                            ->columnSpan(1),
+                                    ]),
+                            ])
+                            ->defaultItems(0)
+                            ->reorderable(true)
+                            ->orderColumn('sort_order')
+                            ->collapsible()
+                            ->itemLabel(fn (array $state): ?string => 
+                                isset($state['name']) && filled($state['name'])
+                                    ? "✨ Variasi: {$state['name']} (Stok: " . ($state['stock'] ?? 0) . ")"
+                                    : "Pilihan Variasi"
+                            ),
                     ])
                     ->columnSpanFull(),
             ]);

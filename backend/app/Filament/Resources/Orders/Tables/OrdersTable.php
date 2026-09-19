@@ -76,18 +76,30 @@ class OrdersTable
                     ]),
             ])
             ->recordActions([
+                Action::make('print_invoice')
+                    ->label('Invoice')
+                    ->icon('heroicon-m-printer')
+                    ->color('info')
+                    ->url(fn (Order $record): string => route('admin.orders.invoice', $record))
+                    ->openUrlInNewTab(),
+
                 Action::make('mark_shipped')
                     ->label('Kirim')
                     ->icon('heroicon-m-truck')
                     ->color('primary')
                     ->visible(fn (Order $record): bool => in_array($record->status, ['paid', 'processing']))
                     ->requiresConfirmation()
+                    ->modalIcon('heroicon-o-truck')
+                    ->modalIconColor('primary')
                     ->modalHeading('Kirim Pesanan Ini?')
                     ->modalDescription('Status pesanan akan diubah menjadi Shipped (Sedang Dikirim).')
+                    ->modalSubmitActionLabel('Konfirmasi')
+                    ->modalCancelActionLabel('Batal')
                     ->action(function (Order $record) {
                         $record->update(['status' => 'shipped']);
                         Notification::make()
                             ->title('Pesanan Telah Dikirim')
+                            ->body("Status pesanan #{$record->order_number} berhasil diubah ke Shipped.")
                             ->success()
                             ->send();
                     }),

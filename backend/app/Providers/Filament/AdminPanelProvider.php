@@ -28,7 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->brandName('RadiantCommerce')
+            ->brandName('RadiantStudio')
             ->brandLogo(fn () => view('filament.brand-logo'))
             ->brandLogoHeight('2.2rem')
             ->spa()
@@ -54,6 +54,7 @@ class AdminPanelProvider extends PanelProvider
                 'Penjualan & Transaksi',
                 'Katalog Produk',
                 'Pengguna & Ulasan',
+                'Laporan & Analisis',
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
