@@ -79,6 +79,7 @@ const DashboardPage = () => {
   const [orders, setOrders] = useState([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(true);
   const [selectedReceipt, setSelectedReceipt] = useState(null);
+  const [isConfirmingOrder, setIsConfirmingOrder] = useState(null);
 
   // Addresses State
   const [addresses, setAddresses] = useState([]);
@@ -210,6 +211,28 @@ const DashboardPage = () => {
       });
     } catch (err) {
       alert(err.message || 'Gagal memproses pembayaran.');
+    }
+  };
+
+  const handleConfirmDelivery = async (orderId) => {
+    if (!window.confirm('Apakah Anda yakin pesanan sudah sampai dan diterima dengan baik?')) return;
+    setIsConfirmingOrder(orderId);
+    try {
+      await ordersApi.confirmDelivery(orderId);
+      addToast({
+        title: 'Pesanan Selesai! 🎉',
+        message: 'Terima kasih, pesanan Anda telah berhasil dikonfirmasi diterima.',
+        type: 'success',
+      });
+      await fetchOrders();
+    } catch (err) {
+      addToast({
+        title: 'Gagal Menyelesaikan Pesanan',
+        message: err.response?.data?.message || err.message || 'Terjadi kesalahan.',
+        type: 'error',
+      });
+    } finally {
+      setIsConfirmingOrder(null);
     }
   };
 
@@ -725,7 +748,7 @@ const DashboardPage = () => {
                       <div>
                         {order.status === 'paid' && (
                           <span className="px-3.5 py-1 bg-emerald-50 text-emerald-800 text-xs font-bold rounded-full border border-emerald-200 inline-flex items-center gap-1.5">
-                            <CheckCircle2 size={13} /> Lunas / Selesai
+                            <CheckCircle2 size={13} /> Pembayaran Berhasil
                           </span>
                         )}
                         {order.status === 'pending' && (
@@ -741,6 +764,11 @@ const DashboardPage = () => {
                         {order.status === 'shipped' && (
                           <span className="px-3.5 py-1 bg-indigo-50 text-indigo-800 text-xs font-bold rounded-full border border-indigo-200 inline-flex items-center gap-1.5">
                             <Truck size={13} /> Sedang Dikirim Kurir
+                          </span>
+                        )}
+                        {order.status === 'delivered' && (
+                          <span className="px-3.5 py-1 bg-emerald-50 text-emerald-800 text-xs font-bold rounded-full border border-emerald-200 inline-flex items-center gap-1.5">
+                            <CheckCircle2 size={13} /> Pesanan Selesai / Diterima
                           </span>
                         )}
                         {order.status === 'cancelled' && (
@@ -851,11 +879,30 @@ const DashboardPage = () => {
                       {order.status === 'pending' && (
                         <button
                           onClick={() => handlePayOrder(order.id)}
-                          className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 active:scale-95 whitespace-nowrap self-start sm:self-auto"
+                          className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 active:scale-95 whitespace-nowrap self-start sm:self-auto cursor-pointer"
                         >
                           <CreditCard size={14} />
                           <span>Bayar Sekarang (MidTrans)</span>
                         </button>
+                      )}
+
+                      {order.status === 'shipped' && (
+                        <button
+                          type="button"
+                          onClick={() => handleConfirmDelivery(order.id)}
+                          disabled={isConfirmingOrder === order.id}
+                          className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 active:scale-95 whitespace-nowrap self-start sm:self-auto cursor-pointer"
+                        >
+                          <CheckCircle2 size={15} />
+                          <span>{isConfirmingOrder === order.id ? 'Mengkonfirmasi...' : 'Pesanan Sudah Sampai / Selesai'}</span>
+                        </button>
+                      )}
+
+                      {order.status === 'delivered' && (
+                        <span className="px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-xl text-xs font-bold flex items-center gap-1.5 self-start sm:self-auto shadow-2xs">
+                          <CheckCircle2 size={15} className="text-emerald-600" />
+                          <span>Pesanan Telah Diterima</span>
+                        </span>
                       )}
                     </div>
                   </div>

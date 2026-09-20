@@ -265,11 +265,17 @@ const OrderHistoryPage = () => {
                 {order.status === 'shipped' && (
                   <button
                     onClick={() => handleConfirmDelivery(order.id)}
-                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-sm"
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
                   >
                     <CheckCircle2 size={13} />
-                    <span>Pesanan Diterima</span>
+                    <span>Pesanan Sudah Sampai / Selesai</span>
                   </button>
+                )}
+                {order.status === 'delivered' && (
+                  <span className="px-3.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-2xs">
+                    <CheckCircle2 size={13} className="text-emerald-600" />
+                    <span>Pesanan Selesai</span>
+                  </span>
                 )}
               </div>
             </div>
