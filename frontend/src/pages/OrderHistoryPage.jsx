@@ -8,10 +8,14 @@ import { formatCurrency } from '@shared/utils/formatCurrency';
 import { formatDate } from '@shared/utils/formatDate';
 import { payWithSnap } from '@shared/utils/midtransSnap';
 import { useAuth } from '@shared/context/AuthContext';
+import { useToast } from '../components/Toast';
+import { useConfirm } from '../components/ConfirmModal';
 
 const OrderHistoryPage = () => {
   const [searchParams] = useSearchParams();
   const { isAuthenticated } = useAuth();
+  const { addToast } = useToast();
+  const { confirm } = useConfirm();
   const [orders, setOrders] = useState([]);
   const [pagination, setPagination] = useState({ current_page: 1, last_page: 1 });
   const [isLoading, setIsLoading] = useState(true);
@@ -44,24 +48,59 @@ const OrderHistoryPage = () => {
     try {
       const res = await paymentsApi.getSnapToken(orderId);
       await payWithSnap(res.snap_token, {
-        onSuccess: () => fetchOrders(),
+        onSuccess: () => {
+          addToast({
+            title: 'Pembayaran Berhasil! 🎉',
+            message: 'Pembayaran Anda telah diterima.',
+            type: 'success',
+          });
+          fetchOrders();
+        },
         onPending: () => fetchOrders(),
-        onError: () => fetchOrders(),
+        onError: () => {
+          addToast({
+            title: 'Pembayaran Dibatalkan',
+            message: 'Transaksi belum selesai.',
+            type: 'error',
+          });
+          fetchOrders();
+        },
         onClose: () => fetchOrders(),
       });
     } catch (err) {
-      alert(err.message || 'Gagal memproses pembayaran.');
+      addToast({
+        title: 'Gagal Memproses Pembayaran',
+        message: err.message || 'Gagal memproses pembayaran.',
+        type: 'error',
+      });
     }
   };
 
   const handleConfirmDelivery = async (orderId) => {
-    if (!window.confirm('Apakah Anda yakin pesanan sudah diterima dengan baik?')) return;
+    const isConfirmed = await confirm({
+      title: 'Selesaikan Pesanan Ini? 📦',
+      message: 'Apakah Anda yakin paket pesanan ini sudah sampai di tujuan dan barang telah Anda terima dengan baik?',
+      confirmText: 'Ya, Sudah Diterima',
+      cancelText: 'Belum / Batal',
+      type: 'success',
+    });
+
+    if (!isConfirmed) return;
+
     try {
       await ordersApi.confirmDelivery(orderId);
-      alert('Pesanan berhasil dikonfirmasi diterima!');
+      addToast({
+        title: 'Pesanan Selesai! 🎉',
+        message: 'Pesanan berhasil dikonfirmasi telah diterima.',
+        type: 'success',
+      });
       fetchOrders(pagination.current_page);
     } catch (err) {
-      alert(err.message || 'Gagal mengkonfirmasi pesanan.');
+      addToast({
+        title: 'Gagal Konfirmasi',
+        message: err.message || 'Gagal mengkonfirmasi pesanan.',
+        type: 'error',
+      });
     }
   };
 

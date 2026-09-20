@@ -282,7 +282,11 @@ const ProductDetailPage = () => {
       await addToCart(product.id, quantity, selectedVariant?.id);
       navigate('/checkout');
     } catch (err) {
-      alert(err.message || 'Gagal memproses pesanan.');
+      addToast({
+        title: 'Gagal Memproses Pesanan',
+        message: err.message || 'Terjadi kesalahan saat memproses pesanan.',
+        type: 'error',
+      });
     }
   };
 

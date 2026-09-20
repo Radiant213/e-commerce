@@ -5,6 +5,7 @@ import { CartProvider } from '@shared/context/CartContext';
 import { WishlistProvider } from '@shared/context/WishlistContext';
 import { LanguageProvider } from '@shared/context/LanguageContext';
 import { ToastProvider } from './components/Toast';
+import { ConfirmProvider } from './components/ConfirmModal';
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -28,9 +29,10 @@ function App() {
         <CartProvider>
           <WishlistProvider>
             <ToastProvider>
-              <Router>
-                <div className="min-h-screen flex flex-col bg-[#FAFAFA] text-slate-900 selection:bg-slate-900 selection:text-white">
-                  <Navbar />
+              <ConfirmProvider>
+                <Router>
+                  <div className="min-h-screen flex flex-col bg-[#FAFAFA] text-slate-900 selection:bg-slate-900 selection:text-white">
+                    <Navbar />
                 <CartDrawer />
                 <main className="flex-grow">
                   <Routes>
@@ -50,7 +52,8 @@ function App() {
                 <Footer />
               </div>
             </Router>
-          </ToastProvider>
+          </ConfirmProvider>
+        </ToastProvider>
         </WishlistProvider>
       </CartProvider>
     </AuthProvider>

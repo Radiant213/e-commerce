@@ -38,6 +38,7 @@ import { useCart } from '@shared/context/CartContext';
 import { useWishlist } from '@shared/context/WishlistContext';
 import { useLanguage } from '@shared/context/LanguageContext';
 import { useToast } from '../components/Toast';
+import { useConfirm } from '../components/ConfirmModal';
 import ordersApi from '@shared/api/orders';
 import paymentsApi from '@shared/api/payments';
 import addressesApi from '@shared/api/addresses';
@@ -66,6 +67,7 @@ const DashboardPage = () => {
   const { totalItems, setIsDrawerOpen } = useCart();
   const { wishlistItems } = useWishlist();
   const { addToast } = useToast();
+  const { confirm } = useConfirm();
 
   const fileInputRef = React.useRef(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -210,12 +212,25 @@ const DashboardPage = () => {
         onClose: () => fetchOrders(),
       });
     } catch (err) {
-      alert(err.message || 'Gagal memproses pembayaran.');
+      addToast({
+        title: 'Gagal Memproses Pembayaran',
+        message: err.message || 'Terjadi kesalahan sistem.',
+        type: 'error',
+      });
     }
   };
 
   const handleConfirmDelivery = async (orderId) => {
-    if (!window.confirm('Apakah Anda yakin pesanan sudah sampai dan diterima dengan baik?')) return;
+    const isConfirmed = await confirm({
+      title: 'Selesaikan Pesanan Ini? 📦',
+      message: 'Apakah Anda yakin paket pesanan ini sudah sampai di tujuan dan barang telah Anda terima dengan baik?',
+      confirmText: 'Ya, Sudah Diterima',
+      cancelText: 'Belum / Batal',
+      type: 'success',
+    });
+
+    if (!isConfirmed) return;
+
     setIsConfirmingOrder(orderId);
     try {
       await ordersApi.confirmDelivery(orderId);
@@ -446,12 +461,21 @@ const DashboardPage = () => {
   };
 
   const handleDeleteAddress = async (id, label) => {
-    if (!window.confirm(`Apakah Anda yakin ingin menghapus alamat "${label}"?`)) return;
+    const isConfirmed = await confirm({
+      title: 'Hapus Alamat Pengiriman? 🗑️',
+      message: `Apakah Anda yakin ingin menghapus alamat "${label}" dari daftar alamat Anda? Tindakan ini tidak dapat dibatalkan.`,
+      confirmText: 'Hapus Alamat',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+
+    if (!isConfirmed) return;
+
     try {
       await addressesApi.deleteAddress(id);
       addToast({
         title: 'Alamat Dihapus',
-        message: `Alamat "${label}" telah dihapus.`,
+        message: `Alamat "${label}" telah berhasil dihapus.`,
         type: 'info',
       });
       fetchAddresses();

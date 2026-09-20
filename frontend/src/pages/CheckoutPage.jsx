@@ -165,7 +165,11 @@ const CheckoutPage = () => {
           navigate(`/dashboard?tab=orders&pending=1&order_number=${order.order_number}`);
         },
         onError: (err) => {
-          alert('Pembayaran dibatalkan.');
+          addToast({
+            title: 'Pembayaran Dibatalkan',
+            message: 'Transaksi pembayaran belum selesai.',
+            type: 'error',
+          });
           navigate('/dashboard?tab=orders');
         },
         onClose: () => {
