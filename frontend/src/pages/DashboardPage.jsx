@@ -46,14 +46,14 @@ import { payWithSnap } from '@shared/utils/midtransSnap';
 import ProductCard from '../components/ProductCard';
 
 const PRESET_AVATARS = [
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
-  'https://api.dicebear.com/7.x/bottts/svg?seed=RadiantHero',
-  'https://api.dicebear.com/7.x/bottts/svg?seed=RadiantCyber',
-  'https://api.dicebear.com/7.x/personas/svg?seed=RadiantPro',
-  'https://api.dicebear.com/7.x/adventurer/svg?seed=RadiantGamer',
+  'https://api.dicebear.com/7.x/adventurer/svg?seed=RadiantHero&backgroundColor=b6e3f4',
+  'https://api.dicebear.com/7.x/adventurer/svg?seed=RadiantQueen&backgroundColor=ffd5dc',
+  'https://api.dicebear.com/7.x/lorelei/svg?seed=RadiantStar&backgroundColor=c0aede',
+  'https://api.dicebear.com/7.x/lorelei/svg?seed=RadiantCool&backgroundColor=d1d4f9',
+  'https://api.dicebear.com/7.x/bottts/svg?seed=RadiantHero&backgroundColor=ffdfbf',
+  'https://api.dicebear.com/7.x/bottts/svg?seed=RadiantCyber&backgroundColor=b6e3f4',
+  'https://api.dicebear.com/7.x/personas/svg?seed=RadiantPro&backgroundColor=ffd5dc',
+  'https://api.dicebear.com/7.x/adventurer/svg?seed=RadiantGamer&backgroundColor=c0aede',
 ];
 
 const DashboardPage = () => {

@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
             'phone' => '081234567890',
             'address' => 'Jl. Sudirman No. 45, Jakarta Pusat',
             'role' => 'admin',
-            'avatar' => 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+            'avatar' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=RadiantAdmin&backgroundColor=b6e3f4',
         ]);
 
         $customer1 = User::create([
@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
             'phone' => '082198765432',
             'address' => 'Jl. Melati Blok C2 No. 12, Bandung',
             'role' => 'customer',
-            'avatar' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+            'avatar' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=BudiSantoso&backgroundColor=ffdfbf',
         ]);
 
         $customer2 = User::create([
@@ -47,7 +47,7 @@ class DatabaseSeeder extends Seeder
             'phone' => '085712345678',
             'address' => 'Jl. Kebon Jeruk No. 88, Surabaya',
             'role' => 'customer',
-            'avatar' => 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
+            'avatar' => 'https://api.dicebear.com/7.x/lorelei/svg?seed=SitiNurhaliza&backgroundColor=ffd5dc',
         ]);
 
         $customers = [
@@ -60,7 +60,7 @@ class DatabaseSeeder extends Seeder
                 'phone' => '081399887766',
                 'address' => 'Jl. Diponegoro No. 10, Yogyakarta',
                 'role' => 'customer',
-                'avatar' => 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
+                'avatar' => 'https://api.dicebear.com/7.x/personas/svg?seed=RezaPratama&backgroundColor=c0aede',
             ]),
             User::create([
                 'name' => 'Dewi Lestari',
@@ -69,7 +69,7 @@ class DatabaseSeeder extends Seeder
                 'phone' => '081233445566',
                 'address' => 'Jl. Gajah Mada No. 23, Semarang',
                 'role' => 'customer',
-                'avatar' => 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
+                'avatar' => 'https://api.dicebear.com/7.x/adventurer/svg?seed=DewiLestari&backgroundColor=d1d4f9',
             ]),
             User::create([
                 'name' => 'Dimas Anggara',
@@ -78,7 +78,7 @@ class DatabaseSeeder extends Seeder
                 'phone' => '087811223344',
                 'address' => 'Jl. Thamrin No. 99, Medan',
                 'role' => 'customer',
-                'avatar' => 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
+                'avatar' => 'https://api.dicebear.com/7.x/bottts/svg?seed=DimasAnggara&backgroundColor=b6e3f4',
             ]),
         ];
 

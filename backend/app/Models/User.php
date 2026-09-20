@@ -38,6 +38,11 @@ class User extends Authenticatable implements FilamentUser
             return $value;
         }
 
+        if (request() && request()->header('host')) {
+            $scheme = (request()->secure() || request()->header('x-forwarded-proto') === 'https') ? 'https' : request()->getScheme();
+            return $scheme . '://' . request()->header('host') . '/storage/' . ltrim($value, '/');
+        }
+
         return url('storage/' . ltrim($value, '/'));
     }
 
