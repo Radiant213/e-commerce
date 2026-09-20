@@ -43,8 +43,8 @@ class ProductImage extends Model
             return;
         }
 
-        // Online image URL (Pinterest or any web link): resolve and cache locally
-        if (str_starts_with($clean, 'http://') || str_starts_with($clean, 'https://')) {
+        // Online image URL, Google link, Pinterest, or Data URI: resolve and cache locally
+        if (str_starts_with($clean, 'http://') || str_starts_with($clean, 'https://') || str_starts_with($clean, 'data:image/')) {
             $this->attributes['image_path'] = \App\Services\MediaUrlService::processImageUrl($clean);
             return;
         }
@@ -76,6 +76,11 @@ class ProductImage extends Model
 
         if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
             return $value;
+        }
+
+        if (request() && request()->header('host')) {
+            $scheme = (request()->secure() || request()->header('x-forwarded-proto') === 'https') ? 'https' : request()->getScheme();
+            return $scheme . '://' . request()->header('host') . '/storage/' . ltrim($value, '/');
         }
 
         return url('storage/' . ltrim($value, '/'));

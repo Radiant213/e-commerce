@@ -31,6 +31,14 @@ const getYouTubeId = (url) => {
   return match ? match[1] : null;
 };
 
+const FALLBACK_PRODUCT_IMAGE = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80';
+
+const handleImgError = (e) => {
+  if (e.currentTarget.src !== FALLBACK_PRODUCT_IMAGE) {
+    e.currentTarget.src = FALLBACK_PRODUCT_IMAGE;
+  }
+};
+
 const ProductDetailPage = () => {
   const { t } = useLanguage();
   const { slug } = useParams();
@@ -398,6 +406,7 @@ const ProductDetailPage = () => {
                               src={`https://img.youtube.com/vi/${item.youtubeId}/hqdefault.jpg`}
                               alt={product.name}
                               referrerPolicy="no-referrer"
+                              onError={handleImgError}
                               className="w-full h-full object-cover opacity-70 pointer-events-none"
                             />
                           ) : (
@@ -424,6 +433,7 @@ const ProductDetailPage = () => {
                           src={item.url}
                           alt={product.name}
                           referrerPolicy="no-referrer"
+                          onError={handleImgError}
                           className="w-full h-full object-cover"
                         />
                       )}
@@ -459,9 +469,10 @@ const ProductDetailPage = () => {
                 )
               ) : (
                 <img
-                  src={currentMedia?.url || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'}
+                  src={currentMedia?.url || FALLBACK_PRODUCT_IMAGE}
                   alt={product.name}
                   referrerPolicy="no-referrer"
+                  onError={handleImgError}
                   className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out bg-slate-50 block"
                 />
               )}

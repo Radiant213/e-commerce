@@ -320,9 +320,9 @@ class ProductForm
 
                                 // Image URL
                                 TextInput::make('image_url')
-                                    ->label('URL Foto Online (Pinterest / Link Gambar Web)')
-                                    ->placeholder('https://id.pinterest.com/pin/... atau link foto publik')
-                                    ->helperText('Mendukung link Pinterest (pin page / pin.it) & gambar web. Otomatis diunduh ke server.')
+                                    ->label('URL Foto Online (Google Images / Pinterest / Link Gambar Web)')
+                                    ->placeholder('https://www.google.com/imgres?... atau link foto / pinterest')
+                                    ->helperText('Mendukung link Google Images, Pinterest (pin.it), link gambar web publik, & base64. Otomatis diunduh dan disimpan ke server.')
                                     ->dehydrated(false)
                                     ->live(onBlur: true)
                                     ->visible(fn ($get) => $get('source_type') === 'url')

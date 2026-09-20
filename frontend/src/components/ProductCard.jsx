@@ -60,6 +60,11 @@ const ProductCard = ({ product }) => {
           src={primaryImg}
           alt={product.name}
           referrerPolicy="no-referrer"
+          onError={(e) => {
+            if (e.currentTarget.src !== 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80') {
+              e.currentTarget.src = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80';
+            }
+          }}
           className="product-img w-full h-full object-cover object-center"
           loading="lazy"
         />

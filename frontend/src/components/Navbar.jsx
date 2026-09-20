@@ -257,6 +257,12 @@ const Navbar = () => {
                         <img
                           src={prod.primary_image?.image_path || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=100&q=80'}
                           alt={prod.name}
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            if (e.currentTarget.src !== 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=100&q=80') {
+                              e.currentTarget.src = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=100&q=80';
+                            }
+                          }}
                           className="w-10 h-10 rounded-lg object-cover bg-slate-50 border border-slate-100 flex-shrink-0 group-hover:scale-105 transition-transform duration-200"
                         />
                         <div className="flex-1 min-w-0">

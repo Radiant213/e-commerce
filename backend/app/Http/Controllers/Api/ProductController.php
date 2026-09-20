@@ -34,13 +34,25 @@ class ProductController extends Controller
             $query->featured();
         }
 
-        // Sort
-        $sortBy = $request->input('sort_by', 'created_at');
-        $sortDir = $request->input('sort_dir', 'desc');
-        $allowedSorts = ['created_at', 'price', 'name', 'avg_rating', 'total_sold'];
+        // Sort & Relevance Ranking
+        if ($request->filled('search') && !$request->has('sort_by')) {
+            $s = trim($request->input('search'));
+            $query->orderByRaw("
+                CASE 
+                    WHEN products.name = ? THEN 1
+                    WHEN products.name LIKE ? THEN 2
+                    WHEN products.name LIKE ? THEN 3
+                    ELSE 4
+                END ASC, products.total_sold DESC, products.avg_rating DESC
+            ", [$s, "{$s}%", "%{$s}%"]);
+        } else {
+            $sortBy = $request->input('sort_by', 'created_at');
+            $sortDir = $request->input('sort_dir', 'desc');
+            $allowedSorts = ['created_at', 'price', 'name', 'avg_rating', 'total_sold'];
 
-        if (in_array($sortBy, $allowedSorts)) {
-            $query->orderBy($sortBy, $sortDir === 'asc' ? 'asc' : 'desc');
+            if (in_array($sortBy, $allowedSorts)) {
+                $query->orderBy($sortBy, $sortDir === 'asc' ? 'asc' : 'desc');
+            }
         }
 
         $perPage = min((int) $request->input('per_page', 12), 50);

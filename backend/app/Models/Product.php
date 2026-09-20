@@ -113,6 +113,11 @@ class Product extends Model
             return $this->video_path;
         }
 
+        if (request() && request()->header('host')) {
+            $scheme = (request()->secure() || request()->header('x-forwarded-proto') === 'https') ? 'https' : request()->getScheme();
+            return $scheme . '://' . request()->header('host') . '/storage/' . ltrim($this->video_path, '/');
+        }
+
         return url('storage/' . ltrim($this->video_path, '/'));
     }
 
@@ -127,19 +132,25 @@ class Product extends Model
         return $this->hasMany(ProductImage::class)->orderBy('sort_order');
     }
 
+    public function primaryImage(): BelongsTo
+    {
+        return $this->belongsTo(ProductImage::class, 'id', 'product_id')
+            ->where('is_primary', true);
+    }
+
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class)->orderBy('sort_order');
     }
 
-    public function primaryImage()
-    {
-        return $this->hasOne(ProductImage::class)->where('is_primary', true);
-    }
-
     public function reviews(): HasMany
     {
-        return $this->hasMany(Review::class)->latest();
+        return $this->hasMany(Review::class);
+    }
+
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
     }
 
     public function wishlists(): HasMany
@@ -172,16 +183,65 @@ class Product extends Model
         return $query->where('is_featured', true);
     }
 
+    /**
+     * Smart E-Commerce Search (Tokopedia / Shopee style)
+     * Matches across Product Name, SKU, Specifications, Description, Category, and Variants.
+     * Supports multi-word tokens in any order.
+     */
     public function scopeSearch($query, ?string $search)
     {
-        if ($search) {
-            return $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('short_description', 'like', "%{$search}%");
-            });
+        if (blank($search)) {
+            return $query;
         }
-        return $query;
+
+        $raw = trim($search);
+        $normalized = preg_replace('/[^\p{L}\p{N}\s\-_]/u', ' ', $raw);
+        $cleanSearch = trim(preg_replace('/\s+/', ' ', $raw));
+        $tokens = array_filter(
+            explode(' ', trim(preg_replace('/\s+/', ' ', $normalized))),
+            fn($t) => mb_strlen($t) >= 2
+        );
+
+        return $query->where(function ($q) use ($cleanSearch, $tokens) {
+            // 1. Full phrase match across all main attributes
+            $q->where('name', 'like', "%{$cleanSearch}%")
+              ->orWhere('sku', 'like', "%{$cleanSearch}%")
+              ->orWhere('slug', 'like', "%{$cleanSearch}%")
+              ->orWhere('short_description', 'like', "%{$cleanSearch}%")
+              ->orWhere('description', 'like', "%{$cleanSearch}%")
+              ->orWhere('specifications', 'like', "%{$cleanSearch}%")
+              ->orWhereHas('category', function ($cq) use ($cleanSearch) {
+                  $cq->where('name', 'like', "%{$cleanSearch}%");
+              })
+              ->orWhereHas('variants', function ($vq) use ($cleanSearch) {
+                  $vq->where('name', 'like', "%{$cleanSearch}%")
+                     ->orWhere('sku', 'like', "%{$cleanSearch}%");
+              });
+
+            // 2. Multi-token smart search (Tokopedia/Shopee style):
+            // Every keyword entered can match across different columns/relations
+            if (count($tokens) > 1) {
+                $q->orWhere(function ($subQ) use ($tokens) {
+                    foreach ($tokens as $token) {
+                        $subQ->where(function ($tokenQ) use ($token) {
+                            $tokenQ->where('name', 'like', "%{$token}%")
+                                   ->orWhere('sku', 'like', "%{$token}%")
+                                   ->orWhere('slug', 'like', "%{$token}%")
+                                   ->orWhere('short_description', 'like', "%{$token}%")
+                                   ->orWhere('description', 'like', "%{$token}%")
+                                   ->orWhere('specifications', 'like', "%{$token}%")
+                                   ->orWhereHas('category', function ($cq) use ($token) {
+                                       $cq->where('name', 'like', "%{$token}%");
+                                   })
+                                   ->orWhereHas('variants', function ($vq) use ($token) {
+                                       $vq->where('name', 'like', "%{$token}%")
+                                          ->orWhere('sku', 'like', "%{$token}%");
+                                   });
+                        });
+                    }
+                });
+            }
+        });
     }
 
     public function scopeByCategory($query, ?int $categoryId)
