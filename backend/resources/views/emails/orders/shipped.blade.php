@@ -1,7 +1,7 @@
 <x-mail::message>
 # Pesanan Anda Sedang Dikirim! 🚚
 
-Halo {{ $order->user->name }},
+Halo {{ $order->user?->name ?? $order->shipping_name }},
 
 Kabar gembira! Pesanan Anda dengan nomor resi **{{ $order->tracking_number ?? 'Menunggu Update' }}** via **{{ $order->courier_name ?? 'Kurir' }}** sudah dalam perjalanan.
 

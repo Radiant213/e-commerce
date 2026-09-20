@@ -34,30 +34,36 @@ class EmailVerificationController extends Controller
      */
     public function verify(Request $request, $id, $hash)
     {
+        $frontendUrl = config('app.frontend_url', 'https://demo1-ecommerce.radiantcode.web.id');
         $user = User::find($id);
 
         if (!$user) {
-            return response()->json(['message' => 'User tidak ditemukan'], 404);
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'User tidak ditemukan'], 404);
+            }
+            return redirect("{$frontendUrl}/login?error=" . urlencode('Akun pengguna tidak ditemukan.'));
         }
 
         if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
-            return response()->json(['message' => 'Link tidak valid atau kadaluarsa.'], 403);
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Link tidak valid atau kadaluarsa.'], 403);
+            }
+            return redirect("{$frontendUrl}/login?error=" . urlencode('Link verifikasi tidak valid atau telah kadaluarsa.'));
         }
 
-        if ($user->hasVerifiedEmail()) {
+        if (!$user->hasVerifiedEmail()) {
+            if ($user->markEmailAsVerified()) {
+                event(new Verified($user));
+            }
+        }
+
+        if ($request->wantsJson()) {
             return response()->json([
                 'status' => 'success',
-                'message' => 'Email sudah terverifikasi.'
+                'message' => 'Email berhasil diverifikasi.'
             ]);
         }
 
-        if ($user->markEmailAsVerified()) {
-            event(new Verified($user));
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Email berhasil diverifikasi.'
-        ]);
+        return redirect("{$frontendUrl}/login?verified=1");
     }
 }

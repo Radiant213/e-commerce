@@ -17,10 +17,16 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     const token = searchParams.get('token');
     const error = searchParams.get('error');
+    const verified = searchParams.get('verified');
+
+    if (verified) {
+      setSuccessMessage('Email Anda telah berhasil diverifikasi! Silakan login.');
+    }
 
     if (error) {
       setErrorMessage(decodeURIComponent(error));
@@ -111,6 +117,12 @@ const LoginPage = () => {
             </button>
           </div>
         </div>
+
+        {successMessage && (
+          <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl font-medium">
+            {successMessage}
+          </div>
+        )}
 
         {errorMessage && (
           <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl">

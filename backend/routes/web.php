@@ -10,7 +10,9 @@ Route::get('/', function () {
 
 Route::get('/auth/google/callback', function () {
     try {
-        $googleUser = Socialite::driver('google')->stateless()->user();
+        /** @var \Laravel\Socialite\Two\AbstractProvider $driver */
+        $driver = Socialite::driver('google');
+        $googleUser = $driver->stateless()->user();
 
         $user = User::where('google_id', $googleUser->getId())->first();
         if (!$user) {
@@ -43,11 +45,11 @@ Route::get('/auth/google/callback', function () {
             return redirect('/admin');
         }
 
-        $frontendUrl = env('FRONTEND_URL', 'https://demo1-ecommerce.radiantcode.web.id');
+        $frontendUrl = config('app.frontend_url');
         return redirect("{$frontendUrl}/login?token={$token}&oauth=success");
     } catch (\Exception $e) {
         \Illuminate\Support\Facades\Log::error('Google callback error: ' . $e->getMessage());
-        $frontendUrl = env('FRONTEND_URL', 'https://demo1-ecommerce.radiantcode.web.id');
+        $frontendUrl = config('app.frontend_url');
         return redirect("{$frontendUrl}/login?error=" . urlencode($e->getMessage()));
     }
 });

@@ -161,9 +161,15 @@ class MidtransService
             $order->update(['status' => 'paid']);
         } elseif (in_array($payment->status, ['expire', 'cancel', 'deny'])) {
             $order->update(['status' => 'cancelled']);
-            // Restore product stock
+            // Restore product and variant stock
             foreach ($order->items as $item) {
-                $item->product->increment('stock', $item->quantity);
+                if ($item->variant) {
+                    $item->variant->increment('stock', $item->quantity);
+                }
+                if ($item->product) {
+                    $item->product->increment('stock', $item->quantity);
+                    $item->product->decrement('total_sold', $item->quantity);
+                }
             }
         }
 
@@ -214,7 +220,13 @@ class MidtransService
                     $payment->save();
                     $order->update(['status' => 'cancelled']);
                     foreach ($order->items as $item) {
-                        $item->product->increment('stock', $item->quantity);
+                        if ($item->variant) {
+                            $item->variant->increment('stock', $item->quantity);
+                        }
+                        if ($item->product) {
+                            $item->product->increment('stock', $item->quantity);
+                            $item->product->decrement('total_sold', $item->quantity);
+                        }
                     }
                 } else {
                     $payment->status = 'pending';

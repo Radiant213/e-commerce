@@ -114,8 +114,13 @@ class OrderService
         DB::transaction(function () use ($order) {
             // Restore stock
             foreach ($order->items as $item) {
-                $item->product->increment('stock', $item->quantity);
-                $item->product->decrement('total_sold', $item->quantity);
+                if ($item->variant) {
+                    $item->variant->increment('stock', $item->quantity);
+                }
+                if ($item->product) {
+                    $item->product->increment('stock', $item->quantity);
+                    $item->product->decrement('total_sold', $item->quantity);
+                }
             }
 
             $order->update(['status' => 'cancelled']);
