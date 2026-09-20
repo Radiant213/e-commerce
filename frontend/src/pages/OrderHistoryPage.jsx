@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Package, Clock, CheckCircle2, AlertCircle, XCircle, ArrowRight, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import { Package, Clock, CheckCircle2, AlertCircle, XCircle, ArrowRight, ExternalLink, Image as ImageIcon, Eye, X, Truck } from 'lucide-react';
 import ordersApi from '@shared/api/orders';
 import paymentsApi from '@shared/api/payments';
 import { formatCurrency } from '@shared/utils/formatCurrency';
@@ -14,6 +15,7 @@ const OrderHistoryPage = () => {
   const [orders, setOrders] = useState([]);
   const [pagination, setPagination] = useState({ current_page: 1, last_page: 1 });
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedReceipt, setSelectedReceipt] = useState(null);
 
   const isSuccessRedirect = searchParams.get('success');
   const isPendingRedirect = searchParams.get('pending');
@@ -216,22 +218,36 @@ const OrderHistoryPage = () => {
 
               {/* Order Footer & Actions */}
               <div className="bg-slate-50/50 px-6 py-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <div className="text-slate-500 flex flex-col gap-1">
+                <div className="text-slate-500 flex flex-col gap-1.5">
                   <span>Penerima: <strong>{order.shipping_name}</strong> ({order.shipping_phone}) - {order.shipping_address}, {order.shipping_city}</span>
-                  {(order.tracking_number || order.courier_name) && (
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-slate-800">Resi Pengiriman: <strong>{order.courier_name || '-'}</strong> - <span className="font-mono text-emerald-700">{order.tracking_number || '-'}</span></span>
+                  {(order.tracking_number || order.courier_name || order.receipt_image_url || order.status === 'shipped' || order.status === 'delivered') && (
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <span className="text-slate-800 font-medium inline-flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                        <Truck size={12} className="text-slate-500" />
+                        <span>Kurir: <strong>{order.courier_name || 'Menunggu input kurir'}</strong></span>
+                      </span>
+
+                      {order.tracking_number && (
+                        <span className="text-slate-800 font-medium inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-lg border border-emerald-200">
+                          <span>Resi:</span>
+                          <strong className="font-mono font-bold tracking-wide">{order.tracking_number}</strong>
+                        </span>
+                      )}
+
                       {order.receipt_image_url && (
-                        <a
-                          href={order.receipt_image_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-800 font-semibold underline bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 text-[11px] transition-colors"
-                          title="Buka foto resi pengiriman"
+                        <button
+                          type="button"
+                          onClick={() => setSelectedReceipt({
+                            url: order.receipt_image_url,
+                            orderNumber: order.order_number,
+                            courier: order.courier_name,
+                            tracking: order.tracking_number,
+                          })}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
                         >
-                          <ImageIcon size={12} />
-                          <span>Foto Resi</span>
-                        </a>
+                          <Eye size={12} />
+                          <span>Lihat Foto Resi</span>
+                        </button>
                       )}
                     </div>
                   )}
@@ -259,6 +275,78 @@ const OrderHistoryPage = () => {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Receipt Photo Lightbox Modal */}
+      {selectedReceipt && createPortal(
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in"
+          onClick={() => setSelectedReceipt(null)}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 animate-scale-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                  <ImageIcon size={18} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Foto Bukti Resi Pengiriman</h3>
+                  <p className="text-[11px] text-slate-500 font-mono">
+                    {selectedReceipt.orderNumber}
+                    {selectedReceipt.courier && ` • ${selectedReceipt.courier}`}
+                    {selectedReceipt.tracking && ` (${selectedReceipt.tracking})`}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedReceipt(null)}
+                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Modal Image Body */}
+            <div className="p-4 bg-slate-900/5 max-h-[70vh] overflow-auto flex items-center justify-center">
+              <img
+                src={selectedReceipt.url}
+                alt="Foto Resi Pengiriman"
+                className="max-h-[60vh] w-auto max-w-full rounded-xl object-contain shadow-sm border border-slate-200 bg-white"
+              />
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-5 py-3 border-t border-slate-100 flex items-center justify-between bg-slate-50 text-xs">
+              <span className="text-slate-500 text-[11px]">
+                Diunggah oleh penjual / kurir
+              </span>
+              <div className="flex items-center gap-2">
+                <a
+                  href={selectedReceipt.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-semibold transition-all shadow-xs"
+                >
+                  <ExternalLink size={13} />
+                  <span>Buka Gambar Asli</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setSelectedReceipt(null)}
+                  className="px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-semibold transition-colors cursor-pointer"
+                >
+                  Tutup
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );

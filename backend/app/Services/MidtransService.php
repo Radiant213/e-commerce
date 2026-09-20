@@ -156,14 +156,9 @@ class MidtransService
 
         $payment->save();
 
-        // Update order status based on payment
+        // Update order status based on payment (OrderObserver automatically dispatches PaymentSuccessMail)
         if ($payment->isSettled()) {
             $order->update(['status' => 'paid']);
-            try {
-                \Illuminate\Support\Facades\Mail::to($order->user->email)->send(new \App\Mail\PaymentSuccessMail($order));
-            } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::warning('Failed sending payment success email: ' . $e->getMessage());
-            }
         } elseif (in_array($payment->status, ['expire', 'cancel', 'deny'])) {
             $order->update(['status' => 'cancelled']);
             // Restore product stock
@@ -212,13 +207,8 @@ class MidtransService
                 if (in_array($transactionStatus, ['settlement', 'capture']) && ($fraudStatus === 'accept' || !$fraudStatus)) {
                     $payment->status = 'settlement';
                     $payment->save();
+                    // OrderObserver automatically dispatches PaymentSuccessMail on status change to paid
                     $order->update(['status' => 'paid']);
-
-                    try {
-                        \Illuminate\Support\Facades\Mail::to($order->user->email)->send(new \App\Mail\PaymentSuccessMail($order));
-                    } catch (\Throwable $e) {
-                        \Illuminate\Support\Facades\Log::warning('Failed sending payment success email: ' . $e->getMessage());
-                    }
                 } elseif (in_array($transactionStatus, ['expire', 'cancel', 'deny'])) {
                     $payment->status = $transactionStatus;
                     $payment->save();

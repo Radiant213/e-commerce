@@ -31,6 +31,7 @@ import {
   UploadCloud,
   Image as ImageIcon,
   RefreshCw,
+  Eye,
 } from 'lucide-react';
 import { useAuth } from '@shared/context/AuthContext';
 import { useCart } from '@shared/context/CartContext';
@@ -77,6 +78,7 @@ const DashboardPage = () => {
   // Orders State
   const [orders, setOrders] = useState([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(true);
+  const [selectedReceipt, setSelectedReceipt] = useState(null);
 
   // Addresses State
   const [addresses, setAddresses] = useState([]);
@@ -806,15 +808,50 @@ const DashboardPage = () => {
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="bg-slate-50/60 px-6 py-3.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
-                      <div className="text-slate-500 text-[11px]">
-                        <span>Tujuan: <strong>{order.shipping_name}</strong> ({order.shipping_phone}) - {order.shipping_address}, {order.shipping_city}</span>
+                    <div className="bg-slate-50/60 px-6 py-3.5 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                      <div className="text-slate-500 text-[11px] space-y-1.5">
+                        <div>
+                          <span>Tujuan: <strong>{order.shipping_name}</strong> ({order.shipping_phone}) - {order.shipping_address}, {order.shipping_city}</span>
+                        </div>
+
+                        {/* Kurir, Resi & Bukti Foto Resi */}
+                        {(order.courier_name || order.tracking_number || order.receipt_image_url || order.status === 'shipped' || order.status === 'delivered') && (
+                          <div className="flex flex-wrap items-center gap-2 pt-1">
+                            <span className="text-slate-800 font-medium inline-flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                              <Truck size={13} className="text-slate-500" />
+                              <span>Kurir: <strong>{order.courier_name || 'Menunggu input kurir'}</strong></span>
+                            </span>
+
+                            {order.tracking_number && (
+                              <span className="text-slate-800 font-medium inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-lg border border-emerald-200">
+                                <span>Resi:</span>
+                                <strong className="font-mono font-bold tracking-wide">{order.tracking_number}</strong>
+                              </span>
+                            )}
+
+                            {order.receipt_image_url && (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedReceipt({
+                                  url: order.receipt_image_url,
+                                  orderNumber: order.order_number,
+                                  courier: order.courier_name,
+                                  tracking: order.tracking_number,
+                                })}
+                                className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
+                              >
+                                <Eye size={13} />
+                                <span>Lihat Foto Resi</span>
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       {order.status === 'pending' && (
                         <button
                           onClick={() => handlePayOrder(order.id)}
-                          className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 active:scale-95"
+                          className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 active:scale-95 whitespace-nowrap self-start sm:self-auto"
                         >
                           <CreditCard size={14} />
                           <span>Bayar Sekarang (MidTrans)</span>
@@ -1339,6 +1376,78 @@ const DashboardPage = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Receipt Photo Lightbox Modal */}
+      {selectedReceipt && createPortal(
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in"
+          onClick={() => setSelectedReceipt(null)}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 animate-scale-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                  <ImageIcon size={18} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Foto Bukti Resi Pengiriman</h3>
+                  <p className="text-[11px] text-slate-500 font-mono">
+                    {selectedReceipt.orderNumber}
+                    {selectedReceipt.courier && ` • ${selectedReceipt.courier}`}
+                    {selectedReceipt.tracking && ` (${selectedReceipt.tracking})`}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedReceipt(null)}
+                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Modal Image Body */}
+            <div className="p-4 bg-slate-900/5 max-h-[70vh] overflow-auto flex items-center justify-center">
+              <img
+                src={selectedReceipt.url}
+                alt="Foto Resi Pengiriman"
+                className="max-h-[60vh] w-auto max-w-full rounded-xl object-contain shadow-sm border border-slate-200 bg-white"
+              />
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-5 py-3 border-t border-slate-100 flex items-center justify-between bg-slate-50 text-xs">
+              <span className="text-slate-500 text-[11px]">
+                Diunggah oleh penjual / kurir
+              </span>
+              <div className="flex items-center gap-2">
+                <a
+                  href={selectedReceipt.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-semibold transition-all shadow-xs"
+                >
+                  <ExternalLink size={13} />
+                  <span>Buka Gambar Asli</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setSelectedReceipt(null)}
+                  className="px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-semibold transition-colors cursor-pointer"
+                >
+                  Tutup
+                </button>
+              </div>
+            </div>
           </div>
         </div>,
         document.body

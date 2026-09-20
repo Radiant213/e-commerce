@@ -135,9 +135,8 @@ class OrdersTable
                                 $updateData['receipt_image'] = $data['receipt_image'];
                             }
 
+                            // Updating record triggers OrderObserver which dispatches OrderShippedMail automatically
                             $record->update($updateData);
-                            
-                            \Illuminate\Support\Facades\Mail::to($record->user->email)->send(new \App\Mail\OrderShippedMail($record));
 
                             Notification::make()
                                 ->title('Pesanan Telah Dikirim')

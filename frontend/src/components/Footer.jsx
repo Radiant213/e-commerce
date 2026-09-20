@@ -236,11 +236,10 @@ const Footer = () => {
                 <button
                   type="button"
                   onClick={() => setLanguage('id')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer ${
-                    language === 'id'
-                      ? 'bg-slate-800 text-white shadow-xs border border-slate-700/60 ring-1 ring-emerald-500/30'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer ${language === 'id'
+                    ? 'bg-slate-800 text-white shadow-xs border border-slate-700/60 ring-1 ring-emerald-500/30'
+                    : 'text-slate-400 hover:text-white'
+                    }`}
                 >
                   <span>🇮🇩</span>
                   <span>Indonesia</span>
@@ -249,11 +248,10 @@ const Footer = () => {
                 <button
                   type="button"
                   onClick={() => setLanguage('en')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer ${
-                    language === 'en'
-                      ? 'bg-slate-800 text-white shadow-xs border border-slate-700/60 ring-1 ring-emerald-500/30'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer ${language === 'en'
+                    ? 'bg-slate-800 text-white shadow-xs border border-slate-700/60 ring-1 ring-emerald-500/30'
+                    : 'text-slate-400 hover:text-white'
+                    }`}
                 >
                   <span>🇬🇧</span>
                   <span>English</span>

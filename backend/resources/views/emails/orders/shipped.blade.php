@@ -14,6 +14,14 @@ Kabar gembira! Pesanan Anda dengan nomor resi **{{ $order->tracking_number ?? 'M
 {{ $order->shipping_address }}, {{ $order->shipping_city }}
 {{ $order->shipping_postal_code }}
 
+@if(!empty($order->receipt_image_url))
+**Foto Bukti Resi Pengiriman:**
+Penjual telah melampirkan foto resi fisik pengiriman untuk pesanan Anda:
+<x-mail::button :url="$order->receipt_image_url">
+Lihat Foto Resi Pengiriman
+</x-mail::button>
+@endif
+
 Silakan pantau status pengiriman melalui website resmi kurir atau cek langsung di dashboard akun Anda.
 
 <x-mail::button :url="config('app.frontend_url') . '/orders'">

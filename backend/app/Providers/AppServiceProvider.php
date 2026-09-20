@@ -36,5 +36,8 @@ class AppServiceProvider extends ServiceProvider
         \Filament\Tables\Columns\SelectColumn::configureUsing(function (\Filament\Tables\Columns\SelectColumn $column): void {
             $column->native(false);
         });
+
+        // Register Order model observer for automatic email notifications
+        \App\Models\Order::observe(\App\Observers\OrderObserver::class);
     }
 }
