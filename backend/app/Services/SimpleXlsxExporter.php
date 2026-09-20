@@ -8,7 +8,8 @@ use ZipArchive;
 class SimpleXlsxExporter
 {
     /**
-     * Generate and stream a true native Microsoft Excel (.xlsx) file.
+     * Generate and stream a true native Microsoft Excel (.xlsx) file
+     * with left-aligned cells, formatted currency, and smart auto-column widths.
      *
      * @param string $filename Name of the output file (e.g. Laporan_Penjualan.xlsx)
      * @param array $headers List of column headers
@@ -63,11 +64,11 @@ class SimpleXlsxExporter
                 . '</workbook>';
             $zip->addFromString('xl/workbook.xml', $workbook);
 
-            // 5. xl/styles.xml (Header: Emerald green background #059669 with bold white text; Data: clean bordered rows)
+            // 5. xl/styles.xml: All cells left-aligned, vertical center, emerald headers
             $styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' . "\n"
                 . '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
                 . '<fonts count="2">'
-                . '<font><name val="Calibri"/><sz val="11"/><color rgb="FF1F2937"/></font>'
+                . '<font><name val="Calibri"/><sz val="11"/><color rgb="FF1E293B"/></font>'
                 . '<font><b/><name val="Calibri"/><sz val="11"/><color rgb="FFFFFFFF"/></font>'
                 . '</fonts>'
                 . '<fills count="3">'
@@ -87,24 +88,40 @@ class SimpleXlsxExporter
                 . '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
                 . '<cellXfs count="3">'
                 . '<xf numFmtId="0" fontId="0" fillId="0" borderId="0"/>'
-                . '<xf numFmtId="0" fontId="1" fillId="2" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>'
-                . '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" applyFont="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf>'
+                . '<xf numFmtId="0" fontId="1" fillId="2" borderId="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>'
+                . '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>'
                 . '</cellXfs>'
                 . '</styleSheet>';
             $zip->addFromString('xl/styles.xml', $styles);
 
+            // Calculate smart column widths based on header and data length
+            $colWidths = [];
+            foreach ($headers as $cIdx => $hText) {
+                $maxLen = mb_strlen((string) $hText, 'UTF-8');
+                foreach ($rows as $row) {
+                    if (isset($row[$cIdx])) {
+                        $cellLen = mb_strlen((string) $row[$cIdx], 'UTF-8');
+                        if ($cellLen > $maxLen) {
+                            $maxLen = $cellLen;
+                        }
+                    }
+                }
+                // Width padding for clean margins and no cut-offs
+                $colWidths[$cIdx] = max(10, min(50, $maxLen + 4));
+            }
+
             // 6. xl/worksheets/sheet1.xml
-            $colCount = count($headers);
             $sheetXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' . "\n"
                 . '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
                 . '<cols>';
-            for ($c = 1; $c <= $colCount; $c++) {
-                $sheetXml .= '<col min="' . $c . '" max="' . $c . '" width="20" customWidth="1"/>';
+            foreach ($colWidths as $cIdx => $w) {
+                $cNum = $cIdx + 1;
+                $sheetXml .= '<col min="' . $cNum . '" max="' . $cNum . '" width="' . $w . '" customWidth="1"/>';
             }
             $sheetXml .= '</cols><sheetData>';
 
-            // Header Row
-            $sheetXml .= '<row r="1" ht="26" customHeight="1">';
+            // Header Row (Left-aligned, height 28)
+            $sheetXml .= '<row r="1" ht="28" customHeight="1">';
             foreach ($headers as $cIndex => $headerText) {
                 $cellRef = self::getColLetter($cIndex) . '1';
                 $safeText = htmlspecialchars((string) $headerText, ENT_XML1, 'UTF-8');
@@ -112,19 +129,15 @@ class SimpleXlsxExporter
             }
             $sheetXml .= '</row>';
 
-            // Data Rows
+            // Data Rows (Left-aligned, height 22)
             $rIndex = 2;
             foreach ($rows as $row) {
-                $sheetXml .= '<row r="' . $rIndex . '" ht="20" customHeight="1">';
+                $sheetXml .= '<row r="' . $rIndex . '" ht="22" customHeight="1">';
                 $cIndex = 0;
                 foreach ($row as $val) {
                     $cellRef = self::getColLetter($cIndex) . $rIndex;
-                    if (is_numeric($val) && !str_starts_with((string) $val, '0') && strlen((string) $val) < 15) {
-                        $sheetXml .= '<c r="' . $cellRef . '" s="2"><v>' . $val . '</v></c>';
-                    } else {
-                        $safeVal = htmlspecialchars((string) $val, ENT_XML1, 'UTF-8');
-                        $sheetXml .= '<c r="' . $cellRef . '" t="inlineStr" s="2"><is><t>' . $safeVal . '</t></is></c>';
-                    }
+                    $safeVal = htmlspecialchars((string) $val, ENT_XML1, 'UTF-8');
+                    $sheetXml .= '<c r="' . $cellRef . '" t="inlineStr" s="2"><is><t>' . $safeVal . '</t></is></c>';
                     $cIndex++;
                 }
                 $sheetXml .= '</row>';

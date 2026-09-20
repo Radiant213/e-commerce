@@ -158,7 +158,7 @@ class ReportsPage extends Page
 
     /**
      * Ambil data Pelanggan Terloyal (Top Customers)
-     * Menggunakan join ke users table untuk mengambil email asli secara aman.
+     * Menggunakan leftJoin ke tabel users agar aman dari error missing column.
      */
     public function getCustomerData(): array
     {
@@ -187,7 +187,7 @@ class ReportsPage extends Page
     }
 
     /**
-     * Ekspor Native Excel (.xlsx) Laporan Penjualan
+     * Ekspor Native Excel (.xlsx) Laporan Penjualan (Rupiah Formatted & Left-Aligned)
      */
     public function exportSalesExcel(): StreamedResponse
     {
@@ -213,7 +213,7 @@ class ReportsPage extends Page
             'Metode Pembayaran',
             'Status Pesanan',
             'Jumlah Item',
-            'Total Tagihan (IDR)',
+            'Total Tagihan',
         ];
 
         $rows = [];
@@ -221,27 +221,26 @@ class ReportsPage extends Page
             $rows[] = [
                 $index + 1,
                 $order->order_number,
-                $order->created_at->format('Y-m-d H:i:s'),
+                $order->created_at->format('d/m/Y H:i'),
                 $order->shipping_name,
                 $order->shipping_phone,
                 strtoupper($order->payment?->payment_type ?? 'ONLINE'),
                 strtoupper($order->status),
-                $order->items->sum('quantity'),
-                (float) $order->total,
+                $order->items->sum('quantity') . ' Unit',
+                'Rp ' . number_format($order->total, 0, ',', '.'),
             ];
         }
 
         return SimpleXlsxExporter::download($filename, $headers, $rows, 'Penjualan');
     }
 
-    // Alias for backward compatibility
     public function exportSalesCsv(): StreamedResponse
     {
         return $this->exportSalesExcel();
     }
 
     /**
-     * Ekspor Native Excel (.xlsx) Laporan Stok & Inventaris
+     * Ekspor Native Excel (.xlsx) Laporan Stok (Rupiah Formatted & Left-Aligned)
      */
     public function exportInventoryExcel(): StreamedResponse
     {
@@ -267,9 +266,9 @@ class ReportsPage extends Page
             'SKU',
             'Nama Produk',
             'Kategori',
-            'Harga Satuan (IDR)',
+            'Harga Satuan',
             'Sisa Stok',
-            'Total Valuasi Stok (IDR)',
+            'Total Valuasi Stok',
             'Status Stok',
         ];
 
@@ -281,9 +280,9 @@ class ReportsPage extends Page
                 $prod->sku ?: '-',
                 $prod->name,
                 $prod->category?->name ?? 'Tanpa Kategori',
-                (float) $prod->price,
-                $prod->stock,
-                (float) ($prod->stock * ($prod->price ?? 0)),
+                'Rp ' . number_format($prod->price, 0, ',', '.'),
+                $prod->stock . ' Unit',
+                'Rp ' . number_format($prod->stock * ($prod->price ?? 0), 0, ',', '.'),
                 $status,
             ];
         }
@@ -291,7 +290,6 @@ class ReportsPage extends Page
         return SimpleXlsxExporter::download($filename, $headers, $rows, 'Stok');
     }
 
-    // Alias for backward compatibility
     public function exportInventoryCsv(): StreamedResponse
     {
         return $this->exportInventoryExcel();
@@ -319,8 +317,8 @@ class ReportsPage extends Page
         $headers = [
             'Peringkat',
             'Nama Produk',
-            'Total Terjual (Unit)',
-            'Estimasi Omset Penjualan (IDR)',
+            'Total Terjual',
+            'Estimasi Omset Penjualan',
         ];
 
         $rows = [];
@@ -328,15 +326,14 @@ class ReportsPage extends Page
             $rows[] = [
                 $index + 1,
                 $item->product_name,
-                (int) $item->total_sold,
-                (float) $item->total_revenue,
+                $item->total_sold . ' Unit',
+                'Rp ' . number_format($item->total_revenue, 0, ',', '.'),
             ];
         }
 
         return SimpleXlsxExporter::download($filename, $headers, $rows, 'Produk Terlaris');
     }
 
-    // Alias for backward compatibility
     public function exportBestSellerCsv(): StreamedResponse
     {
         return $this->exportBestSellerExcel();
@@ -367,7 +364,7 @@ class ReportsPage extends Page
             'No Telepon',
             'Email',
             'Jumlah Pesanan Selesai',
-            'Total Akumulasi Belanja (IDR)',
+            'Total Akumulasi Belanja',
             'Transaksi Terakhir',
         ];
 
@@ -378,16 +375,15 @@ class ReportsPage extends Page
                 $cust->shipping_name,
                 $cust->shipping_phone,
                 $cust->customer_email ?: '-',
-                (int) $cust->order_count,
-                (float) $cust->total_spent,
-                (string) $cust->last_order_at,
+                $cust->order_count . ' Pesanan',
+                'Rp ' . number_format($cust->total_spent, 0, ',', '.'),
+                $cust->last_order_at ? Carbon::parse($cust->last_order_at)->format('d/m/Y H:i') : '-',
             ];
         }
 
         return SimpleXlsxExporter::download($filename, $headers, $rows, 'Pelanggan Loyal');
     }
 
-    // Alias for backward compatibility
     public function exportCustomerCsv(): StreamedResponse
     {
         return $this->exportCustomerExcel();

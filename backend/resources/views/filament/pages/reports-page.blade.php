@@ -293,7 +293,7 @@
         /* 3. KPI Overview Cards Grid */
         .rc-report-kpi-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
             gap: 1rem;
         }
 
@@ -341,11 +341,12 @@
 
         .rc-report-kpi-value {
             font-family: var(--font-heading, 'Plus Jakarta Sans', sans-serif);
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             font-weight: 800;
             letter-spacing: -0.025em;
             color: var(--rc-text, #0f172a);
             margin-top: 0.2rem;
+            white-space: nowrap !important;
         }
 
         /* KPI Icon Themes */
@@ -403,6 +404,7 @@
             letter-spacing: 0.06em;
             padding: 0.75rem 1rem;
             border-bottom: 1px solid var(--rc-border, #e2e8f0);
+            text-align: left;
             white-space: nowrap;
         }
 
@@ -411,6 +413,7 @@
             border-bottom: 1px solid var(--rc-border, #e2e8f0);
             color: var(--rc-text, #0f172a);
             vertical-align: middle;
+            text-align: left;
         }
 
         .rc-report-table tbody tr:last-child td {
@@ -643,7 +646,7 @@
                     <div>
                         <div class="rc-report-kpi-title">Total Omset (Lunas)</div>
                         <div class="rc-report-kpi-value">
-                            Rp {{ number_format($salesData['summary']['total_revenue'], 0, ',', '.') }}
+                            Rp&nbsp;{{ number_format($salesData['summary']['total_revenue'], 0, ',', '.') }}
                         </div>
                     </div>
                 </div>
@@ -697,20 +700,20 @@
                     <table class="rc-report-table">
                         <thead>
                             <tr>
-                                <th style="text-align: center; width: 45px;">No</th>
+                                <th style="width: 45px;">No</th>
                                 <th>No Pesanan</th>
                                 <th>Waktu</th>
                                 <th>Pembeli</th>
                                 <th>Metode Bayar</th>
-                                <th style="text-align: center;">Status</th>
-                                <th style="text-align: right;">Total Tagihan</th>
-                                <th style="text-align: center; width: 90px;">Aksi</th>
+                                <th>Status</th>
+                                <th style="width: 140px; white-space: nowrap;">Total Tagihan</th>
+                                <th style="width: 90px;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($salesData['orders'] as $idx => $order)
                                 <tr>
-                                    <td style="text-align: center; color: var(--rc-text-subtle);">{{ $idx + 1 }}</td>
+                                    <td style="color: var(--rc-text-subtle);">{{ $idx + 1 }}</td>
                                     <td style="font-family: monospace; font-weight: 700;">{{ $order->order_number }}</td>
                                     <td style="color: var(--rc-text-muted);">{{ $order->created_at->format('d/m/Y H:i') }}</td>
                                     <td>
@@ -718,7 +721,7 @@
                                         <div style="font-size: 0.72rem; color: var(--rc-text-subtle);">{{ $order->shipping_phone }}</div>
                                     </td>
                                     <td>{{ strtoupper($order->payment?->payment_type ?? 'Online') }}</td>
-                                    <td style="text-align: center;">
+                                    <td>
                                         @php
                                             $badgeClass = match($order->status) {
                                                 'paid', 'delivered' => 'badge-paid',
@@ -731,10 +734,10 @@
                                             {{ $order->status }}
                                         </span>
                                     </td>
-                                    <td style="text-align: right; font-weight: 800;">
-                                        Rp {{ number_format($order->total, 0, ',', '.') }}
+                                    <td style="font-weight: 800; white-space: nowrap;">
+                                        Rp&nbsp;{{ number_format($order->total, 0, ',', '.') }}
                                     </td>
-                                    <td style="text-align: center;">
+                                    <td>
                                         <a
                                             href="{{ route('admin.orders.invoice', $order->id) }}"
                                             target="_blank"
@@ -899,7 +902,7 @@
                     <div>
                         <div class="rc-report-kpi-title">Valuasi Nilai Aset</div>
                         <div class="rc-report-kpi-value">
-                            Rp {{ number_format($invData['summary']['total_valuation'], 0, ',', '.') }}
+                            Rp&nbsp;{{ number_format($invData['summary']['total_valuation'], 0, ',', '.') }}
                         </div>
                     </div>
                 </div>
@@ -941,29 +944,29 @@
                     <table class="rc-report-table">
                         <thead>
                             <tr>
-                                <th style="text-align: center; width: 45px;">No</th>
-                                <th>SKU</th>
+                                <th style="width: 45px;">No</th>
+                                <th style="width: 110px;">SKU</th>
                                 <th>Nama Produk</th>
-                                <th>Kategori</th>
-                                <th style="text-align: right;">Harga Satuan</th>
-                                <th style="text-align: center;">Sisa Stok</th>
-                                <th style="text-align: right;">Valuasi Stok</th>
-                                <th style="text-align: center; width: 90px;">Status</th>
+                                <th style="width: 160px;">Kategori</th>
+                                <th style="width: 140px; white-space: nowrap;">Harga Satuan</th>
+                                <th style="width: 90px;">Sisa Stok</th>
+                                <th style="width: 150px; white-space: nowrap;">Total Valuasi</th>
+                                <th style="width: 100px;">Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($invData['products'] as $idx => $prod)
                                 <tr>
-                                    <td style="text-align: center; color: var(--rc-text-subtle);">{{ $idx + 1 }}</td>
+                                    <td style="color: var(--rc-text-subtle);">{{ $idx + 1 }}</td>
                                     <td style="font-family: monospace; font-weight: 700;">{{ $prod->sku ?: '-' }}</td>
                                     <td style="font-weight: 600;">{{ $prod->name }}</td>
                                     <td style="color: var(--rc-text-muted);">{{ $prod->category?->name ?? 'Tanpa Kategori' }}</td>
-                                    <td style="text-align: right;">Rp {{ number_format($prod->price, 0, ',', '.') }}</td>
-                                    <td style="text-align: center; font-weight: 800;">{{ $prod->stock }}</td>
-                                    <td style="text-align: right; font-weight: 800;">
-                                        Rp {{ number_format($prod->stock * ($prod->price ?? 0), 0, ',', '.') }}
+                                    <td style="white-space: nowrap;">Rp&nbsp;{{ number_format($prod->price, 0, ',', '.') }}</td>
+                                    <td style="font-weight: 800;">{{ $prod->stock }} Unit</td>
+                                    <td style="font-weight: 800; white-space: nowrap;">
+                                        Rp&nbsp;{{ number_format($prod->stock * ($prod->price ?? 0), 0, ',', '.') }}
                                     </td>
-                                    <td style="text-align: center;">
+                                    <td>
                                         @if($prod->stock <= 0)
                                             <span class="rc-report-badge badge-danger">HABIS</span>
                                         @elseif($prod->stock <= 10)
@@ -1096,16 +1099,16 @@
                     <table class="rc-report-table">
                         <thead>
                             <tr>
-                                <th style="text-align: center; width: 60px;">Rank</th>
+                                <th style="width: 60px;">Rank</th>
                                 <th>Nama Produk</th>
-                                <th style="text-align: center;">Total Terjual</th>
-                                <th style="text-align: right;">Total Nilai Penjualan</th>
+                                <th style="width: 140px;">Total Terjual</th>
+                                <th style="width: 180px; white-space: nowrap;">Total Nilai Penjualan</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($bsData['items'] as $idx => $item)
                                 <tr>
-                                    <td style="text-align: center;">
+                                    <td>
                                         @if($idx === 0)
                                             <span class="rc-report-rank rank-1">1</span>
                                         @elseif($idx === 1)
@@ -1117,8 +1120,8 @@
                                         @endif
                                     </td>
                                     <td style="font-weight: 600;">{{ $item->product_name }}</td>
-                                    <td style="text-align: center; font-weight: 800; color: #4f46e5;">{{ $item->total_sold }} Unit</td>
-                                    <td style="text-align: right; font-weight: 800;">Rp {{ number_format($item->total_revenue, 0, ',', '.') }}</td>
+                                    <td style="font-weight: 800; color: #4f46e5;">{{ $item->total_sold }} Unit</td>
+                                    <td style="font-weight: 800; white-space: nowrap;">Rp&nbsp;{{ number_format($item->total_revenue, 0, ',', '.') }}</td>
                                 </tr>
                             @empty
                                 <tr>
@@ -1178,26 +1181,26 @@
                     <table class="rc-report-table">
                         <thead>
                             <tr>
-                                <th style="text-align: center; width: 50px;">No</th>
+                                <th style="width: 50px;">No</th>
                                 <th>Nama Pelanggan</th>
                                 <th>Kontak & Email</th>
-                                <th style="text-align: center;">Jumlah Transaksi Lunas</th>
-                                <th style="text-align: right;">Total Akumulasi Belanja</th>
-                                <th style="text-align: center;">Transaksi Terakhir</th>
+                                <th style="width: 170px;">Jumlah Transaksi Lunas</th>
+                                <th style="width: 180px; white-space: nowrap;">Total Akumulasi Belanja</th>
+                                <th style="width: 150px;">Transaksi Terakhir</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($custData['customers'] as $idx => $cust)
                                 <tr>
-                                    <td style="text-align: center; color: var(--rc-text-subtle);">{{ $idx + 1 }}</td>
+                                    <td style="color: var(--rc-text-subtle);">{{ $idx + 1 }}</td>
                                     <td style="font-weight: 600;">{{ $cust->shipping_name }}</td>
                                     <td>
                                         <div style="font-weight: 500;">{{ $cust->shipping_phone }}</div>
                                         <div style="font-size: 0.72rem; color: var(--rc-text-subtle);">{{ $cust->customer_email ?: '-' }}</div>
                                     </td>
-                                    <td style="text-align: center; font-weight: 800; color: #4f46e5;">{{ $cust->order_count }} Pesanan</td>
-                                    <td style="text-align: right; font-weight: 900;">Rp {{ number_format($cust->total_spent, 0, ',', '.') }}</td>
-                                    <td style="text-align: center; color: var(--rc-text-muted);">
+                                    <td style="font-weight: 800; color: #4f46e5;">{{ $cust->order_count }} Pesanan</td>
+                                    <td style="font-weight: 900; white-space: nowrap;">Rp&nbsp;{{ number_format($cust->total_spent, 0, ',', '.') }}</td>
+                                    <td style="color: var(--rc-text-muted);">
                                         {{ $cust->last_order_at ? \Illuminate\Support\Carbon::parse($cust->last_order_at)->format('d/m/Y H:i') : '-' }}
                                     </td>
                                 </tr>
