@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Package,
@@ -344,6 +345,18 @@ const DashboardPage = () => {
     }
   };
 
+  // Lock background scroll when address modal is open
+  useEffect(() => {
+    if (isAddressModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isAddressModalOpen]);
+
   // Address Handlers
   const openNewAddressModal = () => {
     setEditingAddress(null);
@@ -352,8 +365,8 @@ const DashboardPage = () => {
       recipient_name: user?.name || '',
       phone: user?.phone || '',
       address_line: '',
-      city: 'Jakarta Selatan',
-      postal_code: '12190',
+      city: '',
+      postal_code: '',
       is_primary: addresses.length === 0,
       notes: '',
     });
@@ -1177,21 +1190,22 @@ const DashboardPage = () => {
       </div>
 
       {/* ========================================================================= */}
-      {/* MODAL DIALOG: TAMBAH / EDIT ALAMAT */}
+      {/* MODAL DIALOG: TAMBAH / EDIT ALAMAT (MOUNTED TO DOCUMENT.BODY VIA PORTAL) */}
       {/* ========================================================================= */}
-      {isAddressModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
+      {isAddressModalOpen && createPortal(
+        <div className="fixed inset-0 z-[99999] overflow-y-auto flex items-center justify-center p-4 sm:p-6">
           <div
             onClick={() => setIsAddressModalOpen(false)}
-            className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity animate-fade-in"
           />
 
-          <div className="relative bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl z-10 animate-fade-in text-left">
+          <div className="relative bg-white border border-slate-200/90 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl z-10 animate-fade-in text-left">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <h3 className="text-base font-extrabold text-slate-900">
-                {editingAddress ? 'Edit Alamat Pengiriman' : 'Tambah Alamat Pengiriman Baru'}
+                {editingAddress ? 'Edit Alamat' : 'Tambah Alamat Baru'}
               </h3>
               <button
+                type="button"
                 onClick={() => setIsAddressModalOpen(false)}
                 className="p-1.5 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100 transition-colors"
               >
@@ -1202,7 +1216,7 @@ const DashboardPage = () => {
             <form onSubmit={handleAddressSubmit} className="space-y-4 pt-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-2">Label Alamat</label>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
                   {['Rumah', 'Kantor', 'Apartemen', 'Kost', 'Lainnya'].map((lbl) => {
                     const isSelected = addressForm.label === lbl;
                     return (
@@ -1210,7 +1224,7 @@ const DashboardPage = () => {
                         type="button"
                         key={lbl}
                         onClick={() => setAddressForm({ ...addressForm, label: lbl })}
-                        className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-1.5 ${isSelected
+                        className={`py-2 px-1 rounded-xl text-[11px] sm:text-xs font-bold transition-all active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 ${isSelected
                             ? 'bg-slate-900 text-white shadow-xs'
                             : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                           }`}
@@ -1230,7 +1244,7 @@ const DashboardPage = () => {
                   required
                   value={addressForm.phone}
                   onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
-                  placeholder="081234567890"
+                  placeholder="Contoh: 081234567890"
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:border-slate-900 transition-colors"
                 />
               </div>
@@ -1267,7 +1281,7 @@ const DashboardPage = () => {
                     required
                     value={addressForm.city}
                     onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
-                    placeholder="Jakarta Selatan"
+                    placeholder="Contoh: Jakarta Selatan"
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:border-slate-900"
                   />
                 </div>
@@ -1279,7 +1293,7 @@ const DashboardPage = () => {
                     required
                     value={addressForm.postal_code}
                     onChange={(e) => setAddressForm({ ...addressForm, postal_code: e.target.value })}
-                    placeholder="12190"
+                    placeholder="Contoh: 12190"
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:border-slate-900"
                   />
                 </div>
@@ -1291,7 +1305,7 @@ const DashboardPage = () => {
                   type="text"
                   value={addressForm.notes}
                   onChange={(e) => setAddressForm({ ...addressForm, notes: e.target.value })}
-                  placeholder="Pagar hitam, samping pos satpam..."
+                  placeholder="Contoh: Pagar hitam, samping pos satpam..."
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:border-slate-900"
                 />
               </div>
@@ -1304,7 +1318,7 @@ const DashboardPage = () => {
                     onChange={(e) => setAddressForm({ ...addressForm, is_primary: e.target.checked })}
                     className="rounded border-slate-300 text-slate-900 focus:ring-slate-900"
                   />
-                  <span>Jadikan Alamat Pengiriman Utama</span>
+                  <span>Jadikan Alamat Utama</span>
                 </label>
               </div>
 
@@ -1326,7 +1340,8 @@ const DashboardPage = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

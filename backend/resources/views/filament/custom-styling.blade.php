@@ -243,7 +243,6 @@
         border: 1px solid var(--rc-border) !important;
         border-radius: 14px !important;
         box-shadow: var(--rc-shadow-pop), 0 20px 45px -10px rgba(0, 0, 0, 0.6) !important;
-        backdrop-filter: blur(16px) !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
         padding: 6px !important;
@@ -251,10 +250,38 @@
         position: absolute !important;
     }
 
+    html.dark .fi-dropdown-panel,
+    html.dark .fi-select-panel,
+    html.dark .fi-ac-dropdown-panel,
+    html.dark .fi-popover-panel,
+    html.dark [role="listbox"],
+    html.dark div.fi-dropdown-panel {
+        background-color: #0F1724 !important;
+    }
+
+    html:not(.dark) .fi-dropdown-panel,
+    html:not(.dark) .fi-select-panel,
+    html:not(.dark) .fi-ac-dropdown-panel,
+    html:not(.dark) .fi-popover-panel,
+    html:not(.dark) [role="listbox"],
+    html:not(.dark) div.fi-dropdown-panel {
+        background-color: #FFFFFF !important;
+    }
+
+    /* Base fields stacking context: low z-index */
+    .fi-fo-field,
+    [data-field-wrapper],
+    .fi-fo-field-wrp {
+        position: relative;
+        z-index: 1;
+    }
+
     /* Never clip dropdown popups or custom selects inside cards, sections, or grids */
     .fi-section,
     .fi-section-content-ctn,
     .fi-section-content,
+    .fi-fo-field,
+    [data-field-wrapper],
     .fi-fo-field-wrp,
     .fi-fo-field-wrp-item,
     .fi-grid,
@@ -263,13 +290,32 @@
         overflow: visible !important;
     }
 
-    /* Elevate active section or field so dropdowns float on top of all following sections and buttons */
+    /* Elevate active section or field wrapper so dropdowns float on top of ALL following fields, sections, and buttons */
     .fi-section:focus-within,
     .fi-section:has([aria-expanded="true"]),
     .fi-section:has([role="listbox"]:not([style*="display: none"])),
+    .fi-fo-field:focus-within,
+    .fi-fo-field:has([aria-expanded="true"]),
+    .fi-fo-field:has([role="listbox"]:not([style*="display: none"])),
+    [data-field-wrapper]:focus-within,
+    [data-field-wrapper]:has([aria-expanded="true"]),
+    [data-field-wrapper]:has([role="listbox"]:not([style*="display: none"])),
     .fi-fo-field-wrp:focus-within,
-    .fi-fo-field-wrp:has([aria-expanded="true"]) {
-        z-index: 60 !important;
+    .fi-fo-field-wrp:has([aria-expanded="true"]),
+    .fi-fo-field-wrp:has([role="listbox"]:not([style*="display: none"])),
+    .fi-fo-select-wrp:focus-within,
+    .fi-fo-select-wrp:has([aria-expanded="true"]),
+    .fi-fo-select-wrp:has([role="listbox"]:not([style*="display: none"])),
+    .fi-input-wrp:focus-within,
+    .fi-input-wrp:has([aria-expanded="true"]),
+    .fi-input-wrp:has([role="listbox"]:not([style*="display: none"])),
+    div.fi-select-input:focus-within,
+    div.fi-select-input:has([aria-expanded="true"]),
+    div.fi-select-input:has([role="listbox"]:not([style*="display: none"])),
+    .fi-select-input-ctn:focus-within,
+    .fi-select-input-ctn:has([aria-expanded="true"]),
+    .fi-select-input-ctn:has([role="listbox"]:not([style*="display: none"])) {
+        z-index: 9999 !important;
         position: relative !important;
     }
 
