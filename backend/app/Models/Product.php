@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 #[Fillable([
@@ -132,10 +133,10 @@ class Product extends Model
         return $this->hasMany(ProductImage::class)->orderBy('sort_order');
     }
 
-    public function primaryImage(): BelongsTo
+    public function primaryImage(): HasOne
     {
-        return $this->belongsTo(ProductImage::class, 'id', 'product_id')
-            ->where('is_primary', true);
+        return $this->hasOne(ProductImage::class)
+            ->ofMany(['is_primary' => 'desc', 'sort_order' => 'asc', 'id' => 'asc']);
     }
 
     public function variants(): HasMany

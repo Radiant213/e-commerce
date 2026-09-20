@@ -120,7 +120,7 @@ class CartService
     public function getCartWithItems(int $userId): ?Cart
     {
         return Cart::where('user_id', $userId)
-            ->with(['items.product.primaryImage', 'items.product.category', 'items.variant'])
+            ->with(['items.product.primaryImage', 'items.product.images', 'items.product.category', 'items.variant'])
             ->first();
     }
 }

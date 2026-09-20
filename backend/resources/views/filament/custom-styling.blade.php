@@ -236,14 +236,48 @@
     .fi-dropdown-panel,
     .fi-select-panel,
     .fi-ac-dropdown-panel,
-    .fi-popover-panel {
+    .fi-popover-panel,
+    [role="listbox"],
+    div.fi-dropdown-panel {
         background-color: var(--rc-surface) !important;
         border: 1px solid var(--rc-border) !important;
         border-radius: 14px !important;
-        box-shadow: var(--rc-shadow-pop) !important;
+        box-shadow: var(--rc-shadow-pop), 0 20px 45px -10px rgba(0, 0, 0, 0.6) !important;
         backdrop-filter: blur(16px) !important;
-        overflow: hidden !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
         padding: 6px !important;
+        z-index: 99999 !important;
+        position: absolute !important;
+    }
+
+    /* Never clip dropdown popups or custom selects inside cards, sections, or grids */
+    .fi-section,
+    .fi-section-content-ctn,
+    .fi-section-content,
+    .fi-fo-field-wrp,
+    .fi-fo-field-wrp-item,
+    .fi-grid,
+    .fi-fo-select-wrp,
+    .fi-select-input {
+        overflow: visible !important;
+    }
+
+    /* Elevate active section or field so dropdowns float on top of all following sections and buttons */
+    .fi-section:focus-within,
+    .fi-section:has([aria-expanded="true"]),
+    .fi-section:has([role="listbox"]:not([style*="display: none"])),
+    .fi-fo-field-wrp:focus-within,
+    .fi-fo-field-wrp:has([aria-expanded="true"]) {
+        z-index: 60 !important;
+        position: relative !important;
+    }
+
+    /* Keep form bottom action buttons at lower z-index so dropdowns always float in front */
+    .fi-form-actions,
+    .fi-page-actions {
+        position: relative !important;
+        z-index: 10 !important;
     }
 
     .fi-dropdown-list-item,
@@ -679,7 +713,7 @@
     .fi-section,
     .fi-ta-ctn,
     .fi-wi {
-        animation: rcFadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+        animation: rcFadeIn 0.25s ease both;
     }
 
     /* Staggered overview widgets */

@@ -121,7 +121,12 @@ const CartDrawer = () => {
             ) : (
               items.map((item) => {
                 const prod = item.product;
-                const img = item.variant?.image_url || prod?.primary_image?.image_path || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=300&q=80';
+                const img = item.variant?.image_url 
+                  || prod?.primary_image?.image_path 
+                  || prod?.images?.find((i) => i.is_primary)?.image_path
+                  || prod?.images?.[0]?.image_path
+                  || prod?.thumbnail_url
+                  || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=300&q=80';
                 const unitPrice = item.variant?.effective_price ?? prod?.effective_price ?? prod?.sale_price ?? prod?.price;
 
                 return (
@@ -130,6 +135,10 @@ const CartDrawer = () => {
                     <img
                       src={img}
                       alt={prod?.name}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=300&q=80';
+                      }}
                       className="w-18 h-18 rounded-2xl object-cover bg-slate-50 border border-slate-200/80 flex-shrink-0 shadow-xs"
                     />
 
