@@ -228,14 +228,16 @@ const ProductDetailPage = () => {
     if (product.specifications && typeof product.specifications === 'object') {
       if (Array.isArray(product.specifications)) {
         product.specifications.forEach((item) => {
-          if (item && item.key && item.value) {
-            list.push({ label: item.key, value: item.value });
+          const key = item?.key || item?.name || item?.label;
+          const val = item?.value || item?.val;
+          if (key && String(key).trim() !== '' && val && String(val).trim() !== '') {
+            list.push({ label: String(key).trim(), value: String(val).trim() });
           }
         });
       } else {
         Object.entries(product.specifications).forEach(([k, v]) => {
-          if (k && v) {
-            list.push({ label: k, value: String(v) });
+          if (k && String(k).trim() !== '' && v !== null && v !== undefined && String(v).trim() !== '') {
+            list.push({ label: String(k).trim(), value: String(v).trim() });
           }
         });
       }

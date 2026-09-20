@@ -76,6 +76,28 @@ class Product extends Model
         }
     }
 
+    public function setSpecificationsAttribute($value): void
+    {
+        if (is_array($value)) {
+            $filtered = [];
+            foreach ($value as $k => $v) {
+                if (filled($k) && filled($v) && trim((string) $k) !== '' && trim((string) $v) !== '') {
+                    $filtered[trim((string) $k)] = is_string($v) ? trim($v) : $v;
+                }
+            }
+            $this->attributes['specifications'] = !empty($filtered) ? json_encode($filtered) : null;
+        } elseif (is_string($value) && !blank($value)) {
+            $decoded = json_decode($value, true);
+            if (is_array($decoded)) {
+                $this->setSpecificationsAttribute($decoded);
+            } else {
+                $this->attributes['specifications'] = null;
+            }
+        } else {
+            $this->attributes['specifications'] = null;
+        }
+    }
+
     public function getThumbnailUrlAttribute(): ?string
     {
         return $this->primaryImage?->image_path ?? $this->images->first()?->image_path;
