@@ -16,7 +16,7 @@
 
     {{-- Collapsed Mode: Clean Centered Mini Icon --}}
     <div x-show="! $store.sidebar.isOpen" style="padding: 12px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-        <a href="https://localhost:5173" target="_blank" rel="noopener noreferrer" title="Buka Web Toko" style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: var(--rc-surface-2); color: var(--rc-emerald); border: 1px solid var(--rc-border); border-radius: 10px; text-decoration: none; transition: all 0.2s ease;">
+        <a href="https://demo1-ecommerce.radiantcode.web.id" target="_blank" rel="noopener noreferrer" title="Buka Web Toko" style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: var(--rc-surface-2); color: var(--rc-emerald); border: 1px solid var(--rc-border); border-radius: 10px; text-decoration: none; transition: all 0.2s ease;">
             <span style="display: inline-block; width: 8px; height: 8px; background: var(--rc-emerald); border-radius: 9999px; box-shadow: 0 0 6px var(--rc-emerald);"></span>
         </a>
     </div>

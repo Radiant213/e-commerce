@@ -6,10 +6,10 @@ use App\Models\Category;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Services\SimpleXlsxExporter;
 use BackedEnum;
 use UnitEnum;
 use Filament\Pages\Page;
-use Filament\Notifications\Notification;
 use Illuminate\Support\Carbon;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -88,7 +88,7 @@ class ReportsPage extends Page
                 'paid_orders_count' => $paidOrdersCount,
                 'total_items_sold' => $totalItemsSold,
             ],
-            'orders' => $allOrders->take(50), // Preview 50 data teratas di UI
+            'orders' => $allOrders->take(50),
             'total_count' => $totalOrders,
         ];
     }
@@ -158,27 +158,38 @@ class ReportsPage extends Page
 
     /**
      * Ambil data Pelanggan Terloyal (Top Customers)
+     * Menggunakan join ke users table untuk mengambil email asli secara aman.
      */
     public function getCustomerData(): array
     {
-        $customers = Order::query()
-            ->whereIn('status', ['paid', 'processing', 'shipped', 'delivered'])
-            ->selectRaw('shipping_name, shipping_phone, shipping_email, COUNT(*) as order_count, SUM(total) as total_spent, MAX(created_at) as last_order_at')
-            ->groupBy('shipping_name', 'shipping_phone', 'shipping_email')
-            ->havingRaw('COUNT(*) >= ?', [$this->customerMinOrders])
-            ->orderByDesc('total_spent')
-            ->limit(30)
-            ->get();
+        try {
+            $minOrders = max(1, (int) $this->customerMinOrders);
 
-        return [
-            'customers' => $customers,
-        ];
+            $customers = Order::query()
+                ->leftJoin('users', 'orders.user_id', '=', 'users.id')
+                ->whereIn('orders.status', ['paid', 'processing', 'shipped', 'delivered'])
+                ->selectRaw('orders.user_id, orders.shipping_name, orders.shipping_phone, users.email as customer_email, COUNT(orders.id) as order_count, SUM(orders.total) as total_spent, MAX(orders.created_at) as last_order_at')
+                ->groupBy('orders.user_id', 'orders.shipping_name', 'orders.shipping_phone', 'users.email')
+                ->havingRaw('COUNT(orders.id) >= ?', [$minOrders])
+                ->orderByDesc('total_spent')
+                ->limit(50)
+                ->get();
+
+            return [
+                'customers' => $customers,
+            ];
+        } catch (\Throwable $e) {
+            report($e);
+            return [
+                'customers' => collect([]),
+            ];
+        }
     }
 
     /**
-     * Ekspor CSV Laporan Penjualan (Excel Friendly via UTF-8 BOM)
+     * Ekspor Native Excel (.xlsx) Laporan Penjualan
      */
-    public function exportSalesCsv(): StreamedResponse
+    public function exportSalesExcel(): StreamedResponse
     {
         $startDate = $this->salesStartDate ? Carbon::parse($this->salesStartDate)->startOfDay() : now()->subDays(30)->startOfDay();
         $endDate = $this->salesEndDate ? Carbon::parse($this->salesEndDate)->endOfDay() : now()->endOfDay();
@@ -191,50 +202,48 @@ class ReportsPage extends Page
         }
 
         $orders = $query->latest()->get();
-        $filename = 'Laporan_Penjualan_' . now()->format('Ymd_His') . '.csv';
+        $filename = 'Laporan_Penjualan_' . now()->format('Ymd_His') . '.xlsx';
 
-        return response()->streamDownload(function () use ($orders) {
-            $handle = fopen('php://output', 'w');
-            // UTF-8 BOM for automatic Excel delimiter & character recognition
-            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+        $headers = [
+            'No',
+            'No Pesanan',
+            'Tanggal',
+            'Nama Pembeli',
+            'No Telepon',
+            'Metode Pembayaran',
+            'Status Pesanan',
+            'Jumlah Item',
+            'Total Tagihan (IDR)',
+        ];
 
-            fputcsv($handle, [
-                'No',
-                'No Pesanan',
-                'Tanggal',
-                'Nama Pembeli',
-                'No Telepon',
-                'Metode Pembayaran',
-                'Status Pesanan',
-                'Jumlah Item',
-                'Total Tagihan (IDR)',
-            ]);
+        $rows = [];
+        foreach ($orders as $index => $order) {
+            $rows[] = [
+                $index + 1,
+                $order->order_number,
+                $order->created_at->format('Y-m-d H:i:s'),
+                $order->shipping_name,
+                $order->shipping_phone,
+                strtoupper($order->payment?->payment_type ?? 'ONLINE'),
+                strtoupper($order->status),
+                $order->items->sum('quantity'),
+                (float) $order->total,
+            ];
+        }
 
-            foreach ($orders as $index => $order) {
-                fputcsv($handle, [
-                    $index + 1,
-                    $order->order_number,
-                    $order->created_at->format('Y-m-d H:i:s'),
-                    $order->shipping_name,
-                    $order->shipping_phone,
-                    strtoupper($order->payment?->payment_type ?? 'ONLINE'),
-                    strtoupper($order->status),
-                    $order->items->sum('quantity'),
-                    $order->total,
-                ]);
-            }
+        return SimpleXlsxExporter::download($filename, $headers, $rows, 'Penjualan');
+    }
 
-            fclose($handle);
-        }, $filename, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-        ]);
+    // Alias for backward compatibility
+    public function exportSalesCsv(): StreamedResponse
+    {
+        return $this->exportSalesExcel();
     }
 
     /**
-     * Ekspor CSV Laporan Stok & Inventaris (Excel Friendly)
+     * Ekspor Native Excel (.xlsx) Laporan Stok & Inventaris
      */
-    public function exportInventoryCsv(): StreamedResponse
+    public function exportInventoryExcel(): StreamedResponse
     {
         $query = Product::with(['category']);
 
@@ -251,48 +260,47 @@ class ReportsPage extends Page
         }
 
         $products = $query->orderBy('stock', 'asc')->get();
-        $filename = 'Laporan_Stok_' . now()->format('Ymd_His') . '.csv';
+        $filename = 'Laporan_Stok_' . now()->format('Ymd_His') . '.xlsx';
 
-        return response()->streamDownload(function () use ($products) {
-            $handle = fopen('php://output', 'w');
-            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+        $headers = [
+            'No',
+            'SKU',
+            'Nama Produk',
+            'Kategori',
+            'Harga Satuan (IDR)',
+            'Sisa Stok',
+            'Total Valuasi Stok (IDR)',
+            'Status Stok',
+        ];
 
-            fputcsv($handle, [
-                'No',
-                'SKU',
-                'Nama Produk',
-                'Kategori',
-                'Harga Satuan (IDR)',
-                'Sisa Stok',
-                'Total Valuasi Stok (IDR)',
-                'Status Stok',
-            ]);
+        $rows = [];
+        foreach ($products as $index => $prod) {
+            $status = $prod->stock <= 0 ? 'HABIS' : ($prod->stock <= 10 ? 'MENIPIS' : 'TERSEDIA');
+            $rows[] = [
+                $index + 1,
+                $prod->sku ?: '-',
+                $prod->name,
+                $prod->category?->name ?? 'Tanpa Kategori',
+                (float) $prod->price,
+                $prod->stock,
+                (float) ($prod->stock * ($prod->price ?? 0)),
+                $status,
+            ];
+        }
 
-            foreach ($products as $index => $prod) {
-                $status = $prod->stock <= 0 ? 'HABIS' : ($prod->stock <= 10 ? 'MENIPIS' : 'TERSEDIA');
-                fputcsv($handle, [
-                    $index + 1,
-                    $prod->sku ?: '-',
-                    $prod->name,
-                    $prod->category?->name ?? 'Tanpa Kategori',
-                    $prod->price,
-                    $prod->stock,
-                    $prod->stock * ($prod->price ?? 0),
-                    $status,
-                ]);
-            }
+        return SimpleXlsxExporter::download($filename, $headers, $rows, 'Stok');
+    }
 
-            fclose($handle);
-        }, $filename, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-        ]);
+    // Alias for backward compatibility
+    public function exportInventoryCsv(): StreamedResponse
+    {
+        return $this->exportInventoryExcel();
     }
 
     /**
-     * Ekspor CSV Produk Terlaris
+     * Ekspor Native Excel (.xlsx) Produk Terlaris
      */
-    public function exportBestSellerCsv(): StreamedResponse
+    public function exportBestSellerExcel(): StreamedResponse
     {
         $startDate = now()->subDays($this->bestsellerDays)->startOfDay();
 
@@ -306,81 +314,82 @@ class ReportsPage extends Page
             ->limit($this->bestsellerLimit)
             ->get();
 
-        $filename = 'Laporan_Produk_Terlaris_' . now()->format('Ymd_His') . '.csv';
+        $filename = 'Laporan_Produk_Terlaris_' . now()->format('Ymd_His') . '.xlsx';
 
-        return response()->streamDownload(function () use ($items) {
-            $handle = fopen('php://output', 'w');
-            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+        $headers = [
+            'Peringkat',
+            'Nama Produk',
+            'Total Terjual (Unit)',
+            'Estimasi Omset Penjualan (IDR)',
+        ];
 
-            fputcsv($handle, [
-                'Peringkat',
-                'Nama Produk',
-                'Total Terjual (Unit)',
-                'Estimasi Omset Penjualan (IDR)',
-            ]);
+        $rows = [];
+        foreach ($items as $index => $item) {
+            $rows[] = [
+                $index + 1,
+                $item->product_name,
+                (int) $item->total_sold,
+                (float) $item->total_revenue,
+            ];
+        }
 
-            foreach ($items as $index => $item) {
-                fputcsv($handle, [
-                    $index + 1,
-                    $item->product_name,
-                    $item->total_sold,
-                    $item->total_revenue,
-                ]);
-            }
+        return SimpleXlsxExporter::download($filename, $headers, $rows, 'Produk Terlaris');
+    }
 
-            fclose($handle);
-        }, $filename, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-        ]);
+    // Alias for backward compatibility
+    public function exportBestSellerCsv(): StreamedResponse
+    {
+        return $this->exportBestSellerExcel();
     }
 
     /**
-     * Ekspor CSV Pelanggan Terloyal
+     * Ekspor Native Excel (.xlsx) Pelanggan Terloyal
      */
-    public function exportCustomerCsv(): StreamedResponse
+    public function exportCustomerExcel(): StreamedResponse
     {
+        $minOrders = max(1, (int) $this->customerMinOrders);
+
         $customers = Order::query()
-            ->whereIn('status', ['paid', 'processing', 'shipped', 'delivered'])
-            ->selectRaw('shipping_name, shipping_phone, shipping_email, COUNT(*) as order_count, SUM(total) as total_spent, MAX(created_at) as last_order_at')
-            ->groupBy('shipping_name', 'shipping_phone', 'shipping_email')
-            ->havingRaw('COUNT(*) >= ?', [$this->customerMinOrders])
+            ->leftJoin('users', 'orders.user_id', '=', 'users.id')
+            ->whereIn('orders.status', ['paid', 'processing', 'shipped', 'delivered'])
+            ->selectRaw('orders.user_id, orders.shipping_name, orders.shipping_phone, users.email as customer_email, COUNT(orders.id) as order_count, SUM(orders.total) as total_spent, MAX(orders.created_at) as last_order_at')
+            ->groupBy('orders.user_id', 'orders.shipping_name', 'orders.shipping_phone', 'users.email')
+            ->havingRaw('COUNT(orders.id) >= ?', [$minOrders])
             ->orderByDesc('total_spent')
             ->limit(100)
             ->get();
 
-        $filename = 'Laporan_Pelanggan_Loyal_' . now()->format('Ymd_His') . '.csv';
+        $filename = 'Laporan_Pelanggan_Loyal_' . now()->format('Ymd_His') . '.xlsx';
 
-        return response()->streamDownload(function () use ($customers) {
-            $handle = fopen('php://output', 'w');
-            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+        $headers = [
+            'No',
+            'Nama Pelanggan',
+            'No Telepon',
+            'Email',
+            'Jumlah Pesanan Selesai',
+            'Total Akumulasi Belanja (IDR)',
+            'Transaksi Terakhir',
+        ];
 
-            fputcsv($handle, [
-                'No',
-                'Nama Pelanggan',
-                'No Telepon',
-                'Email',
-                'Jumlah Pesanan Selesai',
-                'Total Akumulasi Belanja (IDR)',
-                'Transaksi Terakhir',
-            ]);
+        $rows = [];
+        foreach ($customers as $index => $cust) {
+            $rows[] = [
+                $index + 1,
+                $cust->shipping_name,
+                $cust->shipping_phone,
+                $cust->customer_email ?: '-',
+                (int) $cust->order_count,
+                (float) $cust->total_spent,
+                (string) $cust->last_order_at,
+            ];
+        }
 
-            foreach ($customers as $index => $cust) {
-                fputcsv($handle, [
-                    $index + 1,
-                    $cust->shipping_name,
-                    $cust->shipping_phone,
-                    $cust->shipping_email ?: '-',
-                    $cust->order_count,
-                    $cust->total_spent,
-                    $cust->last_order_at,
-                ]);
-            }
+        return SimpleXlsxExporter::download($filename, $headers, $rows, 'Pelanggan Loyal');
+    }
 
-            fclose($handle);
-        }, $filename, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-        ]);
+    // Alias for backward compatibility
+    public function exportCustomerCsv(): StreamedResponse
+    {
+        return $this->exportCustomerExcel();
     }
 }

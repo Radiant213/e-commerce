@@ -84,19 +84,22 @@
             border: 1px solid var(--rc-border, #e2e8f0);
             border-radius: 1rem;
             box-shadow: var(--rc-shadow-sm, 0 1px 3px rgba(15, 23, 42, 0.04));
+            position: relative;
+            z-index: 20;
         }
 
         .rc-report-filter-group {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 1rem;
+            gap: 1.25rem;
         }
 
         .rc-report-filter-item {
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            position: relative;
         }
 
         .rc-report-label {
@@ -108,10 +111,9 @@
             white-space: nowrap;
         }
 
-        .rc-report-input,
-        .rc-report-select {
-            padding: 0.45rem 0.85rem;
-            border-radius: 0.5rem;
+        .rc-report-input {
+            padding: 0.48rem 0.85rem;
+            border-radius: 0.6rem;
             border: 1px solid var(--rc-border-2, #cbd5e1);
             background-color: var(--rc-surface-2, #f1f5f9);
             color: var(--rc-text, #0f172a);
@@ -121,10 +123,116 @@
             transition: all 0.2s ease;
         }
 
-        .rc-report-input:focus,
-        .rc-report-select:focus {
+        .rc-report-input:focus {
             border-color: var(--rc-emerald, #10b981);
             box-shadow: 0 0 0 3px var(--rc-emerald-dim, rgba(16, 185, 129, 0.12));
+        }
+
+        /* Luxury Custom Select Component (Alpine.js Popover) */
+        .rc-custom-select {
+            position: relative;
+            display: inline-block;
+        }
+
+        .rc-select-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.48rem 0.9rem;
+            background-color: var(--rc-surface-2, #f1f5f9);
+            border: 1px solid var(--rc-border-2, #cbd5e1);
+            border-radius: 0.6rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--rc-text, #0f172a);
+            cursor: pointer;
+            min-width: 145px;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: var(--rc-shadow-sm, 0 1px 2px rgba(0,0,0,0.03));
+        }
+
+        .rc-select-btn:hover {
+            border-color: var(--rc-emerald, #10b981);
+            background-color: var(--rc-surface, #ffffff);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px -2px var(--rc-emerald-dim, rgba(16, 185, 129, 0.2));
+        }
+
+        .rc-select-chevron {
+            width: 13px !important;
+            height: 13px !important;
+            stroke: var(--rc-emerald, #10b981);
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .rc-select-chevron.open {
+            transform: rotate(180deg);
+        }
+
+        .rc-select-panel {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            min-width: 180px;
+            max-height: 280px;
+            overflow-y: auto;
+            background-color: var(--rc-surface, #ffffff);
+            border: 1px solid var(--rc-border, #e2e8f0);
+            border-radius: 0.85rem;
+            box-shadow: var(--rc-shadow-pop, 0 16px 32px -8px rgba(15, 23, 42, 0.14));
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 0.35rem;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            animation: rcFadeInDown 0.15s ease both;
+        }
+
+        @keyframes rcFadeInDown {
+            from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .rc-select-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            border: none;
+            background: transparent;
+            color: var(--rc-text, #0f172a);
+            font-size: 0.8125rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+
+        .rc-select-option:hover {
+            background-color: var(--rc-emerald-dim, rgba(16, 185, 129, 0.12));
+            color: var(--rc-emerald, #10b981);
+            transform: translateX(3px);
+        }
+
+        .rc-select-option.active {
+            background-color: var(--rc-emerald-dim, rgba(16, 185, 129, 0.12));
+            color: var(--rc-emerald, #10b981);
+            font-weight: 700;
+        }
+
+        .rc-select-check {
+            width: 14px !important;
+            height: 14px !important;
+            stroke: var(--rc-emerald, #10b981);
+            stroke-width: 2.5;
+            flex-shrink: 0;
         }
 
         /* Action Buttons (Excel & PDF) */
@@ -138,7 +246,7 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.55rem 1rem;
+            padding: 0.55rem 1.1rem;
             border-radius: 0.75rem;
             font-size: 0.78rem;
             font-weight: 700;
@@ -157,23 +265,23 @@
         }
 
         .rc-report-btn-emerald {
-            background-color: #059669;
+            background: linear-gradient(135deg, #059669, #047857);
             color: #ffffff !important;
         }
 
         .rc-report-btn-emerald:hover {
-            background-color: #047857;
+            filter: brightness(1.08);
             transform: translateY(-1px);
             box-shadow: 0 6px 16px -2px rgba(5, 150, 105, 0.45);
         }
 
         .rc-report-btn-indigo {
-            background-color: #4f46e5;
+            background: linear-gradient(135deg, #4f46e5, #4338ca);
             color: #ffffff !important;
         }
 
         .rc-report-btn-indigo:hover {
-            background-color: #4338ca;
+            filter: brightness(1.08);
             transform: translateY(-1px);
             box-shadow: 0 6px 16px -2px rgba(79, 70, 229, 0.45);
         }
@@ -459,33 +567,60 @@
                             class="rc-report-input"
                         />
                     </div>
-                    <div class="rc-report-filter-item">
+
+                    {{-- Custom Luxury Dropdown: Status --}}
+                    @php
+                        $salesStatusOptions = [
+                            'all' => 'Semua Status',
+                            'paid' => 'Lunas (Paid)',
+                            'pending' => 'Menunggu Bayar',
+                            'processing' => 'Diproses',
+                            'shipped' => 'Dikirim',
+                            'delivered' => 'Selesai (Delivered)',
+                            'cancelled' => 'Dibatalkan',
+                        ];
+                    @endphp
+                    <div class="rc-report-filter-item" x-data="{ open: false }" @click.outside="open = false">
                         <label class="rc-report-label">Status:</label>
-                        <select
-                            wire:model.live="salesStatus"
-                            class="rc-report-select"
-                        >
-                            <option value="all">Semua Status</option>
-                            <option value="paid">Lunas (Paid)</option>
-                            <option value="pending">Menunggu Bayar</option>
-                            <option value="processing">Diproses</option>
-                            <option value="shipped">Dikirim</option>
-                            <option value="delivered">Selesai (Delivered)</option>
-                            <option value="cancelled">Dibatalkan</option>
-                        </select>
+                        <div class="rc-custom-select">
+                            <button type="button" @click="open = !open" class="rc-select-btn">
+                                <span>{{ $salesStatusOptions[$salesStatus] ?? 'Semua Status' }}</span>
+                                <svg class="rc-select-chevron" :class="{ 'open': open }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
+                                </svg>
+                            </button>
+                            <div x-show="open" x-cloak class="rc-select-panel">
+                                @foreach($salesStatusOptions as $val => $label)
+                                    <button
+                                        type="button"
+                                        wire:click="$set('salesStatus', '{{ $val }}')"
+                                        @click="open = false"
+                                        class="rc-select-option {{ $salesStatus === $val ? 'active' : '' }}"
+                                    >
+                                        <span>{{ $label }}</span>
+                                        @if($salesStatus === $val)
+                                            <svg class="rc-select-check" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                                            </svg>
+                                        @endif
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {{-- Action Buttons: Excel & PDF --}}
+                {{-- Action Buttons: Excel (.xlsx) & PDF --}}
                 <div class="rc-report-actions">
                     <button
                         type="button"
-                        wire:click="exportSalesCsv"
+                        wire:click="exportSalesExcel"
                         wire:loading.attr="disabled"
                         class="rc-report-btn rc-report-btn-emerald"
+                        title="Unduh file Excel (.xlsx) resmi"
                     >
                         <x-heroicon-m-arrow-down-tray />
-                        <span>Ekspor Excel (.csv)</span>
+                        <span>Ekspor Excel (.xlsx)</span>
                     </button>
 
                     <a
@@ -631,43 +766,105 @@
             {{-- Filter & Action Bar --}}
             <div class="rc-report-filter-bar">
                 <div class="rc-report-filter-group">
-                    <div class="rc-report-filter-item">
+                    {{-- Custom Luxury Dropdown: Kategori --}}
+                    <div class="rc-report-filter-item" x-data="{ open: false }" @click.outside="open = false">
                         <label class="rc-report-label">Kategori:</label>
-                        <select
-                            wire:model.live="inventoryCategoryId"
-                            class="rc-report-select"
-                        >
-                            <option value="all">Semua Kategori</option>
-                            @foreach($invData['categories'] as $cat)
-                                <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                            @endforeach
-                        </select>
+                        <div class="rc-custom-select">
+                            <button type="button" @click="open = !open" class="rc-select-btn">
+                                <span>
+                                    @if($inventoryCategoryId === 'all')
+                                        Semua Kategori
+                                    @else
+                                        {{ $invData['categories']->firstWhere('id', $inventoryCategoryId)?->name ?? 'Semua Kategori' }}
+                                    @endif
+                                </span>
+                                <svg class="rc-select-chevron" :class="{ 'open': open }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
+                                </svg>
+                            </button>
+                            <div x-show="open" x-cloak class="rc-select-panel">
+                                <button
+                                    type="button"
+                                    wire:click="$set('inventoryCategoryId', 'all')"
+                                    @click="open = false"
+                                    class="rc-select-option {{ $inventoryCategoryId === 'all' ? 'active' : '' }}"
+                                >
+                                    <span>Semua Kategori</span>
+                                    @if($inventoryCategoryId === 'all')
+                                        <svg class="rc-select-check" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                                        </svg>
+                                    @endif
+                                </button>
+                                @foreach($invData['categories'] as $cat)
+                                    <button
+                                        type="button"
+                                        wire:click="$set('inventoryCategoryId', '{{ $cat->id }}')"
+                                        @click="open = false"
+                                        class="rc-select-option {{ (string) $inventoryCategoryId === (string) $cat->id ? 'active' : '' }}"
+                                    >
+                                        <span>{{ $cat->name }}</span>
+                                        @if((string) $inventoryCategoryId === (string) $cat->id)
+                                            <svg class="rc-select-check" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                                            </svg>
+                                        @endif
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="rc-report-filter-item">
+                    {{-- Custom Luxury Dropdown: Kondisi Stok --}}
+                    @php
+                        $stockFilterOptions = [
+                            'all' => 'Semua Produk',
+                            'out_of_stock' => 'Stok Habis (0)',
+                            'low_stock' => 'Stok Kritis (≤ 10)',
+                            'in_stock' => 'Stok Aman (> 10)',
+                        ];
+                    @endphp
+                    <div class="rc-report-filter-item" x-data="{ open: false }" @click.outside="open = false">
                         <label class="rc-report-label">Kondisi Stok:</label>
-                        <select
-                            wire:model.live="inventoryStockFilter"
-                            class="rc-report-select"
-                        >
-                            <option value="all">Semua Produk</option>
-                            <option value="out_of_stock">Stok Habis (0)</option>
-                            <option value="low_stock">Stok Kritis (≤ 10)</option>
-                            <option value="in_stock">Stok Aman (> 10)</option>
-                        </select>
+                        <div class="rc-custom-select">
+                            <button type="button" @click="open = !open" class="rc-select-btn">
+                                <span>{{ $stockFilterOptions[$inventoryStockFilter] ?? 'Semua Produk' }}</span>
+                                <svg class="rc-select-chevron" :class="{ 'open': open }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
+                                </svg>
+                            </button>
+                            <div x-show="open" x-cloak class="rc-select-panel">
+                                @foreach($stockFilterOptions as $val => $label)
+                                    <button
+                                        type="button"
+                                        wire:click="$set('inventoryStockFilter', '{{ $val }}')"
+                                        @click="open = false"
+                                        class="rc-select-option {{ $inventoryStockFilter === $val ? 'active' : '' }}"
+                                    >
+                                        <span>{{ $label }}</span>
+                                        @if($inventoryStockFilter === $val)
+                                            <svg class="rc-select-check" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                                            </svg>
+                                        @endif
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {{-- Export Actions --}}
+                {{-- Export Actions: Excel (.xlsx) & PDF --}}
                 <div class="rc-report-actions">
                     <button
                         type="button"
-                        wire:click="exportInventoryCsv"
+                        wire:click="exportInventoryExcel"
                         wire:loading.attr="disabled"
                         class="rc-report-btn rc-report-btn-emerald"
+                        title="Unduh file Excel (.xlsx) resmi"
                     >
                         <x-heroicon-m-arrow-down-tray />
-                        <span>Ekspor Excel (.csv)</span>
+                        <span>Ekspor Excel (.xlsx)</span>
                     </button>
 
                     <a
@@ -796,42 +993,93 @@
             {{-- Filter & Action Bar --}}
             <div class="rc-report-filter-bar">
                 <div class="rc-report-filter-group">
-                    <div class="rc-report-filter-item">
+                    {{-- Custom Luxury Dropdown: Rentang Waktu --}}
+                    @php
+                        $daysOptions = [
+                            7 => '7 Hari Terakhir',
+                            30 => '30 Hari Terakhir',
+                            90 => '3 Bulan Terakhir',
+                            365 => '1 Tahun Terakhir',
+                        ];
+                    @endphp
+                    <div class="rc-report-filter-item" x-data="{ open: false }" @click.outside="open = false">
                         <label class="rc-report-label">Rentang Waktu:</label>
-                        <select
-                            wire:model.live="bestsellerDays"
-                            class="rc-report-select"
-                        >
-                            <option value="7">7 Hari Terakhir</option>
-                            <option value="30">30 Hari Terakhir</option>
-                            <option value="90">3 Bulan Terakhir</option>
-                            <option value="365">1 Tahun Terakhir</option>
-                        </select>
+                        <div class="rc-custom-select">
+                            <button type="button" @click="open = !open" class="rc-select-btn">
+                                <span>{{ $daysOptions[$bestsellerDays] ?? '30 Hari Terakhir' }}</span>
+                                <svg class="rc-select-chevron" :class="{ 'open': open }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
+                                </svg>
+                            </button>
+                            <div x-show="open" x-cloak class="rc-select-panel">
+                                @foreach($daysOptions as $dVal => $dLabel)
+                                    <button
+                                        type="button"
+                                        wire:click="$set('bestsellerDays', {{ $dVal }})"
+                                        @click="open = false"
+                                        class="rc-select-option {{ $bestsellerDays == $dVal ? 'active' : '' }}"
+                                    >
+                                        <span>{{ $dLabel }}</span>
+                                        @if($bestsellerDays == $dVal)
+                                            <svg class="rc-select-check" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                                            </svg>
+                                        @endif
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="rc-report-filter-item">
+                    {{-- Custom Luxury Dropdown: Tampilkan Limit --}}
+                    @php
+                        $limitOptions = [
+                            5 => 'Top 5',
+                            10 => 'Top 10',
+                            25 => 'Top 25',
+                            50 => 'Top 50',
+                        ];
+                    @endphp
+                    <div class="rc-report-filter-item" x-data="{ open: false }" @click.outside="open = false">
                         <label class="rc-report-label">Tampilkan:</label>
-                        <select
-                            wire:model.live="bestsellerLimit"
-                            class="rc-report-select"
-                        >
-                            <option value="5">Top 5</option>
-                            <option value="10">Top 10</option>
-                            <option value="25">Top 25</option>
-                            <option value="50">Top 50</option>
-                        </select>
+                        <div class="rc-custom-select">
+                            <button type="button" @click="open = !open" class="rc-select-btn" style="min-width: 110px;">
+                                <span>{{ $limitOptions[$bestsellerLimit] ?? 'Top 10' }}</span>
+                                <svg class="rc-select-chevron" :class="{ 'open': open }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
+                                </svg>
+                            </button>
+                            <div x-show="open" x-cloak class="rc-select-panel" style="min-width: 120px;">
+                                @foreach($limitOptions as $lVal => $lLabel)
+                                    <button
+                                        type="button"
+                                        wire:click="$set('bestsellerLimit', {{ $lVal }})"
+                                        @click="open = false"
+                                        class="rc-select-option {{ $bestsellerLimit == $lVal ? 'active' : '' }}"
+                                    >
+                                        <span>{{ $lLabel }}</span>
+                                        @if($bestsellerLimit == $lVal)
+                                            <svg class="rc-select-check" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                                            </svg>
+                                        @endif
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="rc-report-actions">
                     <button
                         type="button"
-                        wire:click="exportBestSellerCsv"
+                        wire:click="exportBestSellerExcel"
                         wire:loading.attr="disabled"
                         class="rc-report-btn rc-report-btn-emerald"
+                        title="Unduh file Excel (.xlsx) resmi"
                     >
                         <x-heroicon-m-arrow-down-tray />
-                        <span>Ekspor Excel (.csv)</span>
+                        <span>Ekspor Excel (.xlsx)</span>
                     </button>
                 </div>
             </div>
@@ -907,12 +1155,13 @@
                 <div class="rc-report-actions">
                     <button
                         type="button"
-                        wire:click="exportCustomerCsv"
+                        wire:click="exportCustomerExcel"
                         wire:loading.attr="disabled"
                         class="rc-report-btn rc-report-btn-emerald"
+                        title="Unduh file Excel (.xlsx) resmi"
                     >
                         <x-heroicon-m-arrow-down-tray />
-                        <span>Ekspor Excel (.csv)</span>
+                        <span>Ekspor Excel (.xlsx)</span>
                     </button>
                 </div>
             </div>
@@ -944,16 +1193,22 @@
                                     <td style="font-weight: 600;">{{ $cust->shipping_name }}</td>
                                     <td>
                                         <div style="font-weight: 500;">{{ $cust->shipping_phone }}</div>
-                                        <div style="font-size: 0.72rem; color: var(--rc-text-subtle);">{{ $cust->shipping_email ?: '-' }}</div>
+                                        <div style="font-size: 0.72rem; color: var(--rc-text-subtle);">{{ $cust->customer_email ?: '-' }}</div>
                                     </td>
                                     <td style="text-align: center; font-weight: 800; color: #4f46e5;">{{ $cust->order_count }} Pesanan</td>
                                     <td style="text-align: right; font-weight: 900;">Rp {{ number_format($cust->total_spent, 0, ',', '.') }}</td>
-                                    <td style="text-align: center; color: var(--rc-text-muted);">{{ \Illuminate\Support\Carbon::parse($cust->last_order_at)->format('d/m/Y H:i') }}</td>
+                                    <td style="text-align: center; color: var(--rc-text-muted);">
+                                        {{ $cust->last_order_at ? \Illuminate\Support\Carbon::parse($cust->last_order_at)->format('d/m/Y H:i') : '-' }}
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" style="text-align: center; padding: 2rem; color: var(--rc-text-subtle);">
-                                        Belum ada data pelanggan yang memenuhi kriteria.
+                                    <td colspan="6" style="text-align: center; padding: 2.5rem 1rem; color: var(--rc-text-subtle);">
+                                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
+                                            <x-heroicon-o-user-group style="width: 36px; height: 36px; opacity: 0.4;" />
+                                            <span style="font-weight: 600; font-size: 0.875rem;">Belum Ada Data Pelanggan</span>
+                                            <span style="font-size: 0.75rem; color: var(--rc-text-muted);">Belum ada pelanggan yang memenuhi kriteria minimal {{ $customerMinOrders }} pesanan lunas.</span>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforelse
