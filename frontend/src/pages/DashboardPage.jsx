@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, Navigate } from 'react-router-dom';
 import {
   Package,
   Heart,
@@ -63,11 +63,21 @@ const DashboardPage = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { user, isAuthenticated, logout, updateProfile, updateAvatar } = useAuth();
+  const { user, isAuthenticated, isLoading, logout, updateProfile, updateAvatar } = useAuth();
   const { totalItems, setIsDrawerOpen } = useCart();
   const { wishlistItems } = useWishlist();
   const { addToast } = useToast();
   const { confirm } = useConfirm();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      navigate('/', { replace: true });
+    }
+  };
 
   const fileInputRef = React.useRef(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -158,26 +168,28 @@ const DashboardPage = () => {
     }
   }, [isAuthenticated]);
 
-  if (!isAuthenticated) {
+  // Lock background scroll when address modal is open
+  useEffect(() => {
+    if (isAddressModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isAddressModalOpen]);
+
+  if (isLoading) {
     return (
-      <div className="min-h-[70vh] flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-8 text-center space-y-4 shadow-xl animate-fade-in">
-          <div className="w-14 h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center mx-auto shadow-md">
-            <User size={26} />
-          </div>
-          <h2 className="text-xl font-bold text-slate-900">Akses Dashboard Akun</h2>
-          <p className="text-xs text-slate-500">
-            Silakan masuk ke akun Anda untuk melihat ringkasan aktivitas, pesanan, alamat, dan wishlist Anda.
-          </p>
-          <Link
-            to="/login?redirect=/dashboard"
-            className="inline-block w-full py-3.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95"
-          >
-            Masuk ke Akun Sekarang
-          </Link>
-        </div>
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
       </div>
     );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
   }
 
   // Calculate metrics
@@ -385,18 +397,6 @@ const DashboardPage = () => {
     }
   };
 
-  // Lock background scroll when address modal is open
-  useEffect(() => {
-    if (isAddressModalOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isAddressModalOpen]);
-
   // Address Handlers
   const openNewAddressModal = () => {
     setEditingAddress(null);
@@ -596,8 +596,8 @@ const DashboardPage = () => {
               <span>{t('dash_tab_profile')}</span>
             </button>
             <button
-              onClick={() => logout()}
-              className="px-4 py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-xl text-xs font-bold transition-all border border-red-500/30 flex items-center gap-1.5 active:scale-95"
+              onClick={handleLogout}
+              className="px-4 py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-xl text-xs font-bold transition-all border border-red-500/30 flex items-center gap-1.5 active:scale-95 cursor-pointer"
             >
               <LogOut size={14} />
               <span>{t('nav_logout')}</span>

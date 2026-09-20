@@ -27,6 +27,17 @@ const Navbar = () => {
   const searchContainerRef = useRef(null);
   const searchInputRef = useRef(null);
 
+  const handleLogout = async () => {
+    setIsProfileOpen(false);
+    try {
+      await logout();
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      navigate('/', { replace: true });
+    }
+  };
+
   // Outside click listener for Profile & Search
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -393,10 +404,7 @@ const Navbar = () => {
 
                       <div className="pt-1">
                         <button
-                          onClick={() => {
-                            setIsProfileOpen(false);
-                            logout();
-                          }}
+                          onClick={handleLogout}
                           className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-50 hover:translate-x-1 transition-all duration-200 text-left cursor-pointer group"
                         >
                           <LogOut size={15} className="group-hover:scale-110 transition-transform duration-200" />
