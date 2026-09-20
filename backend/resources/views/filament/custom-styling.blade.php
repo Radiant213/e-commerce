@@ -1072,6 +1072,27 @@
         stroke-width: 2.5 !important;
         display: inline-block;
     }
+
+    /* 20. Reports Page & Blade Icon Global Safety Constraints */
+    .fi-page svg,
+    .rc-report-wrapper svg,
+    .fi-main button svg,
+    .fi-main a svg {
+        max-width: 100%;
+    }
+    .rc-report-tab-btn svg,
+    .rc-report-btn svg {
+        width: 16px !important;
+        height: 16px !important;
+        min-width: 16px !important;
+        max-width: 16px !important;
+    }
+    .rc-report-kpi-icon svg {
+        width: 24px !important;
+        height: 24px !important;
+        min-width: 24px !important;
+        max-width: 24px !important;
+    }
 </style>
 
 
