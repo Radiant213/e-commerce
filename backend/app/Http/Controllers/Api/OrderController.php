@@ -113,4 +113,26 @@ class OrderController extends Controller
             ], 422);
         }
     }
+    /**
+     * Customer confirms delivery.
+     */
+    public function confirmDelivery(Request $request, int $id): JsonResponse
+    {
+        $order = Order::where('user_id', $request->user()->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        if ($order->status !== 'shipped') {
+            return response()->json([
+                'message' => 'Hanya pesanan dengan status "shipped" (sedang dikirim) yang bisa dikonfirmasi.'
+            ], 422);
+        }
+
+        $order->update(['status' => 'delivered']);
+
+        return response()->json([
+            'message' => 'Terima kasih, pesanan telah berhasil dikonfirmasi diterima.',
+            'order' => $order,
+        ]);
+    }
 }

@@ -52,6 +52,11 @@ class OrdersTable
                     })
                     ->label('Status Pesanan'),
 
+                TextColumn::make('courier_name')
+                    ->label('Kurir')
+                    ->description(fn (Order $record): string => $record->tracking_number ?? '-')
+                    ->searchable(['courier_name', 'tracking_number']),
+
                 TextColumn::make('payment.payment_type')
                     ->badge()
                     ->color('gray')
@@ -88,15 +93,30 @@ class OrdersTable
                     ->icon('heroicon-m-truck')
                     ->color('primary')
                     ->visible(fn (Order $record): bool => in_array($record->status, ['paid', 'processing']))
-                    ->requiresConfirmation()
                     ->modalIcon('heroicon-o-truck')
                     ->modalIconColor('primary')
                     ->modalHeading('Kirim Pesanan Ini?')
-                    ->modalDescription('Status pesanan akan diubah menjadi Shipped (Sedang Dikirim).')
-                    ->modalSubmitActionLabel('Konfirmasi')
+                    ->modalDescription('Masukkan nama kurir dan nomor resi untuk mengirim pesanan ini.')
+                    ->modalSubmitActionLabel('Kirim Pesanan')
                     ->modalCancelActionLabel('Batal')
-                    ->action(function (Order $record) {
-                        $record->update(['status' => 'shipped']);
+                    ->form([
+                        \Filament\Forms\Components\TextInput::make('courier_name')
+                            ->label('Nama Kurir')
+                            ->placeholder('JNE / J&T / GoSend')
+                            ->required(),
+                        \Filament\Forms\Components\TextInput::make('tracking_number')
+                            ->label('Nomor Resi')
+                            ->required(),
+                    ])
+                    ->action(function (array $data, Order $record) {
+                        $record->update([
+                            'status' => 'shipped',
+                            'courier_name' => $data['courier_name'],
+                            'tracking_number' => $data['tracking_number'],
+                        ]);
+                        
+                        \Illuminate\Support\Facades\Mail::to($record->user->email)->send(new \App\Mail\OrderShippedMail($record));
+
                         Notification::make()
                             ->title('Pesanan Telah Dikirim')
                             ->body("Status pesanan #{$record->order_number} berhasil diubah ke Shipped.")

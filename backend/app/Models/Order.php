@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 
 #[Fillable([
     'user_id', 'order_number', 'subtotal', 'shipping_cost', 'total',
-    'status', 'shipping_name', 'shipping_phone', 'shipping_address',
+    'status', 'tracking_number', 'courier_name', 'shipping_name', 'shipping_phone', 'shipping_address',
     'shipping_city', 'shipping_postal_code', 'notes',
 ])]
 class Order extends Model

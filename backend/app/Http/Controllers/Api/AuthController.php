@@ -28,10 +28,12 @@ class AuthController extends Controller
             'phone' => $validated['phone'] ?? null,
         ]);
 
+        $user->sendEmailVerificationNotification();
+
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Registrasi berhasil!',
+            'message' => 'Registrasi berhasil! Silakan cek email Anda untuk memverifikasi akun.',
             'user' => $user,
             'token' => $token,
         ], 201);

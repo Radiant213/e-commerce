@@ -109,6 +109,9 @@ const DashboardPage = () => {
   });
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
+  // Email Verification State
+  const [isResendingEmail, setIsResendingEmail] = useState(false);
+
   useEffect(() => {
     if (user) {
       setProfileForm({
@@ -225,6 +228,26 @@ const DashboardPage = () => {
       });
     } finally {
       setIsUpdatingProfile(false);
+    }
+  };
+
+  const handleResendEmail = async () => {
+    setIsResendingEmail(true);
+    try {
+      const response = await authApi.resendVerification();
+      addToast({
+        title: 'Email Terkirim',
+        message: response.message,
+        type: 'success',
+      });
+    } catch (err) {
+      addToast({
+        title: 'Gagal Mengirim Email',
+        message: err.message || 'Terjadi kesalahan saat mengirim ulang email verifikasi.',
+        type: 'error',
+      });
+    } finally {
+      setIsResendingEmail(false);
     }
   };
 
@@ -434,6 +457,25 @@ const DashboardPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 text-left space-y-8 animate-fade-in">
+      {!user?.email_verified_at && (
+        <div className="bg-amber-50 border border-amber-200 rounded-3xl p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3 text-amber-800">
+            <ShieldCheck size={24} className="shrink-0" />
+            <div>
+              <p className="text-sm font-bold">Verifikasi Email Anda</p>
+              <p className="text-xs">Silakan cek kotak masuk email Anda untuk memverifikasi akun agar dapat melakukan checkout.</p>
+            </div>
+          </div>
+          <button
+            onClick={handleResendEmail}
+            disabled={isResendingEmail}
+            className="shrink-0 px-4 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-amber-400 text-white rounded-xl text-xs font-bold transition-colors"
+          >
+            {isResendingEmail ? 'Mengirim...' : 'Kirim Ulang Email'}
+          </button>
+        </div>
+      )}
+
       {/* 1. Header Profile Banner Card with Rich Micro-Animations */}
       <div className="relative bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden border border-slate-800">
         <div className="absolute right-0 top-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />

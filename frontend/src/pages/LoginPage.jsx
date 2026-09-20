@@ -149,6 +149,11 @@ const LoginPage = () => {
                 className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:outline-none focus:border-slate-900"
               />
             </div>
+            <div className="flex justify-end mt-1">
+              <Link to="/forgot-password" className="text-[11px] font-semibold text-slate-500 hover:text-slate-900 transition-colors">
+                Lupa Kata Sandi?
+              </Link>
+            </div>
           </div>
 
           <button

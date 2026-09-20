@@ -20,6 +20,11 @@ export const ordersApi = {
     const response = await apiClient.put(`/orders/${id}/cancel`);
     return response.data;
   },
+
+  confirmDelivery: async (id) => {
+    const response = await apiClient.post(`/orders/${id}/confirm-delivery`);
+    return response.data;
+  },
 };
 
 export default ordersApi;

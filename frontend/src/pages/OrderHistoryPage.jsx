@@ -52,6 +52,17 @@ const OrderHistoryPage = () => {
     }
   };
 
+  const handleConfirmDelivery = async (orderId) => {
+    if (!window.confirm('Apakah Anda yakin pesanan sudah diterima dengan baik?')) return;
+    try {
+      await ordersApi.confirmDelivery(orderId);
+      alert('Pesanan berhasil dikonfirmasi diterima!');
+      fetchOrders(pagination.current_page);
+    } catch (err) {
+      alert(err.message || 'Gagal mengkonfirmasi pesanan.');
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center">
@@ -205,8 +216,11 @@ const OrderHistoryPage = () => {
 
               {/* Order Footer & Actions */}
               <div className="bg-slate-50/50 px-6 py-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <div className="text-slate-500">
+                <div className="text-slate-500 flex flex-col gap-1">
                   <span>Penerima: <strong>{order.shipping_name}</strong> ({order.shipping_phone}) - {order.shipping_address}, {order.shipping_city}</span>
+                  {(order.tracking_number || order.courier_name) && (
+                    <span className="text-slate-800">Resi Pengiriman: <strong>{order.courier_name || '-'}</strong> - <span className="font-mono text-emerald-700">{order.tracking_number || '-'}</span></span>
+                  )}
                 </div>
 
                 {order.status === 'pending' && (
@@ -216,6 +230,15 @@ const OrderHistoryPage = () => {
                   >
                     <span>Bayar Sekarang (MidTrans)</span>
                     <ExternalLink size={13} />
+                  </button>
+                )}
+                {order.status === 'shipped' && (
+                  <button
+                    onClick={() => handleConfirmDelivery(order.id)}
+                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-sm"
+                  >
+                    <CheckCircle2 size={13} />
+                    <span>Pesanan Diterima</span>
                   </button>
                 )}
               </div>

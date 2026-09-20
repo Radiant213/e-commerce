@@ -47,6 +47,16 @@ class OrderForm
                                     ->native(false)
                                     ->label('Status Pesanan'),
 
+                                TextInput::make('courier_name')
+                                    ->label('Nama Kurir')
+                                    ->placeholder('Misal: JNE, J&T, Sicepat')
+                                    ->maxLength(255),
+
+                                TextInput::make('tracking_number')
+                                    ->label('Nomor Resi')
+                                    ->placeholder('Masukkan nomor resi pengiriman')
+                                    ->maxLength(255),
+
                                 Placeholder::make('payment_details')
                                     ->label('Info Gateway Midtrans')
                                     ->content(function ($record) {

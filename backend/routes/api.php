@@ -4,8 +4,10 @@ use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SocialAuthController;
@@ -23,6 +25,13 @@ Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
 
+    // Password Reset
+    Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword']);
+    Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']);
+
+    // Email Verification (Click link from email)
+    Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])->name('verification.verify');
+
     // Google OAuth
     Route::get('/google/redirect', [SocialAuthController::class, 'redirectToGoogle']);
     Route::post('/google/token', [SocialAuthController::class, 'handleGoogleToken']);
@@ -34,6 +43,9 @@ Route::get('/products/featured', [ProductController::class, 'featured']);
 Route::get('/products/best-sellers', [ProductController::class, 'bestSellers']);
 Route::get('/products/new-arrivals', [ProductController::class, 'newArrivals']);
 Route::get('/products/{slug}', [ProductController::class, 'show']);
+
+// Settings
+Route::get('/settings/public', [\App\Http\Controllers\Api\SettingsController::class, 'index']);
 
 // Categories
 Route::get('/categories', [CategoryController::class, 'index']);
@@ -57,6 +69,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::match(['put', 'post'], '/profile', [AuthController::class, 'updateProfile']);
         Route::put('/password', [AuthController::class, 'updatePassword']);
+        
+        // Email Verification
+        Route::post('/email/resend', [EmailVerificationController::class, 'resend']);
     });
 
     // Addresses (Multiple Address Book)
@@ -83,6 +98,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}', [OrderController::class, 'show']);
         Route::post('/', [OrderController::class, 'store']);
         Route::put('/{id}/cancel', [OrderController::class, 'cancel']);
+        Route::post('/{id}/confirm-delivery', [OrderController::class, 'confirmDelivery']);
     });
 
     // Payments

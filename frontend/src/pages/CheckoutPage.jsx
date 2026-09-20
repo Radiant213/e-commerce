@@ -7,6 +7,7 @@ import { useLanguage } from '@shared/context/LanguageContext';
 import { formatCurrency } from '@shared/utils/formatCurrency';
 import ordersApi from '@shared/api/orders';
 import addressesApi from '@shared/api/addresses';
+import settingsApi from '@shared/api/settings';
 import { payWithSnap } from '@shared/utils/midtransSnap';
 import { useToast } from '../components/Toast';
 
@@ -33,6 +34,21 @@ const CheckoutPage = () => {
   const [shippingOption, setShippingOption] = useState('regular');
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  
+  // Shipping Rates State
+  const [shippingRates, setShippingRates] = useState({
+    shipping_rate_regular: 20000,
+    shipping_rate_express: 40000,
+  });
+
+  // Fetch settings
+  useEffect(() => {
+    settingsApi.getPublicSettings().then((settings) => {
+      if (settings) {
+        setShippingRates(prev => ({ ...prev, ...settings }));
+      }
+    }).catch(err => console.error("Failed to fetch settings", err));
+  }, []);
 
   // Fetch saved addresses
   useEffect(() => {
@@ -104,9 +120,16 @@ const CheckoutPage = () => {
 
   // Shipping calculation
   const isFreeShippingEligible = total >= 500000;
+  
+  // Base rates from state (or default)
+  const baseReg = Number(shippingRates.shipping_rate_regular) || 20000;
+  const baseExp = Number(shippingRates.shipping_rate_express) || 40000;
+  
+  // Example "promo" logic: express is discounted if free shipping eligible. 
+  // You can adjust this to just make regular = 0, express = baseExp - baseReg.
   const shippingCost = isFreeShippingEligible
-    ? (shippingOption === 'express' ? 25000 : 0)
-    : (shippingOption === 'express' ? 40000 : 20000);
+    ? (shippingOption === 'express' ? Math.max(0, baseExp - baseReg) : 0)
+    : (shippingOption === 'express' ? baseExp : baseReg);
 
   const grandTotal = total + shippingCost;
 
@@ -359,7 +382,7 @@ const CheckoutPage = () => {
                   />
                 </div>
                 <span className="text-xs font-extrabold text-slate-900 mt-3">
-                  {isFreeShippingEligible ? t('chk_courier_free_badge') : 'Rp 20.000'}
+                  {isFreeShippingEligible ? t('chk_courier_free_badge') : formatCurrency(baseReg)}
                 </span>
               </label>
 
@@ -382,7 +405,7 @@ const CheckoutPage = () => {
                   />
                 </div>
                 <span className="text-xs font-extrabold text-slate-900 mt-3">
-                  {isFreeShippingEligible ? 'Rp 25.000' : 'Rp 40.000'}
+                  {isFreeShippingEligible ? formatCurrency(Math.max(0, baseExp - baseReg)) : formatCurrency(baseExp)}
                 </span>
               </label>
             </div>
@@ -447,14 +470,29 @@ const CheckoutPage = () => {
             </div>
 
             {/* Checkout Submit Button */}
-            <button
-              type="submit"
-              disabled={isProcessing}
-              className="w-full py-4 px-4 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white font-extrabold text-sm rounded-2xl flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95"
-            >
-              <Lock size={16} />
-              <span>{isProcessing ? 'Processing...' : `${t('chk_pay_btn')} (${formatCurrency(grandTotal)})`}</span>
-            </button>
+            {!user?.email_verified_at ? (
+              <div className="w-full text-center space-y-2">
+                <div className="p-3 bg-amber-50 text-amber-800 text-xs rounded-xl border border-amber-200">
+                  Anda harus memverifikasi email sebelum dapat melakukan checkout.
+                </div>
+                <Link
+                  to="/dashboard?tab=profile"
+                  className="w-full py-4 px-4 bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-sm rounded-2xl flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95 block"
+                >
+                  <ShieldCheck size={16} />
+                  <span>Verifikasi Email Sekarang</span>
+                </Link>
+              </div>
+            ) : (
+              <button
+                type="submit"
+                disabled={isProcessing}
+                className="w-full py-4 px-4 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white font-extrabold text-sm rounded-2xl flex items-center justify-center gap-2 shadow-xl transition-all active:scale-95"
+              >
+                <Lock size={16} />
+                <span>{isProcessing ? 'Processing...' : `${t('chk_pay_btn')} (${formatCurrency(grandTotal)})`}</span>
+              </button>
+            )}
           </div>
         </div>
       </form>
