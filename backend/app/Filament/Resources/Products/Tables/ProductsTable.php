@@ -64,10 +64,12 @@ class ProductsTable
                     ->label('Sisa Stok'),
 
                 ToggleColumn::make('is_active')
-                    ->label('Aktif'),
+                    ->label('Aktif')
+                    ->onColor('success'),
 
                 ToggleColumn::make('is_featured')
-                    ->label('Unggulan'),
+                    ->label('Unggulan')
+                    ->onColor('success'),
 
                 TextColumn::make('avg_rating')
                     ->numeric(decimalPlaces: 1)
@@ -95,29 +97,36 @@ class ProductsTable
             ])
             ->headerActions([
                 Action::make('download_template')
-                    ->label('Format CSV')
+                    ->label('Format Excel (.xlsx)')
                     ->icon('heroicon-m-arrow-down-tray')
                     ->color('gray')
                     ->action(fn (ProductImportService $service) => $service->downloadTemplate()),
 
-                Action::make('import_csv')
-                    ->label('Import CSV')
+                Action::make('import_products')
+                    ->label('Import Excel / CSV')
                     ->icon('heroicon-m-arrow-up-tray')
                     ->color('success')
-                    ->modalHeading('Import Data Produk dari File CSV')
-                    ->modalDescription('Unggah file CSV sesuai format template. Produk dengan SKU yang sama akan otomatis diperbarui (Upsert).')
+                    ->modalHeading('Import Data Produk (.xlsx / .csv)')
+                    ->modalDescription('Unggah file Excel (.xlsx) atau CSV sesuai format template. Produk dengan SKU yang sama akan otomatis diperbarui (Upsert).')
                     ->form([
-                        FileUpload::make('csv_file')
-                            ->label('Pilih File CSV')
+                        FileUpload::make('file')
+                            ->label('Pilih File Excel (.xlsx) atau CSV')
                             ->disk('local')
                             ->directory('temp-imports')
-                            ->acceptedFileTypes(['text/csv', 'text/plain', 'application/csv', 'text/comma-separated-values'])
+                            ->acceptedFileTypes([
+                                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                'application/vnd.ms-excel',
+                                'text/csv',
+                                'text/plain',
+                                'application/csv',
+                                'text/comma-separated-values',
+                            ])
                             ->required()
                             ->preserveFilenames(),
                     ])
                     ->action(function (array $data, ProductImportService $service) {
-                        $filePath = storage_path('app/' . $data['csv_file']);
-                        $result = $service->importFromCsv($filePath);
+                        $filePath = storage_path('app/' . $data['file']);
+                        $result = $service->importFromFile($filePath);
                         if (file_exists($filePath)) {
                             @unlink($filePath);
                         }
@@ -131,7 +140,7 @@ class ProductsTable
                         } else {
                             Notification::make()
                                 ->title('Import Gagal')
-                                ->body($result['message'] ?? 'Periksa format file CSV Anda.')
+                                ->body($result['message'] ?? 'Periksa format file Anda.')
                                 ->danger()
                                 ->send();
                         }

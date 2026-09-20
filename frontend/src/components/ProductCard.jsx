@@ -59,6 +59,7 @@ const ProductCard = ({ product }) => {
         <img
           src={primaryImg}
           alt={product.name}
+          referrerPolicy="no-referrer"
           className="product-img w-full h-full object-cover object-center"
           loading="lazy"
         />

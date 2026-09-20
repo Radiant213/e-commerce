@@ -167,4 +167,118 @@ class SimpleXlsxExporter
         }
         return $letter;
     }
+
+    /**
+     * Parse a native .xlsx file and return its rows as an array of string arrays.
+     * Supports shared strings, inline strings, cell coordinates, and numbers.
+     *
+     * @param string $filePath Absolute path to the .xlsx file
+     * @return array List of rows (each row is an array of cell values)
+     */
+    public static function parse(string $filePath): array
+    {
+        if (!file_exists($filePath) || !is_readable($filePath)) {
+            return [];
+        }
+
+        $zip = new ZipArchive();
+        if ($zip->open($filePath) !== true) {
+            return [];
+        }
+
+        // 1. Read shared strings if present
+        $sharedStrings = [];
+        $sharedStringsXml = $zip->getFromName('xl/sharedStrings.xml');
+        if ($sharedStringsXml) {
+            $sXml = @simplexml_load_string($sharedStringsXml);
+            if ($sXml && isset($sXml->si)) {
+                foreach ($sXml->si as $si) {
+                    $text = '';
+                    if (isset($si->t)) {
+                        $text = (string) $si->t;
+                    } elseif (isset($si->r)) {
+                        foreach ($si->r as $r) {
+                            $text .= (string) $r->t;
+                        }
+                    }
+                    $sharedStrings[] = $text;
+                }
+            }
+        }
+
+        // 2. Locate worksheet (usually sheet1.xml)
+        $sheetXmlContent = $zip->getFromName('xl/worksheets/sheet1.xml');
+        if (!$sheetXmlContent) {
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $stat = $zip->statIndex($i);
+                if ($stat && str_starts_with($stat['name'], 'xl/worksheets/') && str_ends_with($stat['name'], '.xml')) {
+                    $sheetXmlContent = $zip->getFromIndex($i);
+                    break;
+                }
+            }
+        }
+
+        if (!$sheetXmlContent) {
+            $zip->close();
+            return [];
+        }
+
+        $sheetXml = @simplexml_load_string($sheetXmlContent);
+        $zip->close();
+
+        if (!$sheetXml || !isset($sheetXml->sheetData->row)) {
+            return [];
+        }
+
+        $rows = [];
+        foreach ($sheetXml->sheetData->row as $row) {
+            $rowData = [];
+            $maxCol = 0;
+
+            foreach ($row->c as $c) {
+                $r = (string) $c['r']; // e.g. "A1", "C2"
+                $colLetters = preg_replace('/[0-9]/', '', $r);
+                $colIdx = self::colLetterToIndex($colLetters);
+                if ($colIdx > $maxCol) {
+                    $maxCol = $colIdx;
+                }
+
+                $t = (string) ($c['t'] ?? '');
+                $val = '';
+
+                if ($t === 's') {
+                    $idx = (int) ($c->v ?? 0);
+                    $val = $sharedStrings[$idx] ?? '';
+                } elseif ($t === 'inlineStr') {
+                    $val = (string) ($c->is->t ?? '');
+                } else {
+                    $val = (string) ($c->v ?? '');
+                }
+
+                $rowData[$colIdx] = trim($val);
+            }
+
+            $normalizedRow = [];
+            for ($c = 0; $c <= $maxCol; $c++) {
+                $normalizedRow[$c] = $rowData[$c] ?? '';
+            }
+
+            if (!empty(array_filter($normalizedRow, fn ($v) => $v !== ''))) {
+                $rows[] = $normalizedRow;
+            }
+        }
+
+        return $rows;
+    }
+
+    private static function colLetterToIndex(string $letters): int
+    {
+        $letters = strtoupper(trim($letters));
+        $idx = 0;
+        $len = strlen($letters);
+        for ($i = 0; $i < $len; $i++) {
+            $idx = $idx * 26 + (ord($letters[$i]) - 64);
+        }
+        return max(0, $idx - 1);
+    }
 }

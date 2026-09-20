@@ -71,12 +71,12 @@ class ProductForm
                                     ->columnSpanFull(),
 
                                 KeyValue::make('specifications')
-                                    ->label('Spesifikasi Teknis Produk (Tabel Atribut Terstruktur)')
+                                    ->label('Spesifikasi Teknis Produk (Tabel Atribut Kustom)')
                                     ->keyLabel('Parameter / Atribut')
                                     ->valueLabel('Nilai / Keterangan')
-                                    ->keyPlaceholder('Misal: Merek, Masa Garansi, Koneksi, Bahan')
-                                    ->valuePlaceholder('Misal: Anker, 18 Bulan, Bluetooth 5.3, ABS')
-                                    ->helperText('Spesifikasi akan otomatis tampil dalam bentuk tabel 2-kolom yang rapi di halaman produk.')
+                                    ->keyPlaceholder('Nama Parameter (misal: Bahan, Ukuran, Garansi)')
+                                    ->valuePlaceholder('Keterangan / Nilai')
+                                    ->helperText('Spesifikasi yang Anda buat akan tampil murni dalam bentuk tabel 2-kolom pada halaman detail produk.')
                                     ->columnSpanFull(),
                             ])
                             ->columnSpan(2),
@@ -118,10 +118,12 @@ class ProductForm
                                     ->schema([
                                         Toggle::make('is_active')
                                             ->default(true)
+                                            ->onColor('success')
                                             ->label('Aktifkan di Toko'),
 
                                         Toggle::make('is_featured')
                                             ->default(false)
+                                            ->onColor('success')
                                             ->label('Produk Unggulan'),
                                     ]),
                             ])
@@ -191,10 +193,11 @@ class ProductForm
                                     }),
 
                                 TextInput::make('video_url_input')
-                                    ->label('URL Video Online / Web Link')
-                                    ->placeholder('https://.../video.mp4')
-                                    ->helperText('Masukkan URL video langsung (diawali dengan https://). Kosongkan untuk menghapus video.')
+                                    ->label('URL Video Showcase (YouTube / Link Video Langsung)')
+                                    ->placeholder('https://www.youtube.com/watch?v=... atau link .mp4')
+                                    ->helperText('Mendukung link YouTube (watch/shorts/youtu.be) atau file video online (mp4/webm).')
                                     ->dehydrated(false)
+                                    ->live(onBlur: true)
                                     ->columnSpan(2)
                                     ->visible(fn ($get) => $get('video_source_type') === 'url')
                                     ->afterStateHydrated(function ($component, $state, $record) {
@@ -206,7 +209,8 @@ class ProductForm
                                         }
                                     })
                                     ->afterStateUpdated(function ($state, callable $set) {
-                                        $set('video_path', $state ?: null);
+                                        $clean = filled($state) ? \App\Services\MediaUrlService::processVideoUrl($state) : null;
+                                        $set('video_path', $clean);
                                     }),
 
                                 Hidden::make('video_path')
@@ -214,7 +218,8 @@ class ProductForm
                                     ->nullable()
                                     ->dehydrateStateUsing(function ($state, $get) {
                                         if ($get('video_source_type') === 'url') {
-                                            return $get('video_url_input') ?: null;
+                                            $url = $get('video_url_input');
+                                            return filled($url) ? \App\Services\MediaUrlService::processVideoUrl($url) : null;
                                         }
                                         $uploaded = $get('video_upload');
                                         if (is_array($uploaded)) {
@@ -267,6 +272,7 @@ class ProductForm
                                             ->label('Gambar Utama (Thumbnail)')
                                             ->helperText('Foto cover pada etalase toko')
                                             ->default(false)
+                                            ->onColor('success')
                                             ->visible(fn ($get) => in_array($get('source_type'), ['upload', 'url']))
                                             ->columnSpan(1),
 
@@ -314,10 +320,11 @@ class ProductForm
 
                                 // Image URL
                                 TextInput::make('image_url')
-                                    ->label('URL Foto Online / Web Link')
-                                    ->placeholder('https://images.unsplash.com/... atau link foto publik')
-                                    ->helperText('Masukkan URL foto lengkap (diawali https://). Kosongkan untuk menghapus.')
+                                    ->label('URL Foto Online (Pinterest / Link Gambar Web)')
+                                    ->placeholder('https://id.pinterest.com/pin/... atau link foto publik')
+                                    ->helperText('Mendukung link Pinterest (pin page / pin.it) & gambar web. Otomatis diunduh ke server.')
                                     ->dehydrated(false)
+                                    ->live(onBlur: true)
                                     ->visible(fn ($get) => $get('source_type') === 'url')
                                     ->afterStateHydrated(function ($component, $state, $record) {
                                         if ($record && $record->image_path && $record->media_type !== 'video') {
@@ -328,7 +335,8 @@ class ProductForm
                                         }
                                     })
                                     ->afterStateUpdated(function ($state, callable $set) {
-                                        $set('image_path', $state ?: null);
+                                        $resolved = filled($state) ? \App\Services\MediaUrlService::processImageUrl($state) : null;
+                                        $set('image_path', $resolved);
                                     }),
 
                                 // Video Upload
@@ -364,10 +372,11 @@ class ProductForm
 
                                 // Video URL
                                 TextInput::make('video_item_url')
-                                    ->label('URL Video Online / Web Link')
-                                    ->placeholder('https://.../video.mp4')
-                                    ->helperText('Masukkan URL video langsung (diawali https://). Kosongkan untuk menghapus.')
+                                    ->label('URL Video Online (YouTube / Link Video Langsung)')
+                                    ->placeholder('https://www.youtube.com/watch?v=... atau https://.../video.mp4')
+                                    ->helperText('Mendukung link YouTube atau file video langsung.')
                                     ->dehydrated(false)
+                                    ->live(onBlur: true)
                                     ->visible(fn ($get) => $get('source_type') === 'video_url')
                                     ->afterStateHydrated(function ($component, $state, $record) {
                                         if ($record && $record->image_path) {
@@ -378,13 +387,22 @@ class ProductForm
                                         }
                                     })
                                     ->afterStateUpdated(function ($state, callable $set) {
-                                        $set('image_path', $state ?: null);
+                                        $clean = filled($state) ? \App\Services\MediaUrlService::processVideoUrl($state) : null;
+                                        $set('image_path', $clean);
                                     }),
 
                                 Hidden::make('media_type')
                                     ->default('image')
                                     ->dehydrateStateUsing(function ($state, $get) {
-                                        return in_array($get('source_type'), ['video_upload', 'video_url']) ? 'video' : 'image';
+                                        $src = $get('source_type');
+                                        if (in_array($src, ['video_upload', 'video_url'])) {
+                                            return 'video';
+                                        }
+                                        $vUrl = $get('video_item_url') ?: $get('image_url');
+                                        if (\App\Services\MediaUrlService::isYouTube($vUrl)) {
+                                            return 'video';
+                                        }
+                                        return 'image';
                                     }),
 
                                 Hidden::make('image_path')
@@ -393,10 +411,12 @@ class ProductForm
                                     ->dehydrateStateUsing(function ($state, $get) {
                                         $src = $get('source_type');
                                         if ($src === 'url') {
-                                            return $get('image_url') ?: null;
+                                            $u = $get('image_url');
+                                            return filled($u) ? \App\Services\MediaUrlService::processImageUrl($u) : null;
                                         }
                                         if ($src === 'video_url') {
-                                            return $get('video_item_url') ?: null;
+                                            $u = $get('video_item_url');
+                                            return filled($u) ? \App\Services\MediaUrlService::processVideoUrl($u) : null;
                                         }
                                         if ($src === 'video_upload') {
                                             $v = $get('video_item_upload');
@@ -477,6 +497,7 @@ class ProductForm
                                         Toggle::make('is_active')
                                             ->label('Variasi Aktif')
                                             ->default(true)
+                                            ->onColor('success')
                                             ->inline(false)
                                             ->columnSpan(1),
                                     ]),

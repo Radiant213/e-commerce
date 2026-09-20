@@ -11,32 +11,26 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class ProductImportService
 {
     /**
-     * Download format template CSV untuk import produk
+     * Download format template Excel (.xlsx) untuk import produk
      */
     public function downloadTemplate(): StreamedResponse
     {
-        $filename = 'template_import_produk_' . date('Ymd') . '.csv';
+        $filename = 'Template_Import_Produk_' . date('Ymd') . '.xlsx';
 
-        return response()->streamDownload(function () {
-            $handle = fopen('php://output', 'w');
-            // UTF-8 BOM for Microsoft Excel
-            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+        $headers = [
+            'SKU',
+            'Nama Produk',
+            'Kategori',
+            'Harga Normal',
+            'Harga Promo',
+            'Stok',
+            'Berat (gram)',
+            'Deskripsi',
+            'Status Aktif (1/0)',
+        ];
 
-            // Header kolom
-            fputcsv($handle, [
-                'sku',
-                'name',
-                'category',
-                'price',
-                'sale_price',
-                'stock',
-                'weight',
-                'description',
-                'is_active',
-            ]);
-
-            // Sample Baris 1
-            fputcsv($handle, [
+        $sampleRows = [
+            [
                 'PRD-TSHIRT-01',
                 'Kaos Polos Combed 30s Premium',
                 'Pakaian Pria',
@@ -46,10 +40,8 @@ class ProductImportService
                 '200',
                 'Kaos bahan 100% cotton combed nyaman dan adem untuk pemakaian sehari-hari.',
                 '1',
-            ]);
-
-            // Sample Baris 2
-            fputcsv($handle, [
+            ],
+            [
                 'PRD-SNK-02',
                 'Sneakers Urban Run Pro Edition',
                 'Sepatu',
@@ -59,61 +51,98 @@ class ProductImportService
                 '800',
                 'Sneakers kasual dengan bantalan empuk dan desain minimalis modern.',
                 '1',
-            ]);
+            ],
+            [
+                'PRD-BAG-03',
+                'Backpack Laptop Waterproof 20L',
+                'Tas & Ransel',
+                '225000',
+                '195000',
+                '35',
+                '550',
+                'Tas ransel laptop tahan air dengan banyak kompartemen dan port USB charger.',
+                '1',
+            ],
+        ];
 
-            fclose($handle);
-        }, $filename, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-        ]);
+        return SimpleXlsxExporter::download($filename, $headers, $sampleRows, 'Template Produk');
     }
 
     /**
-     * Import produk dari file CSV
+     * Import produk dari file (Mendukung .xlsx dan .csv)
      */
-    public function importFromCsv(string $filePath): array
+    public function importFromFile(string $filePath): array
     {
         if (!file_exists($filePath) || !is_readable($filePath)) {
             return [
                 'success' => false,
-                'message' => 'File CSV tidak dapat dibaca atau tidak ditemukan.',
+                'message' => 'File tidak dapat dibaca atau tidak ditemukan.',
                 'created' => 0,
                 'updated' => 0,
                 'errors' => ['File tidak dapat diakses.'],
             ];
         }
 
-        $handle = fopen($filePath, 'r');
-        if (!$handle) {
+        // Check if file is XLSX (ZIP container starting with PK)
+        $isXlsx = false;
+        $fh = @fopen($filePath, 'r');
+        if ($fh) {
+            $magic = fread($fh, 4);
+            fclose($fh);
+            if ($magic === "PK\x03\x04") {
+                $isXlsx = true;
+            }
+        }
+
+        $allRows = [];
+
+        if ($isXlsx) {
+            $allRows = SimpleXlsxExporter::parse($filePath);
+        } else {
+            // Read as CSV
+            $handle = @fopen($filePath, 'r');
+            if ($handle) {
+                while (($line = fgetcsv($handle)) !== false) {
+                    $allRows[] = $line;
+                }
+                fclose($handle);
+            }
+        }
+
+        if (empty($allRows)) {
             return [
                 'success' => false,
-                'message' => 'Gagal membuka stream file CSV.',
+                'message' => 'File kosong atau format tidak dapat dibaca.',
                 'created' => 0,
                 'updated' => 0,
-                'errors' => ['Gagal membuka file.'],
+                'errors' => ['Data kosong.'],
             ];
         }
 
-        // Baca baris pertama (Header)
-        $rawHeader = fgetcsv($handle);
-        if (!$rawHeader) {
-            fclose($handle);
-            return [
-                'success' => false,
-                'message' => 'File CSV kosong.',
-                'created' => 0,
-                'updated' => 0,
-                'errors' => ['Header kosong.'],
-            ];
+        // Header extraction
+        $rawHeader = array_shift($allRows);
+        if (isset($rawHeader[0])) {
+            $rawHeader[0] = preg_replace('/^\xEF\xBB\xBF/', '', (string) $rawHeader[0]);
         }
 
-        // Hapus UTF-8 BOM pada kolom pertama jika ada
-        $rawHeader[0] = preg_replace('/^\xEF\xBB\xBF/', '', $rawHeader[0]);
-
-        // Standarisasi header kolom: lowercase dan trim
-        $headers = array_map(function ($h) {
-            return strtolower(trim($h));
-        }, $rawHeader);
+        // Standardize header keys
+        $headerMap = [];
+        foreach ($rawHeader as $idx => $name) {
+            $cleanName = strtolower(trim((string) $name));
+            $key = match (true) {
+                str_contains($cleanName, 'sku') => 'sku',
+                str_contains($cleanName, 'nama') || $cleanName === 'name' => 'name',
+                str_contains($cleanName, 'kategori') || $cleanName === 'category' => 'category',
+                str_contains($cleanName, 'promo') || str_contains($cleanName, 'sale') || str_contains($cleanName, 'coret') => 'sale_price',
+                str_contains($cleanName, 'harga') || $cleanName === 'price' => 'price',
+                str_contains($cleanName, 'stok') || $cleanName === 'stock' => 'stock',
+                str_contains($cleanName, 'berat') || $cleanName === 'weight' => 'weight',
+                str_contains($cleanName, 'deskripsi') || str_contains($cleanName, 'keterangan') || $cleanName === 'description' => 'description',
+                str_contains($cleanName, 'aktif') || str_contains($cleanName, 'status') || $cleanName === 'is_active' => 'is_active',
+                default => $cleanName,
+            };
+            $headerMap[$idx] = $key;
+        }
 
         $created = 0;
         $updated = 0;
@@ -123,43 +152,43 @@ class ProductImportService
         DB::beginTransaction();
 
         try {
-            while (($row = fgetcsv($handle)) !== false) {
+            foreach ($allRows as $row) {
                 $rowNum++;
 
-                // Abaikan jika baris kosong
-                if (empty(array_filter($row, fn ($val) => !is_null($val) && trim($val) !== ''))) {
+                if (empty(array_filter($row, fn ($val) => !is_null($val) && trim((string) $val) !== ''))) {
                     continue;
                 }
 
-                // Map kolom dengan header
                 $data = [];
-                foreach ($headers as $index => $header) {
-                    $data[$header] = isset($row[$index]) ? trim($row[$index]) : null;
+                foreach ($headerMap as $cIdx => $fieldKey) {
+                    $data[$fieldKey] = isset($row[$cIdx]) ? trim((string) $row[$cIdx]) : null;
                 }
 
                 $name = $data['name'] ?? null;
                 if (empty($name)) {
-                    $errors[] = "Baris {$rowNum}: Kolom 'name' wajib diisi.";
+                    $errors[] = "Baris {$rowNum}: Kolom 'Nama Produk' wajib diisi.";
                     continue;
                 }
 
-                $rawPrice = str_replace(['Rp', '.', ' '], '', $data['price'] ?? '0');
+                $rawPrice = str_replace(['Rp', '.', ',', ' '], '', $data['price'] ?? '0');
                 $price = is_numeric($rawPrice) ? (float) $rawPrice : 0;
                 if ($price <= 0) {
-                    $errors[] = "Baris {$rowNum}: Kolom 'price' harus angka lebih dari 0.";
+                    $errors[] = "Baris {$rowNum}: Kolom 'Harga Normal' harus angka lebih dari 0.";
                     continue;
                 }
 
-                $rawSalePrice = str_replace(['Rp', '.', ' '], '', $data['sale_price'] ?? '0');
-                $salePrice = is_numeric($rawSalePrice) && (float) $rawSalePrice > 0 ? (float) $rawSalePrice : null;
+                $rawSalePrice = str_replace(['Rp', '.', ',', ' '], '', $data['sale_price'] ?? '');
+                $salePrice = (is_numeric($rawSalePrice) && (float) $rawSalePrice > 0) ? (float) $rawSalePrice : null;
 
-                $stock = isset($data['stock']) && is_numeric($data['stock']) ? (int) $data['stock'] : 0;
-                $weight = isset($data['weight']) && is_numeric($data['weight']) ? (float) $data['weight'] : 200.00;
-                $sku = !empty($data['sku']) ? strtoupper(trim($data['sku'])) : null;
+                $stock = (isset($data['stock']) && is_numeric($data['stock'])) ? (int) $data['stock'] : 0;
+                $weight = (isset($data['weight']) && is_numeric($data['weight'])) ? (float) $data['weight'] : 200.00;
+                $sku = !empty($data['sku']) ? strtoupper(trim((string) $data['sku'])) : null;
                 $description = $data['description'] ?? null;
-                $isActive = isset($data['is_active']) ? (bool) $data['is_active'] : true;
 
-                // Resolusi Kategori
+                $isActiveVal = $data['is_active'] ?? '1';
+                $isActive = !in_array(strtolower((string) $isActiveVal), ['0', 'false', 'tidak', 'off', 'nonaktif']);
+
+                // Category resolution
                 $categoryId = null;
                 $categoryName = $data['category'] ?? null;
                 if (!empty($categoryName)) {
@@ -174,14 +203,13 @@ class ProductImportService
                     $categoryId = $category->id;
                 }
 
-                // Cek apakah produk dengan SKU tersebut sudah ada (Upsert)
+                // Check for existing product by SKU
                 $product = null;
                 if ($sku) {
                     $product = Product::where('sku', $sku)->first();
                 }
 
                 if ($product) {
-                    // Update data produk yang ada
                     $updatePayload = [
                         'name' => $name,
                         'price' => $price,
@@ -189,13 +217,11 @@ class ProductImportService
                         'stock' => $stock,
                         'weight' => $weight,
                         'is_active' => $isActive,
-                        'video_source_type' => $product->video_source_type ?: 'upload',
                     ];
 
                     if ($categoryId) {
                         $updatePayload['category_id'] = $categoryId;
                     }
-
                     if ($description) {
                         $updatePayload['description'] = $description;
                     }
@@ -203,7 +229,6 @@ class ProductImportService
                     $product->update($updatePayload);
                     $updated++;
                 } else {
-                    // Buat produk baru
                     $finalSku = $sku ?: ('PRD-' . strtoupper(Str::random(6)));
                     $slug = Str::slug($name) . '-' . Str::random(5);
 
@@ -225,7 +250,6 @@ class ProductImportService
             }
 
             DB::commit();
-            fclose($handle);
 
             return [
                 'success' => true,
@@ -236,9 +260,6 @@ class ProductImportService
             ];
         } catch (\Throwable $e) {
             DB::rollBack();
-            if (is_resource($handle)) {
-                fclose($handle);
-            }
 
             return [
                 'success' => false,
@@ -248,5 +269,13 @@ class ProductImportService
                 'errors' => array_merge($errors, [$e->getMessage()]),
             ];
         }
+    }
+
+    /**
+     * Backward-compatibility proxy for importFromCsv
+     */
+    public function importFromCsv(string $filePath): array
+    {
+        return $this->importFromFile($filePath);
     }
 }

@@ -27,13 +27,42 @@ class ProductImage extends Model
         });
     }
 
+    public function setImagePathAttribute($value): void
+    {
+        if (blank($value)) {
+            $this->attributes['image_path'] = null;
+            return;
+        }
+
+        $clean = trim((string) $value);
+
+        // If it is a video (marked or YouTube link)
+        if (($this->media_type ?? 'image') === 'video' || \App\Services\MediaUrlService::isYouTube($clean)) {
+            $this->attributes['media_type'] = 'video';
+            $this->attributes['image_path'] = \App\Services\MediaUrlService::processVideoUrl($clean);
+            return;
+        }
+
+        // Online image URL (Pinterest or any web link): resolve and cache locally
+        if (str_starts_with($clean, 'http://') || str_starts_with($clean, 'https://')) {
+            $this->attributes['image_path'] = \App\Services\MediaUrlService::processImageUrl($clean);
+            return;
+        }
+
+        $this->attributes['image_path'] = $clean;
+    }
+
     public function getIsVideoAttribute(): bool
     {
         if ($this->media_type === 'video') {
             return true;
         }
 
-        $raw = $this->getRawOriginal('image_path') ?? '';
+        $raw = $this->getRawOriginal('image_path') ?? $this->image_path ?? '';
+        if (\App\Services\MediaUrlService::isYouTube($raw)) {
+            return true;
+        }
+
         $ext = strtolower(pathinfo(parse_url($raw, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
 
         return in_array($ext, ['mp4', 'mov', 'webm', 'ogg']);

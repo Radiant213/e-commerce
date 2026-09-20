@@ -25,6 +25,12 @@ import { useLanguage } from '@shared/context/LanguageContext';
 import { useToast } from '../components/Toast';
 import ProductCard from '../components/ProductCard';
 
+const getYouTubeId = (url) => {
+  if (!url || typeof url !== 'string') return null;
+  const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+  return match ? match[1] : null;
+};
+
 const ProductDetailPage = () => {
   const { t } = useLanguage();
   const { slug } = useParams();
@@ -55,7 +61,7 @@ const ProductDetailPage = () => {
       try {
         const data = await productsApi.getProductBySlug(slug);
         setProduct(data.product);
-        setRelatedProducts(data.related_products || []);
+        setRelatedProducts(data.related_products || data.related || []);
 
         if (data.product?.variants && data.product.variants.length > 0) {
           setSelectedVariant(data.product.variants[0]);
@@ -69,21 +75,25 @@ const ProductDetailPage = () => {
             url: videoUrl,
             type: 'video',
             is_showcase: true,
+            youtubeId: getYouTubeId(videoUrl),
           });
         } else {
           const primary = p?.primary_image || p?.images?.find((i) => i.is_primary) || p?.images?.[0];
           if (primary) {
-            const isVid = primary.is_video || primary.media_type === 'video' || /\.(mp4|mov|webm|ogg)($|\?)/i.test(primary.image_path || '');
+            const ytId = getYouTubeId(primary.image_path);
+            const isVid = primary.is_video || primary.media_type === 'video' || /\.(mp4|mov|webm|ogg)($|\?)/i.test(primary.image_path || '') || !!ytId;
             setSelectedMedia({
               id: primary.id,
               url: primary.image_path,
               type: isVid ? 'video' : 'image',
+              youtubeId: ytId,
             });
           } else {
             setSelectedMedia({
               id: 'default-fallback',
               url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80',
               type: 'image',
+              youtubeId: null,
             });
           }
         }
@@ -110,13 +120,15 @@ const ProductDetailPage = () => {
         url: showcaseVideo,
         type: 'video',
         is_showcase: true,
+        youtubeId: getYouTubeId(showcaseVideo),
       });
     }
 
     // 2. Product Images & Additional Videos (from repeater)
     if (product.images && product.images.length > 0) {
       product.images.forEach((item) => {
-        const isVideo = item.is_video || item.media_type === 'video' || /\.(mp4|mov|webm|ogg)($|\?)/i.test(item.image_path || '');
+        const ytId = getYouTubeId(item.image_path);
+        const isVideo = item.is_video || item.media_type === 'video' || /\.(mp4|mov|webm|ogg)($|\?)/i.test(item.image_path || '') || !!ytId;
         list.push({
           id: item.id,
           url: item.image_path,
@@ -124,6 +136,7 @@ const ProductDetailPage = () => {
           is_primary: item.is_primary,
           is_showcase: false,
           sort_order: item.sort_order ?? 1,
+          youtubeId: ytId,
         });
       });
     }
@@ -210,31 +223,25 @@ const ProductDetailPage = () => {
 
   const specsList = useMemo(() => {
     if (!product) return [];
-    const base = [
-      { label: 'Kategori', value: product.category?.name || '-' },
-      { label: 'SKU Produk', value: product.sku || '-' },
-      { label: 'Berat Barang', value: product.weight ? `${product.weight} gram` : '-' },
-      { label: 'Kondisi', value: 'Baru & 100% Original' },
-      { label: 'Stok Tersedia', value: `${product.stock} unit` },
-    ];
+    const list = [];
 
     if (product.specifications && typeof product.specifications === 'object') {
       if (Array.isArray(product.specifications)) {
         product.specifications.forEach((item) => {
           if (item && item.key && item.value) {
-            base.push({ label: item.key, value: item.value });
+            list.push({ label: item.key, value: item.value });
           }
         });
       } else {
         Object.entries(product.specifications).forEach(([k, v]) => {
           if (k && v) {
-            base.push({ label: k, value: String(v) });
+            list.push({ label: k, value: String(v) });
           }
         });
       }
     }
 
-    return base;
+    return list;
   }, [product]);
 
   const handleAddToCart = async () => {
@@ -384,12 +391,21 @@ const ProductDetailPage = () => {
                     >
                       {item.type === 'video' ? (
                         <div className="w-full h-full relative bg-slate-950 flex items-center justify-center">
-                          <video
-                            src={item.url}
-                            className="w-full h-full object-cover opacity-60 pointer-events-none"
-                            muted
-                            preload="metadata"
-                          />
+                          {item.youtubeId ? (
+                            <img
+                              src={`https://img.youtube.com/vi/${item.youtubeId}/hqdefault.jpg`}
+                              alt={product.name}
+                              referrerPolicy="no-referrer"
+                              className="w-full h-full object-cover opacity-70 pointer-events-none"
+                            />
+                          ) : (
+                            <video
+                              src={item.url}
+                              className="w-full h-full object-cover opacity-60 pointer-events-none"
+                              muted
+                              preload="metadata"
+                            />
+                          )}
                           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                             <div className="w-7 h-7 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center shadow-lg transition-transform group-hover:scale-110">
                               <svg
@@ -405,6 +421,7 @@ const ProductDetailPage = () => {
                         <img
                           src={item.url}
                           alt={product.name}
+                          referrerPolicy="no-referrer"
                           className="w-full h-full object-cover"
                         />
                       )}
@@ -416,29 +433,36 @@ const ProductDetailPage = () => {
 
             {/* Main Large Media */}
             <div className="flex-1 aspect-square rounded-3xl overflow-hidden bg-slate-950 border border-slate-200/90 relative group shadow-sm flex items-center justify-center">
-              {activeVideoUrl && (
-                <video
-                  ref={videoRef}
-                  src={activeVideoUrl}
-                  controls
-                  muted
-                  playsInline
-                  loop
-                  className={`w-full h-full object-contain bg-black rounded-3xl ${
-                    currentMedia?.type === 'video' ? 'block' : 'hidden'
-                  }`}
-                >
-                  Browser Anda tidak mendukung tag video.
-                </video>
+              {currentMedia?.type === 'video' ? (
+                (currentMedia.youtubeId || getYouTubeId(currentMedia.url)) ? (
+                  <iframe
+                    src={`https://www.youtube-nocookie.com/embed/${currentMedia.youtubeId || getYouTubeId(currentMedia.url)}?autoplay=0&rel=0`}
+                    title={product.name}
+                    className="w-full h-full rounded-3xl"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <video
+                    ref={videoRef}
+                    src={activeVideoUrl}
+                    controls
+                    muted
+                    playsInline
+                    loop
+                    className="w-full h-full object-contain bg-black rounded-3xl block"
+                  >
+                    Browser Anda tidak mendukung tag video.
+                  </video>
+                )
+              ) : (
+                <img
+                  src={currentMedia?.url || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'}
+                  alt={product.name}
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out bg-slate-50 block"
+                />
               )}
-
-              <img
-                src={currentMedia?.url || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'}
-                alt={product.name}
-                className={`w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out bg-slate-50 ${
-                  currentMedia?.type === 'video' ? 'hidden' : 'block'
-                }`}
-              />
 
               {/* Discount Badge Overlay (on images) */}
               {discountPercent && currentMedia?.type !== 'video' && (
@@ -730,36 +754,38 @@ const ProductDetailPage = () => {
         <div className="py-8">
           {activeTab === 'description' && (
             <div className="space-y-10 max-w-4xl text-slate-700">
-              {/* SPESIFIKASI PRODUK SECTION (Shopee PDP Style) */}
-              <div className="space-y-4">
-                <h3 className="text-xs uppercase font-extrabold tracking-wider text-slate-400 bg-slate-100/80 px-4 py-2 rounded-lg inline-block">
-                  {t('detail_specifications_title') || 'SPESIFIKASI PRODUK'}
-                </h3>
-                <div className="border border-slate-200/80 rounded-2xl overflow-hidden bg-white shadow-xs">
-                  <table className="w-full text-xs sm:text-sm text-left border-collapse">
-                    <tbody>
-                      {specsList.map((spec, idx) => (
-                        <tr
-                          key={idx}
-                          className={`border-b border-slate-100 last:border-0 ${
-                            idx % 2 === 0 ? 'bg-slate-50/40' : 'bg-white'
-                          }`}
-                        >
-                          <td className="py-3 px-4 sm:px-6 w-1/3 sm:w-1/4 text-slate-500 font-medium">
-                            {spec.label}
-                          </td>
-                          <td className="py-3 px-4 sm:px-6 text-slate-900 font-semibold">
-                            {spec.value}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              {/* SPESIFIKASI PRODUK SECTION (Tampil murni jika diisi oleh admin) */}
+              {specsList.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-xs uppercase font-extrabold tracking-wider text-slate-400 bg-slate-100/80 px-4 py-2 rounded-lg inline-block">
+                    {t('detail_specifications_title') || 'SPESIFIKASI PRODUK'}
+                  </h3>
+                  <div className="border border-slate-200/80 rounded-2xl overflow-hidden bg-white shadow-xs">
+                    <table className="w-full text-xs sm:text-sm text-left border-collapse">
+                      <tbody>
+                        {specsList.map((spec, idx) => (
+                          <tr
+                            key={idx}
+                            className={`border-b border-slate-100 last:border-0 ${
+                              idx % 2 === 0 ? 'bg-slate-50/40' : 'bg-white'
+                            }`}
+                          >
+                            <td className="py-3 px-4 sm:px-6 w-1/3 sm:w-1/4 text-slate-500 font-medium">
+                              {spec.label}
+                            </td>
+                            <td className="py-3 px-4 sm:px-6 text-slate-900 font-semibold">
+                              {spec.value}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* DESKRIPSI PRODUK SECTION (Rich HTML + Images) */}
-              <div className="space-y-4 pt-4 border-t border-slate-200/80">
+              <div className={`space-y-4 ${specsList.length > 0 ? 'pt-4 border-t border-slate-200/80' : ''}`}>
                 <h3 className="text-xs uppercase font-extrabold tracking-wider text-slate-400 bg-slate-100/80 px-4 py-2 rounded-lg inline-block">
                   {t('detail_description_title') || 'DESKRIPSI PRODUK'}
                 </h3>

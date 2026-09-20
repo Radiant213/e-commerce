@@ -1087,11 +1087,66 @@
         min-width: 16px !important;
         max-width: 16px !important;
     }
-    .rc-report-kpi-icon svg {
-        width: 24px !important;
-        height: 24px !important;
-        min-width: 24px !important;
-        max-width: 24px !important;
+    /* 21. Global Toggle Switches (Vibrant Emerald ON / Smooth Slate OFF) */
+    [role="switch"][aria-checked="true"],
+    button[role="switch"][aria-checked="true"],
+    div[role="switch"][aria-checked="true"],
+    .fi-toggle[aria-checked="true"],
+    .fi-ta-toggle [role="switch"][aria-checked="true"],
+    .fi-fo-toggle [role="switch"][aria-checked="true"],
+    .fi-ta-toggle-btn[aria-checked="true"],
+    .fi-fo-toggle-btn[aria-checked="true"],
+    .fi-toggle-on {
+        background-color: #10B981 !important;
+        border-color: #059669 !important;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.45) !important;
+    }
+
+    html.dark [role="switch"][aria-checked="true"],
+    html.dark button[role="switch"][aria-checked="true"],
+    html.dark div[role="switch"][aria-checked="true"],
+    html.dark .fi-toggle[aria-checked="true"],
+    html.dark .fi-ta-toggle [role="switch"][aria-checked="true"],
+    html.dark .fi-fo-toggle [role="switch"][aria-checked="true"],
+    html.dark .fi-ta-toggle-btn[aria-checked="true"],
+    html.dark .fi-fo-toggle-btn[aria-checked="true"],
+    html.dark .fi-toggle-on {
+        background-color: #10B981 !important;
+        border-color: #34D399 !important;
+        box-shadow: 0 0 14px rgba(16, 185, 129, 0.55) !important;
+    }
+
+    [role="switch"][aria-checked="false"],
+    button[role="switch"][aria-checked="false"],
+    div[role="switch"][aria-checked="false"],
+    .fi-toggle[aria-checked="false"],
+    .fi-ta-toggle [role="switch"][aria-checked="false"],
+    .fi-fo-toggle [role="switch"][aria-checked="false"],
+    .fi-ta-toggle-btn[aria-checked="false"],
+    .fi-fo-toggle-btn[aria-checked="false"] {
+        background-color: #CBD5E1 !important;
+        border-color: #94A3B8 !important;
+        box-shadow: none !important;
+    }
+
+    html.dark [role="switch"][aria-checked="false"],
+    html.dark button[role="switch"][aria-checked="false"],
+    html.dark div[role="switch"][aria-checked="false"],
+    html.dark .fi-toggle[aria-checked="false"],
+    html.dark .fi-ta-toggle [role="switch"][aria-checked="false"],
+    html.dark .fi-fo-toggle [role="switch"][aria-checked="false"],
+    html.dark .fi-ta-toggle-btn[aria-checked="false"],
+    html.dark .fi-fo-toggle-btn[aria-checked="false"] {
+        background-color: #334155 !important;
+        border-color: #475569 !important;
+        box-shadow: none !important;
+    }
+
+    [role="switch"] > div,
+    [role="switch"] > span {
+        background-color: #FFFFFF !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease !important;
     }
 </style>
 

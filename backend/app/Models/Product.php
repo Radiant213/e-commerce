@@ -60,6 +60,22 @@ class Product extends Model
         $this->attributes['video_source_type'] = !empty($value) ? $value : 'upload';
     }
 
+    public function setVideoPathAttribute($value): void
+    {
+        if (blank($value)) {
+            $this->attributes['video_path'] = null;
+            return;
+        }
+
+        $clean = trim((string) $value);
+        if (\App\Services\MediaUrlService::isYouTube($clean)) {
+            $this->attributes['video_source_type'] = 'url';
+            $this->attributes['video_path'] = \App\Services\MediaUrlService::processVideoUrl($clean);
+        } else {
+            $this->attributes['video_path'] = $clean;
+        }
+    }
+
     public function getThumbnailUrlAttribute(): ?string
     {
         return $this->primaryImage?->image_path ?? $this->images->first()?->image_path;

@@ -12,7 +12,9 @@ auth.json
 # Dependencies
 # ==============================================================================
 node_modules/
-vendor/
+/vendor/
+/backend/vendor/
+!/backend/resources/views/vendor/**
 
 # ==============================================================================
 # Build & Distribution Artifacts
