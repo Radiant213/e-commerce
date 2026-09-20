@@ -642,6 +642,31 @@
 
     .fi-ta-cell, .fi-ta-text-item { color: var(--rc-text) !important; }
 
+    /* Table Actions Column: Solid Background & Clean Alignment */
+    .fi-ta-actions-cell,
+    td.fi-ta-actions-cell,
+    th.fi-ta-actions-header-cell {
+        background-color: var(--rc-surface) !important;
+        white-space: nowrap !important;
+    }
+
+    html.dark .fi-ta-actions-cell,
+    html.dark td.fi-ta-actions-cell,
+    html.dark th.fi-ta-actions-header-cell {
+        background-color: #0F1724 !important;
+    }
+
+    html:not(.dark) .fi-ta-actions-cell,
+    html:not(.dark) td.fi-ta-actions-cell,
+    html:not(.dark) th.fi-ta-actions-header-cell {
+        background-color: #FFFFFF !important;
+    }
+
+    .fi-ta-record:hover .fi-ta-actions-cell,
+    .fi-ta-record:hover td.fi-ta-actions-cell {
+        background-color: var(--rc-row-hover) !important;
+    }
+
     /* 14. Clean Standalone Stat Cards (Smooth Modern Hover) */
     .fi-wi-stats-overview-stat {
         background-color: var(--rc-surface) !important;

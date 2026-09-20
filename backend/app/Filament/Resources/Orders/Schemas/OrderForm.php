@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Orders\Schemas;
 
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -56,6 +57,18 @@ class OrderForm
                                     ->label('Nomor Resi')
                                     ->placeholder('Masukkan nomor resi pengiriman')
                                     ->maxLength(255),
+
+                                FileUpload::make('receipt_image')
+                                    ->label('Foto Bukti Resi Pengiriman')
+                                    ->image()
+                                    ->maxSize(10240)
+                                    ->disk('public')
+                                    ->directory('receipts')
+                                    ->visibility('public')
+                                    ->openable()
+                                    ->downloadable()
+                                    ->previewable(true)
+                                    ->helperText('Upload foto bukti resi fisik pengiriman. Format: JPG, PNG, WEBP. Maksimal 10 MB.'),
 
                                 Placeholder::make('payment_details')
                                     ->label('Info Gateway Midtrans')

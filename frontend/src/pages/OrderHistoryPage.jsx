@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Package, Clock, CheckCircle2, AlertCircle, XCircle, ArrowRight, ExternalLink } from 'lucide-react';
+import { Package, Clock, CheckCircle2, AlertCircle, XCircle, ArrowRight, ExternalLink, Image as ImageIcon } from 'lucide-react';
 import ordersApi from '@shared/api/orders';
 import paymentsApi from '@shared/api/payments';
 import { formatCurrency } from '@shared/utils/formatCurrency';
@@ -219,7 +219,21 @@ const OrderHistoryPage = () => {
                 <div className="text-slate-500 flex flex-col gap-1">
                   <span>Penerima: <strong>{order.shipping_name}</strong> ({order.shipping_phone}) - {order.shipping_address}, {order.shipping_city}</span>
                   {(order.tracking_number || order.courier_name) && (
-                    <span className="text-slate-800">Resi Pengiriman: <strong>{order.courier_name || '-'}</strong> - <span className="font-mono text-emerald-700">{order.tracking_number || '-'}</span></span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-slate-800">Resi Pengiriman: <strong>{order.courier_name || '-'}</strong> - <span className="font-mono text-emerald-700">{order.tracking_number || '-'}</span></span>
+                      {order.receipt_image_url && (
+                        <a
+                          href={order.receipt_image_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-800 font-semibold underline bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 text-[11px] transition-colors"
+                          title="Buka foto resi pengiriman"
+                        >
+                          <ImageIcon size={12} />
+                          <span>Foto Resi</span>
+                        </a>
+                      )}
+                    </div>
                   )}
                 </div>
 

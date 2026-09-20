@@ -76,7 +76,7 @@ class MidtransService
         } catch (\Throwable $e) {
             // If Midtrans reports order_id is already used, generate a fresh unique order_number and retry
             if (str_contains(strtolower($e->getMessage()), 'sudah digunakan') || str_contains(strtolower($e->getMessage()), 'already been used') || str_contains(strtolower($e->getMessage()), 'order_id')) {
-                $order->order_number = 'ORD-' . strtoupper(\Illuminate\Support\Str::random(8)) . '-' . time();
+                $order->order_number = 'ORD-' . date('Ymd') . '-' . strtoupper(\Illuminate\Support\Str::random(6));
                 $order->save();
 
                 $snapToken = Snap::getSnapToken($buildParams($order->order_number));

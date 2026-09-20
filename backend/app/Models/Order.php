@@ -12,12 +12,14 @@ use Illuminate\Support\Str;
 
 #[Fillable([
     'user_id', 'order_number', 'subtotal', 'shipping_cost', 'total',
-    'status', 'tracking_number', 'courier_name', 'shipping_name', 'shipping_phone', 'shipping_address',
+    'status', 'tracking_number', 'courier_name', 'receipt_image', 'shipping_name', 'shipping_phone', 'shipping_address',
     'shipping_city', 'shipping_postal_code', 'notes',
 ])]
 class Order extends Model
 {
     use HasFactory;
+
+    protected $appends = ['receipt_image_url'];
 
     protected function casts(): array
     {
@@ -32,7 +34,7 @@ class Order extends Model
     {
         static::creating(function (Order $order) {
             if (empty($order->order_number)) {
-                $order->order_number = 'ORD-' . strtoupper(Str::random(8)) . '-' . time();
+                $order->order_number = 'ORD-' . date('Ymd') . '-' . strtoupper(Str::random(6));
             }
         });
     }
@@ -60,5 +62,18 @@ class Order extends Model
     public function canBeCancelled(): bool
     {
         return in_array($this->status, ['pending']);
+    }
+
+    public function getReceiptImageUrlAttribute(): ?string
+    {
+        if (!$this->receipt_image) {
+            return null;
+        }
+
+        if (str_starts_with($this->receipt_image, 'http://') || str_starts_with($this->receipt_image, 'https://')) {
+            return $this->receipt_image;
+        }
+
+        return asset('storage/' . ltrim($this->receipt_image, '/'));
     }
 }

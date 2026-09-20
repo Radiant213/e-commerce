@@ -74,7 +74,7 @@ const Footer = () => {
               <div className="flex items-center gap-2">
                 {/* WhatsApp */}
                 <a
-                  href="https://wa.me/"
+                  href="https://wa.me/+6287878444402"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 hover:border-emerald-500/50 hover:bg-emerald-600 hover:text-white text-slate-400 flex items-center justify-center hover-pop-bounce cursor-pointer group"
@@ -85,7 +85,7 @@ const Footer = () => {
 
                 {/* Instagram */}
                 <a
-                  href="https://instagram.com/"
+                  href="https://instagram.com/radofdiant"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 hover:border-pink-500/50 hover:bg-gradient-to-tr hover:from-amber-500 hover:via-pink-500 hover:to-purple-600 hover:text-white text-slate-400 flex items-center justify-center hover-pop-bounce cursor-pointer group"
@@ -98,7 +98,7 @@ const Footer = () => {
 
                 {/* X / Twitter */}
                 <a
-                  href="https://twitter.com/"
+                  href="https://twitter.com/radiant213_"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-600 hover:bg-white hover:text-slate-950 text-slate-400 flex items-center justify-center hover-pop-bounce cursor-pointer group"
@@ -111,7 +111,7 @@ const Footer = () => {
 
                 {/* GitHub */}
                 <a
-                  href="https://github.com/"
+                  href="https://github.com/Radiant213"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-600 hover:bg-slate-800 hover:text-white text-slate-400 flex items-center justify-center hover-pop-bounce cursor-pointer group"
