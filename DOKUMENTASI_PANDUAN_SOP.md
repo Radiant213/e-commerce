@@ -5,10 +5,12 @@
 
 ## 📑 DAFTAR ISI
 1. [Ringkasan Arsitektur & Peran Pengguna](#1-ringkasan-arsitektur--peran-pengguna)
-2. [Panduan Rekaman Video Tutorial (Skrip & Alur)](#2-panduan-rekaman-video-tutorial-skrip--alur)
-   - [Video 1: Pengalaman Berbelanja Pembeli (Frontend)](#video-1-pengalaman-berbelanja-pembeli-frontend-durasi-3-5-menit)
-   - [Video 2: CMS Admin Part 1 - Katalog & Master Data](#video-2-cms-admin-part-1---manajemen-katalog--produk-durasi-5-7-menit)
-   - [Video 3: CMS Admin Part 2 - Pesanan, Resi, & Laporan](#video-3-cms-admin-part-2---operasional-transaksi-resi--laporan-durasi-5-7-menit)
+2. [Panduan Rekaman Video Tutorial (1 Video All-in-One: 3 Section & Timestamps YouTube)](#2-panduan-rekaman-video-tutorial-1-video-all-in-one-3-section--timestamps-youtube)
+   - [Aturan Wajib YouTube Video Chapters](#aturan-wajib-fitur-youtube-chapters-track-play)
+   - [Template Deskripsi YouTube Siap Pakai (Timestamps & Links)](#template-deskripsi-youtube-siap-pakai)
+   - [Section 1: Pengalaman Berbelanja Pembeli (Frontend Toko)](#section-1-pengalaman-berbelanja-pembeli-frontend-toko)
+   - [Section 2: CMS Admin Part 1 - Manajemen Katalog & Master Produk](#section-2-cms-admin-part-1---manajemen-katalog--master-produk)
+   - [Section 3: CMS Admin Part 2 - Operasional Transaksi, Resi, & Laporan](#section-3-cms-admin-part-2---operasional-transaksi-resi--laporan)
 3. [SOP Standar Operasional Prosedur Admin](#3-sop-standar-operasional-prosedur-admin)
    - [SOP-01: Penambahan & Pembaruan Produk Baru](#sop-01-penambahan--pembaruan-produk-baru)
    - [SOP-02: Import Massal Produk via Excel / CSV](#sop-02-import-massal-produk-via-excel--csv)
@@ -29,120 +31,175 @@
 
 ---
 
-## 2. Panduan Rekaman Video Tutorial (Skrip & Alur)
+## 2. Panduan Rekaman Video Tutorial (1 Video All-in-One: 3 Section & Timestamps YouTube)
 
-### Video 1: Pengalaman Berbelanja Pembeli (Frontend)
-> **Target Durasi:** 3 – 5 Menit  
-> **Tujuan:** Menunjukkan kemudahan dan kenyamanan pelanggan dalam mencari barang, memilih varian, membayar via Midtrans, hingga menyelesaikan pesanan.
+> **Konsep:** 1 Video Komprehensif (Durasi ± 15 - 18 Menit) yang terbagi menjadi **3 Bagian Besar (Section)** menggunakan fitur **YouTube Video Chapters**.  
+> Di video player YouTube, bar pemutaran (*track play / scrubber*) akan otomatis terpecah menjadi babak-babak interaktif yang memudahkan penonton meloncat ke topik yang mereka butuhkan.
 
-#### 🎬 Urutan Adegan (Scene by Scene):
-1. **Scene 1: Registrasi & Login Cepat (00:00 - 00:45)**
-   - Buka halaman utama website.
-   - Tunjukkan tombol **Login** di pojok kanan atas.
+### Aturan Wajib Fitur YouTube Chapters (Track Play)
+Agar timeline YouTube otomatis terbagi menjadi segmen-segmen interaktif, format berikut **WAJIB** dipenuhi:
+1. Timestamp pertama **HARUS dimulai dari `00:00`** (Jika dimulai dari 00:05 atau detik lain, fitur chapter otomatis gagal aktif).
+2. Minimal memiliki **3 timestamp** secara kronologis (waktu naik).
+3. Setiap babak/chapter minimal berdurasi **10 detik**.
+4. Akun YouTube Anda tidak memiliki teguran pedoman komunitas aktif (fitur chapter aktif default untuk semua video standar).
+
+---
+
+### Template Deskripsi YouTube Siap Pakai
+
+Salin teks berikut ke kolom **Deskripsi Video YouTube** Anda (sesuaikan menit dan detik setelah rekaman selesai):
+
+```text
+🚀 Demo & Tutorial Lengkap Sistem E-Commerce Full-Stack Modern (Laravel 11 + Filament CMS + React 19 + Midtrans Gateway).
+Video ini mencakup panduan lengkap dari sudut pandang Pembeli (Frontend Storefront) hingga pengelolaan operasional toko online oleh Administrator (CMS Backend).
+
+Gunakan Chapter / Timestamp di bawah untuk langsung menuju bagian yang Anda inginkan:
+
+⏱️ DAFTAR ISI VIDEO (CHAPTERS):
+00:00 - Pendahuluan & Overview Sistem E-Commerce
+00:30 - [SECTION 1] Pengalaman Berbelanja Pembeli (Frontend)
+01:00 - Registrasi Akun, Login Google & Fitur Fast Demo
+02:15 - Eksplorasi Etalase & Pencarian Cerdas (Smart Search)
+03:45 - Halaman Detail Produk, Video Showcase & Pilihan Varian
+05:10 - Keranjang Belanja & Checkout Terintegrasi Buku Alamat
+06:30 - Pembayaran Otomatis Midtrans Snap (QRIS & Virtual Account)
+07:50 - Dashboard Pelanggan, Lacak Resi & Konfirmasi Pesanan Selesai
+
+09:15 - [SECTION 2] CMS Admin: Manajemen Katalog & Produk
+09:45 - Login Filament Admin Panel & Statistik Dashboard
+10:45 - Kelola Kategori Produk & Icon Lucide
+12:00 - Input Produk Lengkap: Deskripsi, Spesifikasi & Video Showcase
+14:10 - Konfigurasi Varian Produk (Warna/Ukuran) & Galeri Media
+15:30 - Fitur Import & Export Massal Produk via Excel / CSV
+
+17:00 - [SECTION 3] CMS Admin: Operasional Pesanan, Resi & Laporan
+17:30 - Monitoring Pesanan Masuk & Verifikasi Pembayaran Midtrans
+18:45 - Proses Pengiriman, Input Resi & Upload Bukti Foto Resi Fisik
+20:00 - Cetak Invoice & Label Pengiriman Paket
+21:15 - Pusat Laporan Penjualan, Laporan Stok & Ekspor Excel
+22:30 - Pengaturan Toko, Banner Slider & Penutup
+
+🔗 TAUTAN AKSES APLIKASI:
+• Website Toko: https://demo1-ecommerce.radiantcode.web.id
+• Admin Panel: https://api-ecommerce.radiantcode.web.id/admin (Akun: admin@radiantcode.web.id / password123)
+• Source Code GitHub: https://github.com/Radiant213/e-commerce
+
+🛠️ TEKNOLOGI YANG DIGUNAKAN:
+- Backend: Laravel 11, PHP 8.2+, MySQL
+- Admin CMS: Filament PHP v4
+- Frontend: React 19, Vite, Tailwind CSS, Lucide Icons
+- Payment Gateway: Midtrans Snap API (Sandbox/Production)
+- Deployment: Docker Nginx + VPS Ubuntu 24.04 LTS
+
+Jangan lupa Like, Share, dan Subscribe jika video ini bermanfaat!
+```
+
+---
+
+### Section 1: Pengalaman Berbelanja Pembeli (Frontend Toko)
+> **Estimasi Durasi:** ± 5 – 7 Menit  
+> **Tujuan:** Menunjukkan pengalaman antarmuka yang modern, cepat, responsif, dan alur belanja tanpa kendala.
+
+#### 🎬 Urutan Adegan Rekaman:
+1. **Scene 1.1: Registrasi & Pilihan Login Cepat**
+   - Buka halaman utama website (`https://demo1-ecommerce.radiantcode.web.id`).
+   - Tunjukkan tombol **Masuk / Daftar** di navbar.
    - Sorot opsi login fleksibel:
-     - Login biasa (Email & Kata Sandi).
+     - Login reguler (Email & Sandi).
      - **Login 1-Klik Akun Google**.
-     - **Fitur Fast Demo Button** (klik tombol *Customer* untuk login instan tanpa ketik).
-2. **Scene 2: Eksplorasi Etalase & Smart Search (00:45 - 01:30)**
-   - Coba fitur **Smart Search** di kolom pencarian:
-     - Ketik kata kunci bebas (misal: `"Sony"`, `"Headphone Hitam"`, atau kode SKU `"PRD-"`). Tunjukkan bagaimana sistem mencari kecocokan multi-kata secara cerdas.
-   - Filter berdasarkan kategori (Elektronik, Fashion, dsb.) dan urutkan harga/terlaris.
-3. **Scene 3: Halaman Detail Produk & Varian (01:30 - 02:30)**
-   - Buka produk unggulan (misal: *Sony WH-1000XM5*).
+     - **Tombol Fast Demo**: klik badge *Customer* untuk langsung masuk tanpa perlu mengetik kredensial.
+2. **Scene 1.2: Eksplorasi Etalase & Smart Search**
+   - Gunakan search bar di bagian atas.
+   - Ketik kata kunci parsial (misal: `"sony"`, `"headphone hitam"`, atau SKU `"PRD-"`).
+   - Tunjukkan pencarian cerdas yang memecah kata kunci secara akurat.
+   - Filter produk berdasarkan kategori dan urutkan harga terendah/terlaris.
+3. **Scene 1.3: Halaman Detail Produk & Variasi**
+   - Buka salah satu produk unggulan (misal: *Sony WH-1000XM5*).
    - Tunjukkan:
-     - **Video Showcase Produk** (bisa diputar langsung).
+     - **Video Showcase Produk** (bisa langsung diputar lancar di halaman produk).
      - **Galeri Foto Interaktif**.
-     - **Pilihan Varian** (pilih warna/tipe, perhatikan harga dan stok menyesuaikan).
+     - **Pemilihan Varian** (pilih warna/tipe, tunjukkan harga dan stok otomatis berganti sesuai varian).
      - **Tabel Spesifikasi Teknis**.
-     - **Ulasan Pembeli** dengan badge *Verified Purchase*.
-   - Klik tombol **+ Keranjang** atau **Beli Sekarang**.
-4. **Scene 4: Checkout & Pembayaran Midtrans (02:30 - 03:45)**
-   - Masuk ke halaman Checkout.
-   - Pilih alamat pengiriman dari **Buku Alamat Tersimpan** (atau input alamat baru).
+     - **Ulasan Pembeli** dengan lencana *Verified Purchase*.
+   - Klik **Beli Sekarang** atau **+ Keranjang**.
+4. **Scene 1.4: Checkout & Pembayaran Midtrans Snap**
+   - Masuk ke keranjang dan lanjut ke Checkout.
+   - Pilih alamat dari **Buku Alamat Tersimpan** (atau isi alamat penerima baru).
    - Klik tombol **Bayar Sekarang**.
-   - Pop-up **Midtrans Snap** muncul di layar:
-     - Pilih metode bayar (misal QRIS Simulator atau Virtual Account).
-     - Lakukan pembayaran sampai status berhasil (*Payment Success*).
-5. **Scene 5: Dashboard Pelanggan & Konfirmasi Pesanan Selesai (03:45 - 05:00)**
-   - Masuk ke menu **Dashboard Akun ➔ Riwayat Pesanan**.
-   - Tunjukkan:
-     - Status berubah menjadi **Pembayaran Berhasil / Diproses**.
-     - Stepper 4 tahap visual (Dipesan ➔ Dibayar ➔ Dikirim ➔ Diterima).
-     - Ketika pesanan sudah dikirim oleh penjual: nomor resi muncul dan klik tombol **"Lihat Foto Resi"** untuk melihat bukti fisik resi paket.
-     - Klik tombol hijau **"Pesanan Sudah Sampai / Selesai"**.
-     - Tunjukkan **Pop-up Modal Estetik Baru** yang muncul untuk konfirmasi. Klik *"Ya, Sudah Diterima"*, dan tunjukkan status pesanan berubah hijau penuh menjadi *Selesai*.
+   - Pop-up modal **Midtrans Snap** terbuka:
+     - Pilih metode pembayaran (misal: QRIS Simulator atau Virtual Account).
+     - Selesaikan pembayaran simulasi hingga status berhasil (*Payment Success*).
+5. **Scene 1.5: Dashboard Pelanggan & Tombol "Pesanan Selesai"**
+   - Masuk ke menu **Akun Saya ➔ Riwayat Pesanan**.
+   - Perhatikan stepper 4 status visual:
+     1. Menunggu Pembayaran ➔ 2. Diproses ➔ 3. Dikirim ➔ 4. Diterima.
+   - Tunjukkan nomor resi dan tombol **"Lihat Foto Resi"** untuk memeriksa bukti foto paket fisik yang dikirimkan penjual.
+   - Klik tombol hijau **"Pesanan Sudah Sampai / Selesai"**.
+   - Tunjukkan **Modal Dialog Konfirmasi Estetik Baru** yang muncul dengan backdrop blur. Klik *"Ya, Sudah Diterima"*, pesanan langsung berstatus *Delivered (Selesai)*.
 
 ---
 
-### Video 2: CMS Admin Part 1 - Manajemen Katalog & Produk
-> **Target Durasi:** 5 – 7 Menit  
-> **Tujuan:** Menjelaskan cara admin mengatur kategori, memasukkan produk baru lengkap dengan varian dan media showcase, serta fitur import massal Excel.
+### Section 2: CMS Admin Part 1 - Manajemen Katalog & Master Produk
+> **Estimasi Durasi:** ± 5 – 6 Menit  
+> **Tujuan:** Menunjukkan betapa cepat dan rapinya tim admin dalam mengelola etalase, kategori, stok, media showcase, dan import massal.
 
-#### 🎬 Urutan Adegan (Scene by Scene):
-1. **Scene 1: Pengenalan Filament Admin Panel (00:00 - 01:00)**
-   - Login ke `/admin` menggunakan akun Administrator.
-   - Jelaskan halaman Dashboard:
-     - Widget ringkasan total omset, jumlah pesanan, total produk, dan customer.
-     - Grafik penjualan mingguan dan tabel pesanan terkini.
-2. **Scene 2: Mengelola Kategori Produk (01:00 - 02:00)**
+#### 🎬 Urutan Adegan Rekaman:
+1. **Scene 2.1: Overview Filament Admin Panel**
+   - Buka `/admin` dan login sebagai Administrator.
+   - Jelaskan widget Dashboard: Total Pendapatan, Pesanan Baru, Grafik Penjualan Mingguan, dan status stok.
+2. **Scene 2.2: Mengelola Kategori Produk**
    - Buka menu **Katalog Produk ➔ Kategori Produk**.
-   - Klik **Tambah Kategori**:
-     - Masukkan nama kategori (misal: *Gadget & Aksesoris*).
-     - Pilih icon Lucide (misal: `Smartphone` atau `Headphones`).
-     - Tunjukkan fleksibilitas banner: bisa upload file gambar atau masukkan URL gambar langsung (Unsplash/CDN).
-3. **Scene 3: Input Produk Baru Lengkap (02:00 - 04:30)**
-   - Buka menu **Katalog Produk ➔ Produk ➔ Buat Produk**.
-   - **Bagian 1: Info Utama & Harga:**
-     - Nama produk, kategori, harga normal, harga promo coret, dan stok dasar.
-   - **Bagian 2: Deskripsi & Spesifikasi:**
-     - Tulis deskripsi dengan Rich Editor (bisa sisip foto).
-     - Tambahkan atribut di **Tabel Spesifikasi Teknis** (misal: *Bahan: Aluminium*, *Koneksi: Bluetooth 5.2*, *Garansi: 1 Tahun*).
-   - **Bagian 3: Video Showcase Utama:**
-     - Tunjukkan opsi upload video langsung (file MP4 s/d 100MB) atau tempelkan link YouTube.
-   - **Bagian 4: Galeri Media Tambahan:**
-     - Tambahkan beberapa foto produk tambahan.
-   - **Bagian 5: Variasi Produk (Warna / Ukuran):**
-     - Tambahkan varian (misal: *Hitam*, *Putih*, *Midnight Blue*).
-     - Tentukan stok per variasi dan upload foto thumbnail mini varian.
-   - Klik **Simpan** dan buka halaman web frontend untuk melihat produk langsung tayang rapi.
-4. **Scene 4: Fitur Import & Export Excel / CSV (04:30 - 06:30)**
-   - Di daftar tabel produk, klik tombol **"Format Excel (.xlsx)"** untuk mengunduh template resmi.
-   - Buka file Excel, tunjukkan format kolom yang disediakan.
+   - Tambah kategori baru:
+     - Masukkan nama kategori.
+     - Pilih ikon Lucide modern (misal: `Laptop`, `Smartphone`).
+     - Tunjukkan fleksibilitas banner: bisa upload file lokal atau input tautan gambar langsung (URL).
+3. **Scene 2.3: Input Produk Baru Lengkap**
+   - Masuk ke **Katalog Produk ➔ Produk ➔ Buat Produk**.
+   - Isi form bertahap:
+     - **Info Utama:** Nama produk, kategori, harga dasar, harga diskon coret, stok awal.
+     - **Deskripsi & Spesifikasi:** Tulis deskripsi rich-text & tambahkan baris spesifikasi teknis dinamis.
+     - **Video Showcase:** Tunjukkan upload video lokal (MP4 hingga 100MB) atau paste link YouTube produk.
+     - **Variasi Produk:** Tambahkan varian (misal warna Hitam, Perak) lengkap dengan stok dan thumbnail varian.
+   - Klik **Simpan** dan buka tab frontend untuk membuktikan produk langsung muncul rapi di etalase pembeli.
+4. **Scene 2.4: Fitur Import & Export Excel / CSV**
+   - Di tabel produk, klik tombol **"Format Excel (.xlsx)"** untuk mengunduh template resmi.
+   - Tunjukkan kolom-kolom Excel yang mudah dipahami.
    - Klik tombol **"Import Excel / CSV"**, pilih file, dan jalankan proses import.
-   - Tunjukkan notifikasi sukses dan produk bertambah/ter-update otomatis (Upsert).
+   - Tunjukkan notifikasi keberhasilan dan pembaruan data produk secara otomatis (Upsert).
 
 ---
 
-### Video 3: CMS Admin Part 2 - Operasional Transaksi, Resi, & Laporan
-> **Target Durasi:** 5 – 7 Menit  
-> **Tujuan:** Panduan harian admin operasional untuk memproses pesanan masuk, menginput resi kurir beserta foto bukti resi, mencetak invoice/surat jalan, dan menutup laporan pembukuan.
+### Section 3: CMS Admin Part 2 - Operasional Transaksi, Resi, & Laporan
+> **Estimasi Durasi:** ± 5 – 6 Menit  
+> **Tujuan:** Panduan langkah demi langkah menangani pesanan pembeli, integrasi resi kurir, pencetakan dokumen toko, hingga pembukuan keuangan.
 
-#### 🎬 Urutan Adegan (Scene by Scene):
-1. **Scene 1: Memantau Pesanan Masuk (00:00 - 01:30)**
+#### 🎬 Urutan Adegan Rekaman:
+1. **Scene 3.1: Memantau Pesanan Masuk & Verifikasi Midtrans**
    - Buka menu **Penjualan & Transaksi ➔ Pesanan Masuk**.
-   - Jelaskan badge counter notifikasi pending di sidebar.
-   - Buka detail salah satu pesanan:
-     - Tunjukkan tabel produk belanjaan pelanggan.
-     - Tunjukkan **Info Gateway Midtrans** (ID Transaksi Midtrans, tipe pembayaran QRIS/VA, status settlement lunas).
-2. **Scene 2: Pengiriman Pesanan & Upload Foto Resi (01:30 - 03:30)**
-   - Di tabel pesanan (atau halaman detail), klik aksi **"Kirim Pesanan"**:
-     - Masukkan nama kurir (misal: *JNE Reguler*).
-     - Masukkan nomor resi (misal: *JNE12873812*).
-     - **Upload Foto Bukti Resi Fisik Pengiriman** (foto struk/label paket dari kurir, maks 10 MB).
+   - Sorot badge notifikasi pesanan pending di bilah navigasi kiri.
+   - Buka detail pesanan yang baru saja dibayar di Section 1:
+     - Tunjukkan rincian item belanja.
+     - Tunjukkan bagian **Detail Transaksi Midtrans**: Settlement lunas, ID Transaksi Midtrans, dan channel pembayaran.
+2. **Scene 3.2: Pengiriman Barang & Upload Foto Resi Fisik**
+   - Di daftar pesanan (atau halaman detail), klik aksi **"Kirim Pesanan"**:
+     - Masukkan nama kurir (misal: *JNE YES* / *SiCepat*).
+     - Masukkan nomor resi pengiriman.
+     - **Upload Foto Bukti Resi Fisik Pengiriman** (foto kertas struk dari agen ekspedisi).
    - Klik **Kirim Pesanan**.
-   - Jelaskan bahwa:
-     - Sistem otomatis mengubah status menjadi **Shipped**.
-     - **Email notifikasi pengiriman otomatis terkirim** ke inbox email customer, lengkap dengan nomor resi dan link foto resi.
-3. **Scene 3: Cetak Invoice & Label Pengiriman (03:30 - 04:30)**
-   - Klik menu aksi titik tiga pada pesanan ➔ **Cetak Invoice**.
-   - Tunjukkan halaman invoice cetak resmi yang siap di-print atau diunduh sebagai PDF, lengkap dengan rincian barang dan alamat pembeli untuk ditempel di paket.
-4. **Scene 4: Pusat Laporan & Pembukuan Keuangan (04:30 - 06:30)**
-   - Buka menu **Laporan & Analisis ➔ Pusat Laporan**.
-   - Tunjukkan 4 tab laporan:
-     - **Laporan Penjualan:** filter rentang tanggal, lihat total omset, jumlah barang terjual, dan klik **"Cetak Laporan Penjualan"** / **"Ekspor Excel"**.
-     - **Laporan Stok & Inventaris:** pantau produk habis (*out of stock*) atau stok menipis (*low stock*), dan klik **"Cetak Laporan Stok"**.
-     - **Produk Terlaris:** ranking 10 produk paling laku 30 hari terakhir.
-     - **Top Pelanggan:** pelanggan dengan total transaksi terbanyak.
+   - Jelaskan bahwa sistem otomatis mengirim email notifikasi pengiriman ke pembeli beserta tautan resi dan lampiran foto fisik paket.
+3. **Scene 3.3: Cetak Invoice & Label Alamat Paket**
+   - Klik aksi **"Cetak Invoice"** pada pesanan.
+   - Tunjukkan tampilan dokumen cetak invoice resmi siap print (PDF) yang berisi rincian barang dan alamat penerima untuk ditempel langsung di kardus paket.
+4. **Scene 3.4: Pusat Laporan & Pembukuan Keuangan**
+   - Masuk ke menu **Laporan & Analisis ➔ Pusat Laporan**.
+   - Tunjukkan 4 tab laporan lengkap:
+     - **Laporan Penjualan:** filter periode tanggal, rekap omset, tombol *Cetak Laporan Penjualan* & *Ekspor Excel*.
+     - **Laporan Stok & Inventaris:** status *Out of Stock* dan *Low Stock Alert*, tombol *Cetak Laporan Stok*.
+     - **Produk Terlaris:** top ranking barang paling laku.
+     - **Pelanggan Terbaik:** pembeli dengan loyalitas transaksi tertinggi.
+5. **Scene 3.5: Pengaturan Sistem Toko & Penutup**
+   - Buka menu **Pengaturan Sistem**: manajemen profil toko, konfigurasi slider banner promo halaman depan.
+   - Penutup video: ringkasan integrasi keseluruhan dan ajakan untuk mencoba demo publik.
 
 ---
 
