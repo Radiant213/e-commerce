@@ -135,8 +135,7 @@ class Product extends Model
 
     public function primaryImage(): HasOne
     {
-        return $this->hasOne(ProductImage::class)
-            ->ofMany(['is_primary' => 'desc', 'sort_order' => 'asc', 'id' => 'asc']);
+        return $this->hasOne(ProductImage::class)->where('is_primary', true);
     }
 
     public function variants(): HasMany
