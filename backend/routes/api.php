@@ -56,6 +56,7 @@ Route::get('/products/{productId}/reviews', [ReviewController::class, 'index']);
 
 // MidTrans Webhook Notification
 Route::match(['get', 'post'], '/payments/notification', [PaymentController::class, 'notification']);
+Route::match(['get', 'post'], '/payments/notifications', [PaymentController::class, 'notification']);
 
 /*
 |--------------------------------------------------------------------------
