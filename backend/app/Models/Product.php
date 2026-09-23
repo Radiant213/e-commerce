@@ -203,13 +203,9 @@ class Product extends Model
         );
 
         return $query->where(function ($q) use ($cleanSearch, $tokens) {
-            // 1. Full phrase match across all main attributes
+            // 1. Full phrase match on core fields (no description text to prevent random matches)
             $q->where('name', 'like', "%{$cleanSearch}%")
               ->orWhere('sku', 'like', "%{$cleanSearch}%")
-              ->orWhere('slug', 'like', "%{$cleanSearch}%")
-              ->orWhere('short_description', 'like', "%{$cleanSearch}%")
-              ->orWhere('description', 'like', "%{$cleanSearch}%")
-              ->orWhere('specifications', 'like', "%{$cleanSearch}%")
               ->orWhereHas('category', function ($cq) use ($cleanSearch) {
                   $cq->where('name', 'like', "%{$cleanSearch}%");
               })
@@ -218,18 +214,13 @@ class Product extends Model
                      ->orWhere('sku', 'like', "%{$cleanSearch}%");
               });
 
-            // 2. Multi-token smart search (Tokopedia/Shopee style):
-            // Every keyword entered can match across different columns/relations
+            // 2. Multi-token smart search: Every keyword must exist in core fields
             if (count($tokens) > 1) {
                 $q->orWhere(function ($subQ) use ($tokens) {
                     foreach ($tokens as $token) {
                         $subQ->where(function ($tokenQ) use ($token) {
                             $tokenQ->where('name', 'like', "%{$token}%")
                                    ->orWhere('sku', 'like', "%{$token}%")
-                                   ->orWhere('slug', 'like', "%{$token}%")
-                                   ->orWhere('short_description', 'like', "%{$token}%")
-                                   ->orWhere('description', 'like', "%{$token}%")
-                                   ->orWhere('specifications', 'like', "%{$token}%")
                                    ->orWhereHas('category', function ($cq) use ($token) {
                                        $cq->where('name', 'like', "%{$token}%");
                                    })

@@ -174,7 +174,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20 gap-4">
           {/* Mobile menu button */}
-          <div className="flex items-center lg:hidden">
+          <div className={`items-center lg:hidden ${isSearchOpen ? 'hidden sm:flex' : 'flex'}`}>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="p-2 text-slate-700 hover:text-slate-900 rounded-xl hover:bg-slate-100 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
@@ -184,7 +184,7 @@ const Navbar = () => {
           </div>
 
           {/* Brand Logo */}
-          <div className="flex-shrink-0 flex items-center">
+          <div className={`flex-shrink-0 items-center ${isSearchOpen ? 'hidden sm:flex' : 'flex'}`}>
             <Link to="/" className="flex items-center gap-2.5 group cursor-pointer hover-pop-lift select-none">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-white flex items-center justify-center font-bold text-lg tracking-tighter shadow-sm transition-all duration-300 group-hover:scale-115 group-hover:-rotate-8 group-hover:bg-gradient-to-br group-hover:from-emerald-950 group-hover:to-emerald-800 group-hover:shadow-md group-hover:shadow-emerald-900/30">
                 R
@@ -225,15 +225,15 @@ const Navbar = () => {
           </nav>
 
           {/* Action Icons & Morphing Search Bar */}
-          <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+          <div className={`flex items-center space-x-2 sm:space-x-3 ${isSearchOpen ? 'flex-grow sm:flex-grow-0 sm:flex-shrink-0 justify-end' : 'flex-shrink-0'}`}>
             {/* Inline Morphing Expanding Search Bar */}
-            <div className="relative flex-shrink-0" ref={searchContainerRef}>
+            <div className={`relative flex-shrink-0 ${isSearchOpen ? 'w-full sm:w-auto' : ''}`} ref={searchContainerRef}>
               <div className="flex items-center">
                 {/* Search Expansion Input Container */}
                 <form
                   onSubmit={handleSearchSubmit}
                   className={`flex items-center bg-slate-100/90 rounded-2xl border border-slate-200 overflow-hidden transition-all duration-300 ease-out shadow-xs ${isSearchOpen
-                      ? 'w-48 sm:w-64 md:w-72 lg:w-84 px-3 py-1.5 opacity-100 border-slate-900 bg-white ring-2 ring-slate-900/10'
+                      ? 'w-full sm:w-64 md:w-72 lg:w-84 px-3 py-1.5 opacity-100 border-slate-900 bg-white ring-2 ring-slate-900/10'
                       : 'w-0 opacity-0 px-0 py-0 border-transparent pointer-events-none'
                     }`}
                 >
@@ -257,6 +257,9 @@ const Navbar = () => {
                         setSearchQuery('');
                         setSearchResults([]);
                         searchInputRef.current?.focus();
+                        if (location.pathname === '/products') {
+                          navigate('/products');
+                        }
                       }}
                       className="p-1 text-slate-400 hover:text-slate-700 flex-shrink-0 transition-transform hover:scale-110 active:scale-90 cursor-pointer"
                     >
@@ -282,19 +285,6 @@ const Navbar = () => {
                   </button>
                 )}
 
-                {/* Close Search Button (When open) */}
-                {isSearchOpen && (
-                  <button
-                    onClick={() => {
-                      setIsSearchOpen(false);
-                      setSearchResults([]);
-                    }}
-                    className="p-2 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100 transition-all duration-200 hover:scale-110 active:scale-90 ml-1 flex-shrink-0 cursor-pointer"
-                    title="Tutup Pencarian"
-                  >
-                    <X size={18} />
-                  </button>
-                )}
               </div>
 
               {/* Search History Dropdown */}
@@ -388,7 +378,7 @@ const Navbar = () => {
             {/* Wishlist Link */}
             <Link
               to="/wishlist"
-              className="p-2.5 text-slate-700 hover:text-rose-600 rounded-full hover:bg-rose-50/70 transition-all duration-200 hover-pop-bounce relative flex-shrink-0 group cursor-pointer hover-heart-throb"
+              className={`p-2.5 text-slate-700 hover:text-rose-600 rounded-full hover:bg-rose-50/70 transition-all duration-200 hover-pop-bounce relative flex-shrink-0 group cursor-pointer hover-heart-throb ${isSearchOpen ? 'hidden sm:block' : 'block'}`}
               title={t('nav_wishlist')}
             >
               <Heart size={20} strokeWidth={2} className="group-hover:scale-120 group-hover:fill-rose-500 text-slate-700 group-hover:text-rose-500 transition-all duration-300" />
@@ -402,7 +392,7 @@ const Navbar = () => {
             {/* Cart Trigger Button */}
             <button
               onClick={() => setIsDrawerOpen(true)}
-              className="p-2.5 text-slate-700 hover:text-emerald-800 rounded-full hover:bg-emerald-50/70 transition-all duration-200 hover-pop-bounce relative group flex-shrink-0 cursor-pointer hover-cart-bounce"
+              className={`p-2.5 text-slate-700 hover:text-emerald-800 rounded-full hover:bg-emerald-50/70 transition-all duration-200 hover-pop-bounce relative group flex-shrink-0 cursor-pointer hover-cart-bounce ${isSearchOpen ? 'hidden sm:block' : 'block'}`}
               title="Keranjang Belanja"
             >
               <ShoppingCart size={20} strokeWidth={1.8} className="group-hover:scale-115 transition-all duration-300" />
@@ -414,7 +404,7 @@ const Navbar = () => {
             </button>
 
             {/* User Profile / Auth */}
-            <div className="relative flex-shrink-0" ref={profileRef}>
+            <div className={`relative flex-shrink-0 ${isSearchOpen ? 'hidden sm:block' : 'block'}`} ref={profileRef}>
               {isAuthenticated ? (
                 <div className="relative flex-shrink-0">
                   <button

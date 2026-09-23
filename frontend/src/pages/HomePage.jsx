@@ -100,7 +100,7 @@ const HomePage = () => {
               </div>
 
               {/* Quick stats tags */}
-              <div className="pt-8 border-t border-slate-100 grid grid-cols-3 gap-6 text-slate-700">
+              <div className="pt-8 border-t border-slate-100 grid grid-cols-3 gap-3 sm:gap-6 text-slate-700">
                 <div>
                   <p className="text-2xl sm:text-3xl font-extrabold text-slate-900">500+</p>
                   <p className="text-xs text-slate-500 mt-0.5 font-medium">{t('hero_stat_curated')}</p>

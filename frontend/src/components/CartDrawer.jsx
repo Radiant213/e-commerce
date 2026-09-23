@@ -50,7 +50,7 @@ const CartDrawer = () => {
       />
 
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col animate-slide-in-right border-l border-slate-200">
+        <div className="w-[90vw] sm:w-screen max-w-md bg-white shadow-2xl flex flex-col animate-slide-in-right border-l border-slate-200">
           {/* Header */}
           <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between bg-white">
             <div className="flex items-center gap-2.5">

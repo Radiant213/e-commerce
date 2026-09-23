@@ -367,7 +367,7 @@ const ProductDetailPage = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 text-left animate-fade-in">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 pb-28 sm:pb-8 lg:pb-12 text-left animate-fade-in">
       {/* Breadcrumb */}
       <nav className="text-xs text-slate-500 mb-8 flex items-center gap-2">
         <Link to="/" className="hover:text-slate-900 transition-colors">{t('nav_home')}</Link>
@@ -691,7 +691,7 @@ const ProductDetailPage = () => {
               </span>
             </div>
 
-            <div className="flex items-center gap-3 pt-2">
+            <div className="fixed sm:static bottom-0 left-0 right-0 p-4 sm:p-0 bg-white sm:bg-transparent border-t border-slate-200 sm:border-0 z-50 sm:z-auto shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.2)] sm:shadow-none flex items-center gap-2 sm:gap-3 pt-3 sm:pt-2">
               <button
                 onClick={handleAddToCart}
                 disabled={!isInStock}
