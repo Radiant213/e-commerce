@@ -250,22 +250,7 @@ const Navbar = () => {
                     placeholder={t('nav_search_placeholder')}
                     className="w-full bg-transparent text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none"
                   />
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSearchQuery('');
-                        setSearchResults([]);
-                        searchInputRef.current?.focus();
-                        if (location.pathname === '/products') {
-                          navigate('/products');
-                        }
-                      }}
-                      className="p-1 text-slate-400 hover:text-slate-700 flex-shrink-0 transition-transform hover:scale-110 active:scale-90 cursor-pointer"
-                    >
-                      <X size={13} />
-                    </button>
-                  )}
+
                   <button
                     type="submit"
                     className="ml-1.5 px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-[11px] font-bold transition-all hover:scale-105 active:scale-95 flex-shrink-0 shadow-xs cursor-pointer"
@@ -285,6 +270,23 @@ const Navbar = () => {
                   </button>
                 )}
 
+                {/* Close/Reset Search Button (When open) */}
+                {isSearchOpen && (
+                  <button
+                    onClick={() => {
+                      setIsSearchOpen(false);
+                      setSearchQuery('');
+                      setSearchResults([]);
+                      if (location.pathname === '/products') {
+                        navigate('/products');
+                      }
+                    }}
+                    className="p-2 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100 transition-all duration-200 hover:scale-110 active:scale-90 ml-1 flex-shrink-0 cursor-pointer"
+                    title="Tutup Pencarian"
+                  >
+                    <X size={18} />
+                  </button>
+                )}
               </div>
 
               {/* Search History Dropdown */}
