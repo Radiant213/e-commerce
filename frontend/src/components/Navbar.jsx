@@ -55,14 +55,24 @@ const Navbar = () => {
         setIsProfileOpen(false);
       }
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
-        setIsSearchOpen(false);
+        const isProductsPage = location.pathname === '/products';
+        const hasSearchText = searchQuery.trim().length > 0;
+        
+        if (!(isProductsPage && hasSearchText)) {
+          setIsSearchOpen(false);
+        }
         setSearchResults([]);
       }
     };
 
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        setIsSearchOpen(false);
+        const isProductsPage = location.pathname === '/products';
+        const hasSearchText = searchQuery.trim().length > 0;
+        
+        if (!(isProductsPage && hasSearchText)) {
+          setIsSearchOpen(false);
+        }
         setIsProfileOpen(false);
         setSearchResults([]);
       }
@@ -74,7 +84,7 @@ const Navbar = () => {
       document.removeEventListener('mousedown', handleClickOutside);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [location.pathname, searchQuery]);
 
   // Auto-focus input when opened
   useEffect(() => {
