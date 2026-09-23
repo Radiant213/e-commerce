@@ -95,25 +95,17 @@ const LoginPage = () => {
 
         {/* Demo Fast Login Buttons */}
         <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 space-y-2">
-          <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">
+          <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block text-center">
             {t('auth_demo_title')}
           </span>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-2">
             <button
               type="button"
               onClick={() => fillDemoAccount('budi@example.com', 'password123')}
-              className="px-2.5 py-1.5 bg-white border border-slate-200 hover:border-slate-400 rounded-xl text-xs font-bold text-slate-800 text-left transition-colors flex items-center gap-1.5 shadow-2xs"
+              className="px-2.5 py-2 bg-white border border-slate-200 hover:border-slate-400 rounded-xl text-xs font-bold text-slate-800 text-left transition-colors flex items-center justify-center gap-1.5 shadow-2xs w-full"
             >
               <UserCheck size={14} className="text-emerald-700" />
-              <span>Customer</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => fillDemoAccount('admin@radiantcode.web.id', 'password123')}
-              className="px-2.5 py-1.5 bg-white border border-slate-200 hover:border-slate-400 rounded-xl text-xs font-bold text-slate-800 text-left transition-colors flex items-center gap-1.5 shadow-2xs"
-            >
-              <UserCheck size={14} className="text-indigo-700" />
-              <span>Admin Studio</span>
+              <span>Customer Demo Account</span>
             </button>
           </div>
         </div>

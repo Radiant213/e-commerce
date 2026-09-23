@@ -85,8 +85,8 @@ class DatabaseSeeder extends Seeder
         // 2. Categories
         $categoriesData = [
             [
-                'name' => 'Elektronik & Gadget',
-                'slug' => 'elektronik-gadget',
+                'name' => 'Elektronik',
+                'slug' => 'elektronik',
                 'description' => 'Smartphone, laptop, audio, dan aksesoris teknologi terkini.',
                 'image' => 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=600&q=80',
                 'icon' => 'Smartphone',

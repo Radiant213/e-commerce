@@ -23,6 +23,16 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
+  const [searchHistory, setSearchHistory] = useState(() => {
+    try {
+      const saved = localStorage.getItem('search_history');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [isInputFocused, setIsInputFocused] = useState(false);
+
   const profileRef = useRef(null);
   const searchContainerRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -73,6 +83,18 @@ const Navbar = () => {
     }
   }, [isSearchOpen]);
 
+  // Keep search expanded when on products page
+  useEffect(() => {
+    if (location.pathname === '/products' && location.search.includes('search=')) {
+      setIsSearchOpen(true);
+      const params = new URLSearchParams(location.search);
+      const q = params.get('search');
+      if (q) setSearchQuery(q);
+    } else if (location.pathname === '/') {
+      setIsSearchOpen(false);
+    }
+  }, [location.pathname, location.search]);
+
   // Live search debounced suggestions
   useEffect(() => {
     if (!searchQuery.trim() || searchQuery.length < 2) {
@@ -95,18 +117,29 @@ const Navbar = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  const saveToHistory = (query) => {
+    if (!query.trim()) return;
+    setSearchHistory(prev => {
+      const filtered = prev.filter(item => item.toLowerCase() !== query.toLowerCase());
+      const newHistory = [query, ...filtered].slice(0, 5);
+      localStorage.setItem('search_history', JSON.stringify(newHistory));
+      return newHistory;
+    });
+  };
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
+      saveToHistory(searchQuery.trim());
       navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
-      setIsSearchOpen(false);
+      setIsSearchOpen(true);
       setSearchResults([]);
     }
   };
 
   const handleSelectProductSuggestion = (slug) => {
     navigate(`/products/${slug}`);
-    setIsSearchOpen(false);
+    setIsSearchOpen(true);
     setSearchQuery('');
     setSearchResults([]);
   };
@@ -200,6 +233,10 @@ const Navbar = () => {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setIsInputFocused(true)}
+                    onBlur={() => {
+                      setTimeout(() => setIsInputFocused(false), 200);
+                    }}
                     placeholder={t('nav_search_placeholder')}
                     className="w-full bg-transparent text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none"
                   />
@@ -249,6 +286,43 @@ const Navbar = () => {
                   </button>
                 )}
               </div>
+
+              {/* Search History Dropdown */}
+              {isSearchOpen && isInputFocused && !searchQuery && searchHistory.length > 0 && (
+                <div className="absolute right-0 mt-2 w-72 sm:w-88 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-2.5 z-50 animate-fade-in text-left">
+                  <div className="px-3.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                    <span>Pencarian Terakhir</span>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setSearchHistory([]);
+                        localStorage.removeItem('search_history');
+                      }}
+                      className="text-red-400 hover:text-red-600 transition-colors cursor-pointer"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                  <div className="py-1">
+                    {searchHistory.map((item, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => {
+                          setSearchQuery(item);
+                          saveToHistory(item);
+                          navigate(`/products?search=${encodeURIComponent(item)}`);
+                          setIsSearchOpen(true);
+                        }}
+                        className="px-3.5 py-2.5 hover:bg-slate-50 flex items-center gap-3 cursor-pointer transition-all duration-150 group"
+                      >
+                        <Search size={14} className="text-slate-400 group-hover:text-emerald-600 transition-colors" />
+                        <span className="text-xs font-bold text-slate-700 group-hover:text-slate-950 transition-colors flex-1">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Live Search Autocomplete Suggestions Dropdown */}
               {isSearchOpen && searchResults.length > 0 && (
