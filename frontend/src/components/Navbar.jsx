@@ -220,14 +220,20 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center space-x-1">
+          <nav
+            className={`hidden lg:flex items-center space-x-1 transition-all duration-300 ease-in-out ${
+              isSearchOpen
+                ? 'opacity-0 scale-95 pointer-events-none max-w-0 overflow-hidden -mr-2'
+                : 'opacity-100 scale-100 max-w-2xl'
+            }`}
+          >
             {navLinks.map((link) => {
               const isActive = location.pathname + location.search === link.path;
               return (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`relative px-3.5 py-2 text-xs font-bold tracking-wide transition-all duration-200 group cursor-pointer hover-pop-bounce ${isActive
+                  className={`relative px-3.5 py-2 text-xs font-bold tracking-wide transition-all duration-200 group cursor-pointer hover-pop-bounce whitespace-nowrap ${isActive
                       ? 'text-slate-950 font-extrabold'
                       : 'text-slate-600 hover:text-slate-950'
                     }`}
@@ -250,7 +256,7 @@ const Navbar = () => {
                 <form
                   onSubmit={handleSearchSubmit}
                   className={`flex items-center bg-slate-100/90 rounded-2xl border border-slate-200 overflow-hidden transition-all duration-300 ease-out shadow-xs ${isSearchOpen
-                      ? 'w-60 md:w-72 lg:w-84 px-3 py-1.5 opacity-100 border-slate-900 bg-white ring-2 ring-slate-900/10'
+                      ? 'w-72 md:w-84 lg:w-[440px] px-3.5 py-1.5 opacity-100 border-slate-900 bg-white ring-2 ring-slate-900/10'
                       : 'w-0 opacity-0 px-0 py-0 border-transparent pointer-events-none'
                     }`}
                 >
