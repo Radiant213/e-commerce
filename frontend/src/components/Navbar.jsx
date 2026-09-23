@@ -93,15 +93,20 @@ const Navbar = () => {
     }
   }, [isSearchOpen]);
 
-  // Keep search expanded when on products page
+  // Synchronize search query with URL query params
   useEffect(() => {
-    if (location.pathname === '/products' && location.search.includes('search=')) {
-      setIsSearchOpen(true);
-      const params = new URLSearchParams(location.search);
-      const q = params.get('search');
-      if (q) setSearchQuery(q);
-    } else if (location.pathname === '/') {
-      setIsSearchOpen(false);
+    const params = new URLSearchParams(location.search);
+    const q = params.get('search') || '';
+    if (location.pathname === '/products') {
+      setSearchQuery(q);
+      if (q) {
+        setIsSearchOpen(true);
+      }
+    } else {
+      if (!q) {
+        setSearchQuery('');
+        setIsSearchOpen(false);
+      }
     }
   }, [location.pathname, location.search]);
 
@@ -147,9 +152,22 @@ const Navbar = () => {
     }
   };
 
+  const handleClearSearch = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setSearchQuery('');
+    setSearchResults([]);
+    setIsSearchOpen(false);
+    if (location.pathname === '/products') {
+      navigate('/products', { replace: true });
+    }
+  };
+
   const handleSelectProductSuggestion = (slug) => {
     navigate(`/products/${slug}`);
-    setIsSearchOpen(true);
+    setIsSearchOpen(false);
     setSearchQuery('');
     setSearchResults([]);
   };
@@ -171,29 +189,30 @@ const Navbar = () => {
         <span>{t('nav_announcement')}</span>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20 gap-4">
-          {/* Mobile menu button */}
-          <div className={`items-center lg:hidden ${isSearchOpen ? 'hidden sm:flex' : 'flex'}`}>
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4">
+          {/* Mobile menu button (Always visible on mobile) */}
+          <div className="flex items-center lg:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 text-slate-700 hover:text-slate-900 rounded-xl hover:bg-slate-100 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
+              className="p-2 text-slate-700 hover:text-slate-900 rounded-xl hover:bg-slate-100 transition-all duration-200 active:scale-95 cursor-pointer"
+              title="Menu Navigasi"
             >
               {isMenuOpen ? <X size={22} className="rotate-90 transition-transform duration-200" /> : <Menu size={22} />}
             </button>
           </div>
 
-          {/* Brand Logo */}
-          <div className={`flex-shrink-0 items-center ${isSearchOpen ? 'hidden sm:flex' : 'flex'}`}>
-            <Link to="/" className="flex items-center gap-2.5 group cursor-pointer hover-pop-lift select-none">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-white flex items-center justify-center font-bold text-lg tracking-tighter shadow-sm transition-all duration-300 group-hover:scale-115 group-hover:-rotate-8 group-hover:bg-gradient-to-br group-hover:from-emerald-950 group-hover:to-emerald-800 group-hover:shadow-md group-hover:shadow-emerald-900/30">
+          {/* Brand Logo (Always visible on mobile) */}
+          <div className="flex-shrink-0 flex items-center">
+            <Link to="/" className="flex items-center gap-2 sm:gap-2.5 group cursor-pointer hover-pop-lift select-none">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-white flex items-center justify-center font-bold text-base sm:text-lg tracking-tighter shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:-rotate-6 group-hover:bg-gradient-to-br group-hover:from-emerald-950 group-hover:to-emerald-800">
                 R
               </div>
               <div className="flex flex-col text-left">
-                <span className="font-extrabold text-lg tracking-tight text-slate-900 leading-none group-hover:text-emerald-950 transition-colors duration-200">
+                <span className="font-extrabold text-base sm:text-lg tracking-tight text-slate-900 leading-none group-hover:text-emerald-950 transition-colors duration-200">
                   RADIANT
                 </span>
-                <span className="text-[10px] tracking-[0.25em] text-slate-400 uppercase font-semibold mt-0.5 group-hover:text-emerald-700 group-hover:tracking-[0.35em] transition-all duration-300">
+                <span className="text-[9px] sm:text-[10px] tracking-[0.22em] text-slate-400 uppercase font-semibold mt-0.5 group-hover:text-emerald-700 transition-all duration-300">
                   STUDIO
                 </span>
               </div>
@@ -201,7 +220,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className={`hidden lg:flex items-center space-x-1 transition-opacity duration-300 ${isSearchOpen ? 'opacity-0 pointer-events-none lg:hidden xl:flex' : 'opacity-100'}`}>
+          <nav className="hidden lg:flex items-center space-x-1">
             {navLinks.map((link) => {
               const isActive = location.pathname + location.search === link.path;
               return (
@@ -214,7 +233,6 @@ const Navbar = () => {
                     }`}
                 >
                   <span className="relative z-10 inline-block transition-transform duration-200 group-hover:scale-105">{link.name}</span>
-                  {/* Interactive animated bottom indicator bar on hover */}
                   <span
                     className={`absolute bottom-0 left-2.5 right-2.5 h-0.5 bg-emerald-600 rounded-full transition-all duration-300 origin-center ${isActive ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100'
                       }`}
@@ -224,16 +242,15 @@ const Navbar = () => {
             })}
           </nav>
 
-          {/* Action Icons & Morphing Search Bar */}
-          <div className={`flex items-center space-x-2 sm:space-x-3 ${isSearchOpen ? 'flex-grow sm:flex-grow-0 sm:flex-shrink-0 justify-end' : 'flex-shrink-0'}`}>
-            {/* Inline Morphing Expanding Search Bar */}
-            <div className={`relative flex-shrink-0 ${isSearchOpen ? 'w-full sm:w-auto' : ''}`} ref={searchContainerRef}>
+          {/* Action Icons */}
+          <div className="flex items-center space-x-1 sm:space-x-3 flex-shrink-0">
+            {/* Desktop Expanding Search Bar (Hidden on Mobile) */}
+            <div className="hidden sm:block relative" ref={searchContainerRef}>
               <div className="flex items-center">
-                {/* Search Expansion Input Container */}
                 <form
                   onSubmit={handleSearchSubmit}
                   className={`flex items-center bg-slate-100/90 rounded-2xl border border-slate-200 overflow-hidden transition-all duration-300 ease-out shadow-xs ${isSearchOpen
-                      ? 'w-full sm:w-64 md:w-72 lg:w-84 px-3 py-1.5 opacity-100 border-slate-900 bg-white ring-2 ring-slate-900/10'
+                      ? 'w-60 md:w-72 lg:w-84 px-3 py-1.5 opacity-100 border-slate-900 bg-white ring-2 ring-slate-900/10'
                       : 'w-0 opacity-0 px-0 py-0 border-transparent pointer-events-none'
                     }`}
                 >
@@ -262,6 +279,7 @@ const Navbar = () => {
                 {/* Compact Trigger Button (When closed) */}
                 {!isSearchOpen && (
                   <button
+                    type="button"
                     onClick={() => setIsSearchOpen(true)}
                     className="p-2.5 text-slate-700 hover:text-slate-950 rounded-full hover:bg-slate-100/80 transition-all duration-200 hover-pop-bounce flex-shrink-0 group cursor-pointer hover-spin-search"
                     title="Buka Pencarian"
@@ -273,28 +291,23 @@ const Navbar = () => {
                 {/* Close/Reset Search Button (When open) */}
                 {isSearchOpen && (
                   <button
-                    onClick={() => {
-                      setIsSearchOpen(false);
-                      setSearchQuery('');
-                      setSearchResults([]);
-                      if (location.pathname === '/products') {
-                        navigate('/products');
-                      }
-                    }}
+                    type="button"
+                    onClick={handleClearSearch}
                     className="p-2 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-100 transition-all duration-200 hover:scale-110 active:scale-90 ml-1 flex-shrink-0 cursor-pointer"
-                    title="Tutup Pencarian"
+                    title="Tutup & Reset Pencarian"
                   >
                     <X size={18} />
                   </button>
                 )}
               </div>
 
-              {/* Search History Dropdown */}
+              {/* Desktop Search History Dropdown */}
               {isSearchOpen && isInputFocused && !searchQuery && searchHistory.length > 0 && (
                 <div className="absolute right-0 mt-2 w-72 sm:w-88 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-2.5 z-50 animate-fade-in text-left">
                   <div className="px-3.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center justify-between">
                     <span>Pencarian Terakhir</span>
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -326,7 +339,7 @@ const Navbar = () => {
                 </div>
               )}
 
-              {/* Live Search Autocomplete Suggestions Dropdown */}
+              {/* Desktop Live Search Autocomplete Suggestions Dropdown */}
               {isSearchOpen && searchResults.length > 0 && (
                 <div className="absolute right-0 mt-2 w-72 sm:w-88 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-2.5 z-50 animate-fade-in divide-y divide-slate-100 text-left">
                   <div className="px-3.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center justify-between">
@@ -366,6 +379,7 @@ const Navbar = () => {
 
                   <div className="pt-1.5 px-3">
                     <button
+                      type="button"
                       onClick={handleSearchSubmit}
                       className="w-full py-2 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all duration-200 hover:shadow-xs group cursor-pointer"
                     >
@@ -377,13 +391,25 @@ const Navbar = () => {
               )}
             </div>
 
+            {/* Mobile Search Button Toggle */}
+            <button
+              type="button"
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className={`sm:hidden p-2 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer ${
+                isSearchOpen ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100'
+              }`}
+              title="Pencarian Produk"
+            >
+              {isSearchOpen ? <X size={18} /> : <Search size={18} />}
+            </button>
+
             {/* Wishlist Link */}
             <Link
               to="/wishlist"
-              className={`p-2.5 text-slate-700 hover:text-rose-600 rounded-full hover:bg-rose-50/70 transition-all duration-200 hover-pop-bounce relative flex-shrink-0 group cursor-pointer hover-heart-throb ${isSearchOpen ? 'hidden sm:block' : 'block'}`}
+              className="p-2 sm:p-2.5 text-slate-700 hover:text-rose-600 rounded-full hover:bg-rose-50/70 transition-all duration-200 hover-pop-bounce relative flex-shrink-0 group cursor-pointer hover-heart-throb"
               title={t('nav_wishlist')}
             >
-              <Heart size={20} strokeWidth={2} className="group-hover:scale-120 group-hover:fill-rose-500 text-slate-700 group-hover:text-rose-500 transition-all duration-300" />
+              <Heart size={19} strokeWidth={2} className="group-hover:scale-120 group-hover:fill-rose-500 text-slate-700 group-hover:text-rose-500 transition-all duration-300" />
               {totalWishlist > 0 && (
                 <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-slate-900 group-hover:bg-rose-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pop group-hover:scale-115 transition-all duration-200 shadow-xs">
                   {totalWishlist}
@@ -393,11 +419,12 @@ const Navbar = () => {
 
             {/* Cart Trigger Button */}
             <button
+              type="button"
               onClick={() => setIsDrawerOpen(true)}
-              className={`p-2.5 text-slate-700 hover:text-emerald-800 rounded-full hover:bg-emerald-50/70 transition-all duration-200 hover-pop-bounce relative group flex-shrink-0 cursor-pointer hover-cart-bounce ${isSearchOpen ? 'hidden sm:block' : 'block'}`}
+              className="p-2 sm:p-2.5 text-slate-700 hover:text-emerald-800 rounded-full hover:bg-emerald-50/70 transition-all duration-200 hover-pop-bounce relative group flex-shrink-0 cursor-pointer hover-cart-bounce"
               title="Keranjang Belanja"
             >
-              <ShoppingCart size={20} strokeWidth={1.8} className="group-hover:scale-115 transition-all duration-300" />
+              <ShoppingCart size={19} strokeWidth={1.8} className="group-hover:scale-115 transition-all duration-300" />
               {totalItems > 0 && (
                 <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-emerald-700 group-hover:bg-emerald-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pop group-hover:scale-115 transition-all duration-200 shadow-xs">
                   {totalItems}
@@ -406,21 +433,22 @@ const Navbar = () => {
             </button>
 
             {/* User Profile / Auth */}
-            <div className={`relative flex-shrink-0 ${isSearchOpen ? 'hidden sm:block' : 'block'}`} ref={profileRef}>
+            <div className="relative flex-shrink-0" ref={profileRef}>
               {isAuthenticated ? (
                 <div className="relative flex-shrink-0">
                   <button
+                    type="button"
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
-                    className="flex items-center gap-2 p-1 rounded-full hover:ring-2 hover:ring-emerald-500 hover:ring-offset-2 transition-all duration-200 active:scale-95 flex-shrink-0 group cursor-pointer"
+                    className="flex items-center gap-2 p-0.5 sm:p-1 rounded-full hover:ring-2 hover:ring-emerald-500 hover:ring-offset-2 transition-all duration-200 active:scale-95 flex-shrink-0 group cursor-pointer"
                   >
                     {user?.avatar ? (
                       <img
                         src={user.avatar}
                         alt={user.name}
-                        className="w-8 h-8 min-w-[32px] min-h-[32px] aspect-square rounded-full object-cover border border-slate-200 shadow-xs group-hover:scale-105 transition-transform duration-200 flex-shrink-0"
+                        className="w-7 h-7 sm:w-8 sm:h-8 min-w-[28px] min-h-[28px] aspect-square rounded-full object-cover border border-slate-200 shadow-xs group-hover:scale-105 transition-transform duration-200 flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-8 h-8 min-w-[32px] min-h-[32px] aspect-square rounded-full bg-slate-900 group-hover:bg-emerald-950 text-white flex items-center justify-center text-xs font-bold shadow-xs group-hover:scale-105 transition-all duration-200 flex-shrink-0">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 min-w-[28px] min-h-[28px] aspect-square rounded-full bg-slate-900 group-hover:bg-emerald-950 text-white flex items-center justify-center text-[11px] sm:text-xs font-bold shadow-xs group-hover:scale-105 transition-all duration-200 flex-shrink-0">
                         {user?.name?.charAt(0) || 'U'}
                       </div>
                     )}
@@ -480,6 +508,7 @@ const Navbar = () => {
 
                       <div className="pt-1">
                         <button
+                          type="button"
                           onClick={handleLogout}
                           className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-50 hover:translate-x-1 transition-all duration-200 text-left cursor-pointer group"
                         >
@@ -493,16 +522,91 @@ const Navbar = () => {
               ) : (
                 <Link
                   to="/login"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition-all duration-200 shadow-xs hover:shadow-lg hover:shadow-slate-900/30 hover-pop-lift cursor-pointer group"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition-all duration-200 shadow-xs hover:shadow-lg hover:shadow-slate-900/30 hover-pop-lift cursor-pointer group"
                 >
-                  <UserIcon size={14} className="group-hover:scale-125 group-hover:-rotate-12 transition-transform duration-200" />
-                  <span>{t('nav_login')}</span>
+                  <UserIcon size={14} className="group-hover:scale-125 transition-transform duration-200" />
+                  <span className="hidden xs:inline sm:inline">{t('nav_login')}</span>
                 </Link>
               )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Mobile Slide-down Full-Width Search Bar */}
+      {isSearchOpen && (
+        <div className="sm:hidden px-3.5 py-2.5 bg-white/98 backdrop-blur-md border-t border-slate-200/90 shadow-md animate-page-slide-up text-left">
+          <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
+            <div className="relative flex-1 flex items-center bg-slate-100 rounded-xl border border-slate-300 px-3 py-1.5 focus-within:border-slate-900 focus-within:bg-white focus-within:ring-2 focus-within:ring-slate-900/10 transition-all">
+              <Search size={15} className="text-slate-400 mr-2 flex-shrink-0" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t('nav_search_placeholder')}
+                className="w-full bg-transparent text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                autoFocus
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="p-1 text-slate-400 hover:text-slate-700"
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+            <button
+              type="submit"
+              className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shrink-0 shadow-xs active:scale-95 transition-all cursor-pointer"
+            >
+              {t('nav_search_btn')}
+            </button>
+            <button
+              type="button"
+              onClick={handleClearSearch}
+              className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+              title="Reset & Tutup"
+            >
+              <X size={18} />
+            </button>
+          </form>
+
+          {/* Mobile Live Suggestions Dropdown */}
+          {searchResults.length > 0 && (
+            <div className="mt-2 bg-white rounded-xl border border-slate-200/90 shadow-xl overflow-hidden divide-y divide-slate-100 text-left">
+              {searchResults.map((prod) => (
+                <div
+                  key={prod.id}
+                  onClick={() => handleSelectProductSuggestion(prod.slug)}
+                  className="p-2.5 flex items-center gap-2.5 active:bg-slate-50 cursor-pointer"
+                >
+                  <img
+                    src={prod.primary_image?.image_path || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=100&q=80'}
+                    alt={prod.name}
+                    className="w-9 h-9 rounded-lg object-cover bg-slate-50 border border-slate-100 flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-slate-900 truncate">{prod.name}</p>
+                    <p className="text-[11px] font-bold text-slate-700">{formatCurrency(prod.effective_price || prod.price)}</p>
+                  </div>
+                </div>
+              ))}
+              <div className="p-2 bg-slate-50">
+                <button
+                  type="button"
+                  onClick={handleSearchSubmit}
+                  className="w-full py-1.5 bg-white text-slate-800 text-xs font-bold rounded-lg border border-slate-200 flex items-center justify-center gap-1 cursor-pointer"
+                >
+                  <span>{t('nav_view_all_results')} "{searchQuery}"</span>
+                  <ArrowRight size={13} />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Mobile Drawer Menu */}
       {isMenuOpen && (

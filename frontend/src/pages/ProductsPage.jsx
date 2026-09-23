@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import { SlidersHorizontal, X, Star, ChevronDown, Check, ArrowUpDown, Sparkles } from 'lucide-react';
 import productsApi from '@shared/api/products';
 import categoriesApi from '@shared/api/categories';
@@ -9,6 +9,8 @@ import ProductCard from '../components/ProductCard';
 const ProductsPage = () => {
   const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const SORT_OPTIONS = [
     { label: t('prod_sort_latest'), value: 'created_at_desc', sortBy: 'created_at', sortDir: 'desc' },
@@ -90,7 +92,7 @@ const ProductsPage = () => {
 
     fetchProducts();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [searchParams]);
+  }, [location.search, categoryId, search, minPrice, maxPrice, minRating, isFeatured, sortBy, sortDir, page]);
 
   const updateFilters = (updates) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -113,7 +115,7 @@ const ProductsPage = () => {
   const clearAllFilters = () => {
     setLocalMinPrice('');
     setLocalMaxPrice('');
-    setSearchParams(new URLSearchParams());
+    navigate('/products', { replace: true });
   };
 
   const currentSortOption =
