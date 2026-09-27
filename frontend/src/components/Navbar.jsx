@@ -5,6 +5,7 @@ import { useAuth } from '@shared/context/AuthContext';
 import { useCart } from '@shared/context/CartContext';
 import { useWishlist } from '@shared/context/WishlistContext';
 import { useLanguage } from '@shared/context/LanguageContext';
+import { useCms } from '@shared/context/CmsContext';
 import productsApi from '@shared/api/products';
 import { formatCurrency } from '@shared/utils/formatCurrency';
 
@@ -15,6 +16,7 @@ const Navbar = () => {
   const { totalItems, setIsDrawerOpen } = useCart();
   const { totalWishlist } = useWishlist();
   const { t } = useLanguage();
+  const { settings, menus } = useCms();
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -172,7 +174,13 @@ const Navbar = () => {
     setSearchResults([]);
   };
 
-  const navLinks = [
+  const cmsHeaderItems = menus?.header?.items?.map((item) => ({
+    name: item.label,
+    path: item.url,
+    target: item.target || '_self',
+  }));
+
+  const navLinks = cmsHeaderItems && cmsHeaderItems.length > 0 ? cmsHeaderItems : [
     { name: t('nav_home'), path: '/' },
     { name: t('nav_all_products'), path: '/products' },
     { name: t('nav_gadget'), path: '/products?category_id=1' },
@@ -181,13 +189,29 @@ const Navbar = () => {
     { name: t('nav_home_living'), path: '/products?category_id=4' },
   ];
 
+  const showAnnouncement = settings?.announcement_active !== '0' && settings?.announcement_active !== false;
+
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 transition-all">
       {/* Top Announcement Bar */}
-      <div className="bg-slate-950 text-slate-200 text-xs py-2 px-4 text-center tracking-wide font-medium flex items-center justify-center gap-2">
-        <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-        <span>{t('nav_announcement')}</span>
-      </div>
+      {showAnnouncement && (
+        <div 
+          className="text-xs py-2 px-4 text-center tracking-wide font-medium flex items-center justify-center gap-2 transition-colors"
+          style={{
+            backgroundColor: settings?.announcement_bg_color || '#0f172a',
+            color: settings?.announcement_text_color || '#ffffff',
+          }}
+        >
+          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+          {settings?.announcement_link ? (
+            <Link to={settings.announcement_link} className="hover:underline">
+              {settings?.announcement_text || t('nav_announcement')}
+            </Link>
+          ) : (
+            <span>{settings?.announcement_text || t('nav_announcement')}</span>
+          )}
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4">

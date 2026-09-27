@@ -49,7 +49,17 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->role === 'admin';
+        // Admin can access ALL panels (admin + cms)
+        if ($this->role === 'admin') {
+            return true;
+        }
+
+        // Content Editor can only access CMS panel
+        if ($this->role === 'content_editor' && $panel->getId() === 'cms') {
+            return true;
+        }
+
+        return false;
     }
 
     protected function casts(): array
@@ -93,5 +103,15 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    public function isContentEditor(): bool
+    {
+        return $this->role === 'content_editor';
+    }
+
+    public function canManageCms(): bool
+    {
+        return in_array($this->role, ['admin', 'content_editor']);
     }
 }

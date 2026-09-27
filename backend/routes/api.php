@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CmsController;
 use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
@@ -118,4 +119,23 @@ Route::middleware('auth:sanctum')->group(function () {
     // Reviews (Create / Delete)
     Route::post('/products/{productId}/reviews', [ReviewController::class, 'store']);
     Route::delete('/reviews/{id}', [ReviewController::class, 'destroy']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| CMS Public Routes (Content Management)
+|--------------------------------------------------------------------------
+| These routes serve dynamic content managed via the CMS panel.
+| All responses are cached for performance.
+*/
+Route::prefix('cms')->group(function () {
+    Route::get('/bootstrap', [CmsController::class, 'bootstrap']); // All-in-one initial load
+    Route::get('/settings', [CmsController::class, 'settings']);
+    Route::get('/homepage', [CmsController::class, 'homepage']);
+    Route::get('/menus/{location}', [CmsController::class, 'menu']);
+    Route::get('/pages', [CmsController::class, 'pages']);
+    Route::get('/pages/{slug}', [CmsController::class, 'page']);
+    Route::get('/banners/{placement?}', [CmsController::class, 'banners']);
+    Route::get('/footer', [CmsController::class, 'footer']);
+    Route::get('/popups', [CmsController::class, 'popups']);
 });

@@ -69,6 +69,7 @@ class UserForm
                                 Select::make('role')
                                     ->options([
                                         'admin' => '👑 Administrator (Akses Penuh)',
+                                        'content_editor' => '✍️ Content Editor (Akses CMS Saja)',
                                         'customer' => '🛍️ Pelanggan (Customer)',
                                     ])
                                     ->required()

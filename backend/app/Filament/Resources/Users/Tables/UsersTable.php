@@ -42,8 +42,15 @@ class UsersTable
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'admin' => 'primary',
+                        'content_editor' => 'warning',
                         'customer' => 'gray',
                         default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'admin' => 'Administrator',
+                        'content_editor' => 'Content Editor',
+                        'customer' => 'Customer',
+                        default => ucfirst($state),
                     })
                     ->label('Peran Akun'),
 
