@@ -24,14 +24,14 @@ class CmsPanelProvider extends PanelProvider
             ->id('cms')
             ->path('cms')
             ->login()
-            ->brandName('RadiantStudio CMS')
-            ->brandLogo(fn () => view('filament.brand-logo'))
-            ->brandLogoHeight('2.2rem')
+            ->brandName('RadiantStudio Studio Konten')
+            ->brandLogo(fn () => view('filament.cms-brand-logo'))
+            ->brandLogoHeight('2.6rem')
             ->spa()
             ->font('Plus Jakarta Sans')
             ->sidebarCollapsibleOnDesktop()
             ->colors([
-                'primary' => Color::Emerald,
+                'primary' => Color::Indigo,
                 'gray' => Color::Slate,
                 'success' => Color::Emerald,
                 'warning' => Color::Amber,
@@ -43,11 +43,9 @@ class CmsPanelProvider extends PanelProvider
                 fn () => view('filament.custom-styling')
             )
             ->navigationGroups([
-                'Pengaturan',
-                'Konten Homepage',
-                'Halaman & Navigasi',
-                'Marketing',
-                'Email',
+                'Tampilan & Promo',
+                'Informasi Toko',
+                'Pengaturan Toko',
             ])
             ->discoverResources(in: app_path('Filament/Cms/Resources'), for: 'App\\Filament\\Cms\\Resources')
             ->discoverPages(in: app_path('Filament/Cms/Pages'), for: 'App\\Filament\\Cms\\Pages')

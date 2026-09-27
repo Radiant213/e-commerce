@@ -20,13 +20,13 @@ class PageResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Halaman & Navigasi';
+    protected static string|UnitEnum|null $navigationGroup = 'Informasi Toko';
 
-    protected static ?string $navigationLabel = 'Semua Halaman';
+    protected static ?string $navigationLabel = 'Halaman Informasi';
 
     protected static ?string $modelLabel = 'Halaman';
 
-    protected static ?string $pluralModelLabel = 'Halaman Statis';
+    protected static ?string $pluralModelLabel = 'Halaman Informasi';
 
     protected static ?int $navigationSort = 1;
 

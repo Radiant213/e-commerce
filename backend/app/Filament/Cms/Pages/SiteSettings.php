@@ -23,9 +23,9 @@ use UnitEnum;
 class SiteSettings extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-cog-6-tooth';
-    protected static ?string $navigationLabel = 'Pengaturan Toko';
-    protected static ?string $title = 'Pengaturan Toko';
-    protected static string|UnitEnum|null $navigationGroup = 'Pengaturan';
+    protected static ?string $navigationLabel = 'Identitas & Kontak';
+    protected static ?string $title = 'Identitas & Kontak Toko';
+    protected static string|UnitEnum|null $navigationGroup = 'Pengaturan Toko';
     protected static ?int $navigationSort = 1;
     protected string $view = 'filament.cms.pages.site-settings';
 
@@ -118,11 +118,11 @@ class SiteSettings extends Page
                     ->columnSpanFull()
                     ->tabs([
                         // Tab 1: General
-                        Tab::make('Umum')
+                        Tab::make('Profil & Kontak Toko')
                             ->icon('heroicon-o-building-storefront')
                             ->schema([
-                                Section::make('Informasi Toko')
-                                    ->description('Pengaturan dasar toko yang tampil di seluruh halaman.')
+                                Section::make('Informasi Dasar Toko')
+                                    ->description('Pengaturan nama, slogan, dan kontak resmi yang tampil di website.')
                                     ->schema([
                                         Grid::make(2)->schema([
                                             TextInput::make('site_name')
@@ -130,76 +130,25 @@ class SiteSettings extends Page
                                                 ->required()
                                                 ->maxLength(100),
                                             TextInput::make('site_tagline')
-                                                ->label('Tagline')
+                                                ->label('Slogan / Tagline')
                                                 ->maxLength(200),
-                                        ]),
-                                        Grid::make(2)->schema([
-                                            TextInput::make('site_email')
-                                                ->label('Email Toko')
-                                                ->email(),
-                                            TextInput::make('site_phone')
-                                                ->label('No. Telepon'),
                                         ]),
                                         Grid::make(2)->schema([
                                             TextInput::make('site_whatsapp')
-                                                ->label('WhatsApp CS')
-                                                ->helperText('Format: +628...'),
-                                            Select::make('site_currency')
-                                                ->label('Mata Uang Default')
-                                                ->options([
-                                                    'IDR' => 'IDR (Rp) - Indonesian Rupiah',
-                                                    'USD' => 'USD ($) - US Dollar',
-                                                ])
-                                                ->default('IDR'),
+                                                ->label('WhatsApp Customer Service')
+                                                ->helperText('Contoh: +6287878444402'),
+                                            TextInput::make('site_email')
+                                                ->label('Email Bantuan')
+                                                ->email(),
                                         ]),
                                         Textarea::make('site_address')
-                                            ->label('Alamat Toko')
+                                            ->label('Alamat Fisik Toko')
                                             ->rows(3),
-                                        Grid::make(2)->schema([
-                                            TextInput::make('copyright_text')
-                                                ->label('Teks Copyright')
-                                                ->helperText('Gunakan {year} untuk tahun otomatis')
-                                                ->maxLength(200),
-                                            TextInput::make('powered_by_text')
-                                                ->label('Teks Powered By')
-                                                ->maxLength(100),
-                                        ]),
-                                        Toggle::make('maintenance_mode')
-                                            ->label('Mode Pemeliharaan (Maintenance Mode)')
-                                            ->helperText('Jika aktif, halaman frontend akan menampilkan pesan maintenance')
-                                            ->default(false),
                                     ]),
                             ]),
 
-                        // Tab 2: Branding
-                        Tab::make('Branding')
-                            ->icon('heroicon-o-paint-brush')
-                            ->schema([
-                                Section::make('Identitas Visual')
-                                    ->description('Warna tema dan font untuk frontend toko.')
-                                    ->schema([
-                                        Grid::make(3)->schema([
-                                            ColorPicker::make('primary_color')
-                                                ->label('Warna Primer')
-                                                ->helperText('Warna teks utama & header'),
-                                            ColorPicker::make('accent_color')
-                                                ->label('Warna Aksen')
-                                                ->helperText('Warna tombol, badge, link active'),
-                                            Select::make('font_family')
-                                                ->label('Font Family')
-                                                ->options([
-                                                    'Plus Jakarta Sans' => 'Plus Jakarta Sans (Modern)',
-                                                    'Inter' => 'Inter (Clean)',
-                                                    'Poppins' => 'Poppins (Friendly)',
-                                                    'Roboto' => 'Roboto (Classic)',
-                                                ])
-                                                ->default('Plus Jakarta Sans'),
-                                        ]),
-                                    ]),
-                            ]),
-
-                        // Tab 3: Announcement Bar
-                        Tab::make('Announcement Bar')
+                        // Tab 2: Announcement Bar
+                        Tab::make('Promo Berjalan (Navbar)')
                             ->icon('heroicon-o-megaphone')
                             ->schema([
                                 Section::make('Banner Pengumuman Atas')
@@ -269,69 +218,21 @@ class SiteSettings extends Page
                                     ]),
                             ]),
 
-                        // Tab 5: Footer
-                        Tab::make('Footer')
+                        // Tab 4: Footer
+                        Tab::make('Tampilan Footer')
                             ->icon('heroicon-o-queue-list')
                             ->schema([
-                                Section::make('Konten Footer')
-                                    ->description('Informasi brand dan metode pembayaran di footer.')
+                                Section::make('Konten Bagian Bawah (Footer)')
+                                    ->description('Informasi singkat toko dan metode pembayaran resmi.')
                                     ->schema([
-                                        Grid::make(2)->schema([
-                                            Textarea::make('footer_about_desc')
-                                                ->label('Deskripsi Toko (ID)')
-                                                ->rows(3),
-                                            Textarea::make('footer_about_desc_en')
-                                                ->label('Deskripsi Toko (EN)')
-                                                ->rows(3),
-                                        ]),
-                                        TextInput::make('footer_verified_payment')
-                                            ->label('Label Metode Pembayaran')
-                                            ->default('Verified Payment Methods'),
+                                        Textarea::make('footer_about_desc')
+                                            ->label('Deskripsi Singkat Toko di Footer')
+                                            ->rows(3)
+                                            ->placeholder('Platform e-commerce premium terpercaya...'),
                                         TextInput::make('footer_payment_methods')
                                             ->label('Daftar Metode Pembayaran (Pisahkan koma)')
                                             ->helperText('Contoh: MIDTRANS,QRIS,BCA / MANDIRI,GOPAY / OVO')
                                             ->maxLength(255),
-                                        Textarea::make('footer_trust_pillars')
-                                            ->label('Trust Pillars (JSON)')
-                                            ->helperText('Array of: [{"icon":"Truck","title":"...","subtitle":"..."}]')
-                                            ->rows(5),
-                                    ]),
-                            ]),
-
-                        // Tab 6: SEO & Tracking
-                        Tab::make('SEO & Tracking')
-                            ->icon('heroicon-o-globe-alt')
-                            ->schema([
-                                Section::make('Search Engine Optimization (SEO)')
-                                    ->description('Pengaturan meta tag default untuk mesin pencari.')
-                                    ->schema([
-                                        TextInput::make('seo_title_template')
-                                            ->label('Template Judul SEO')
-                                            ->helperText('Gunakan {page} sebagai placeholder judul halaman'),
-                                        Grid::make(2)->schema([
-                                            Textarea::make('seo_default_description')
-                                                ->label('Meta Deskripsi Default (ID)')
-                                                ->rows(3),
-                                            Textarea::make('seo_default_description_en')
-                                                ->label('Meta Deskripsi Default (EN)')
-                                                ->rows(3),
-                                        ]),
-                                    ]),
-                                Section::make('Analytics & Tracking Scripts')
-                                    ->description('Integrasi Google Analytics, Facebook Pixel, dan script kustom.')
-                                    ->schema([
-                                        Grid::make(2)->schema([
-                                            TextInput::make('google_analytics_id')
-                                                ->label('Google Analytics Measurement ID')
-                                                ->placeholder('G-XXXXXXXXXX'),
-                                            TextInput::make('facebook_pixel_id')
-                                                ->label('Facebook Pixel ID')
-                                                ->placeholder('1234567890'),
-                                        ]),
-                                        Textarea::make('custom_head_scripts')
-                                            ->label('Custom Scripts (Head)')
-                                            ->helperText('Script tambahan yang akan di-inject ke tag <head>. Hati-hati!')
-                                            ->rows(4),
                                     ]),
                             ]),
                     ]),

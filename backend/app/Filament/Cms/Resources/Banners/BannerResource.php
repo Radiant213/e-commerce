@@ -20,13 +20,13 @@ class BannerResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-photo';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Marketing';
+    protected static string|UnitEnum|null $navigationGroup = 'Tampilan & Promo';
 
-    protected static ?string $navigationLabel = 'Banner & Promo';
+    protected static ?string $navigationLabel = 'Banner Promo Beranda';
 
     protected static ?string $modelLabel = 'Banner Promo';
 
-    protected static ?string $pluralModelLabel = 'Banner & Promo';
+    protected static ?string $pluralModelLabel = 'Banner Promo Beranda';
 
     protected static ?int $navigationSort = 1;
 

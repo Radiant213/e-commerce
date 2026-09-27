@@ -37,28 +37,23 @@ class PageForm
                                         }
                                     }),
 
-                                Grid::make(2)->schema([
-                                    TextInput::make('slug')
-                                        ->label('URL Slug')
-                                        ->required()
-                                        ->maxLength(255)
-                                        ->prefix('/pages/')
-                                        ->helperText('Alamat URL unik untuk halaman ini'),
-
-                                    TextInput::make('title_translations.en')
-                                        ->label('Judul Halaman (Inggris - EN)')
-                                        ->placeholder('About Us, FAQ, etc.'),
-                                ]),
+                                TextInput::make('slug')
+                                    ->label('URL Slug')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->prefix('/pages/')
+                                    ->helperText('Alamat URL unik untuk halaman ini'),
                             ]),
 
-                        Section::make('Blok Konten Dinamis')
-                            ->description('Susun konten halaman menggunakan blok-blok modular (Heading, Teks, FAQ, Gambar, dll).')
+                        Section::make('Blok Konten Halaman')
+                            ->description('Klik pada blok untuk membuka atau mengubah isinya. Anda bisa menambah teks, tanya-jawab (FAQ), atau gambar.')
                             ->schema([
                                 Repeater::make('blocks')
                                     ->relationship('blocks')
-                                    ->label('Blok Konten')
+                                    ->label('Daftar Blok Konten')
                                     ->orderColumn('sort_order')
                                     ->reorderable()
+                                    ->collapsed()
                                     ->schema([
                                         Grid::make(3)->schema([
                                             Select::make('type')

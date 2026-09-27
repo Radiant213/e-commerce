@@ -18,36 +18,33 @@ class CmsOverviewWidget extends BaseWidget
     protected function getStats(): array
     {
         $publishedPages = Page::where('status', 'published')->count();
-        $totalDraftPages = Page::where('status', 'draft')->count();
-
-        $activeSections = HomepageSection::where('is_active', true)->count();
-        $totalSections = HomepageSection::count();
-
         $activeBanners = Banner::where('is_active', true)->count();
-
-        $totalMenus = Menu::count();
-        $totalLinks = MenuItem::where('is_visible', true)->count();
+        $activePopups = Popup::where('is_active', true)->count();
 
         return [
-            Stat::make('Halaman Statis', "{$publishedPages} Tayang")
-                ->description($totalDraftPages > 0 ? "{$totalDraftPages} draf menunggu tayang" : 'Semua halaman aktif')
-                ->descriptionIcon('heroicon-m-document-text')
-                ->color('success'),
-
-            Stat::make('Section Homepage', "{$activeSections} / {$totalSections} Aktif")
-                ->description('Urutan dan visibilitas diatur dari CMS')
-                ->descriptionIcon('heroicon-m-view-columns')
-                ->color('primary'),
-
             Stat::make('Banner Promo', "{$activeBanners} Aktif")
-                ->description('Tampil di slider & homepage')
+                ->description('Banner promosi di beranda')
                 ->descriptionIcon('heroicon-m-photo')
-                ->color('info'),
+                ->color('primary')
+                ->url(route('filament.cms.resources.banners.index')),
 
-            Stat::make('Menu & Tautan', "{$totalLinks} Link")
-                ->description("Tersebar di {$totalMenus} lokasi navigasi")
-                ->descriptionIcon('heroicon-m-bars-3')
-                ->color('warning'),
+            Stat::make('Pop-up Promo', "{$activePopups} Aktif")
+                ->description($activePopups > 0 ? 'Promo otomatis muncul ke pengunjung' : 'Tidak ada pop-up aktif')
+                ->descriptionIcon('heroicon-m-sparkles')
+                ->color('warning')
+                ->url(route('filament.cms.resources.popups.index')),
+
+            Stat::make('Halaman Informasi', "{$publishedPages} Halaman")
+                ->description('Tentang Kami, FAQ, Kebijakan, dll.')
+                ->descriptionIcon('heroicon-m-document-text')
+                ->color('success')
+                ->url(route('filament.cms.resources.pages.index')),
+
+            Stat::make('Status Toko Online', 'Siap Menerima Order')
+                ->description('Katalog & transaksi aktif')
+                ->descriptionIcon('heroicon-m-check-badge')
+                ->color('info')
+                ->url('/'),
         ];
     }
 }

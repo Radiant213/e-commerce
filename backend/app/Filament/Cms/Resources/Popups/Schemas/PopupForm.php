@@ -2,8 +2,6 @@
 
 namespace App\Filament\Cms\Resources\Popups\Schemas;
 
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -21,82 +19,57 @@ class PopupForm
                 Grid::make(3)->schema([
                     // Left 2 cols: Content
                     Grid::make(1)->columnSpan(2)->schema([
-                        Section::make('Konten Pop-up')
+                        Section::make('Konten Pop-up Penawaran')
+                            ->description('Pesan promosi atau voucher yang akan muncul kepada pengunjung toko.')
                             ->schema([
                                 TextInput::make('title')
-                                    ->label('Judul Pop-up (ID)')
+                                    ->label('Judul Pop-up')
                                     ->required()
-                                    ->placeholder('Selamat Datang di Toko Kami! 🎉'),
-
-                                TextInput::make('title_translations.en')
-                                    ->label('Judul Pop-up (EN)')
-                                    ->placeholder('Welcome to Our Store! 🎉'),
+                                    ->placeholder('Contoh: Selamat Datang di Toko Kami! 🎉'),
 
                                 Textarea::make('description')
-                                    ->label('Deskripsi / Pesan Promo (ID)')
+                                    ->label('Pesan / Keterangan Promo')
                                     ->rows(3)
-                                    ->placeholder('Gunakan kode promo FIRSTBUY untuk diskon 10%...'),
-
-                                Textarea::make('description_translations.en')
-                                    ->label('Deskripsi / Pesan Promo (EN)')
-                                    ->rows(3),
+                                    ->required()
+                                    ->placeholder('Contoh: Gunakan kode voucher RADIANT10 untuk potongan Rp 25.000 belanja pertama Anda.'),
 
                                 TextInput::make('image')
-                                    ->label('URL Gambar Banner Modal (Opsional)')
-                                    ->placeholder('https://...'),
+                                    ->label('URL Gambar Pop-up (Opsional)')
+                                    ->placeholder('https://... atau tautan foto promo'),
 
                                 Grid::make(2)->schema([
                                     TextInput::make('cta_text')
-                                        ->label('Teks Tombol Aksi (ID)')
-                                        ->placeholder('Gunakan Sekarang'),
+                                        ->label('Teks Tombol')
+                                        ->placeholder('Klaim Voucher Sekarang')
+                                        ->default('Belanja Sekarang'),
 
                                     TextInput::make('cta_link')
-                                        ->label('Link Tombol Aksi')
-                                        ->placeholder('/products'),
+                                        ->label('Link Tujuan Tombol')
+                                        ->placeholder('/products')
+                                        ->default('/products'),
                                 ]),
                             ]),
                     ]),
 
-                    // Right 1 col: Settings & Triggers
+                    // Right 1 col: Settings
                     Grid::make(1)->columnSpan(1)->schema([
-                        Section::make('Pemicu & Penayangan')
+                        Section::make('Pengaturan Tampil')
                             ->schema([
-                                TextInput::make('name')
-                                    ->label('Nama Identifikasi Internal')
-                                    ->required()
-                                    ->helperText('Hanya terlihat di CMS'),
-
-                                Select::make('type')
-                                    ->label('Pemicu Tampil (Trigger)')
-                                    ->options([
-                                        'welcome' => 'Saat Pengunjung Masuk (Welcome)',
-                                        'exit_intent' => 'Niat Keluar Website (Exit Intent)',
-                                        'timed' => 'Setelah X Detik (Timed)',
-                                        'scroll' => 'Setelah Scroll Halaman',
-                                    ])
-                                    ->default('welcome')
-                                    ->required(),
-
-                                TextInput::make('delay_seconds')
-                                    ->label('Jeda Waktu (Detik)')
-                                    ->numeric()
-                                    ->default(3)
-                                    ->helperText('Berapa detik setelah halaman dimuat pop-up muncul'),
-
-                                Toggle::make('show_once_per_session')
-                                    ->label('Tampilkan 1x Saja Per Sesi')
-                                    ->helperText('Pengunjung tidak akan terganggu terus menerus')
+                                Toggle::make('is_active')
+                                    ->label('Aktifkan Pop-up')
+                                    ->helperText('Jika aktif, pop-up akan otomatis tampil saat pengunjung membuka web')
                                     ->default(true),
 
-                                Toggle::make('is_active')
-                                    ->label('Pop-up Aktif')
-                                    ->default(false),
+                                TextInput::make('delay_seconds')
+                                    ->label('Waktu Tunggu Muncul (Detik)')
+                                    ->numeric()
+                                    ->default(2)
+                                    ->helperText('Berapa detik setelah halaman terbuka pop-up akan muncul'),
 
-                                DateTimePicker::make('starts_at')
-                                    ->label('Mulai Berlaku (Opsional)'),
-
-                                DateTimePicker::make('ends_at')
-                                    ->label('Berakhir Pada (Opsional)'),
+                                TextInput::make('name')
+                                    ->label('Nama Pengenal')
+                                    ->default('Promo Toko')
+                                    ->helperText('Hanya terlihat di dalam dashboard CMS'),
                             ]),
                     ]),
                 ]),

@@ -20,7 +20,7 @@ class PopupResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-sparkles';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Marketing';
+    protected static string|UnitEnum|null $navigationGroup = 'Tampilan & Promo';
 
     protected static ?string $navigationLabel = 'Pop-up Promo';
 

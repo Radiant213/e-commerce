@@ -27,7 +27,7 @@ class HomepageSectionResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Section Homepage';
 
-    protected static ?int $navigationSort = 1;
+    protected static bool $shouldRegisterNavigation = false;
 
     public static function form(Schema $schema): Schema
     {
