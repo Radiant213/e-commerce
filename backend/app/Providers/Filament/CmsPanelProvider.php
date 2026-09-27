@@ -42,10 +42,6 @@ class CmsPanelProvider extends PanelProvider
                 \Filament\View\PanelsRenderHook::HEAD_END,
                 fn () => view('filament.custom-styling')
             )
-            ->renderHook(
-                \Filament\View\PanelsRenderHook::SIDEBAR_FOOTER,
-                fn () => view('filament.cms-sidebar-footer')
-            )
             ->navigationGroups([
                 'Pengaturan',
                 'Konten Homepage',

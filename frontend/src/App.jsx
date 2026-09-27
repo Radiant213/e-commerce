@@ -12,6 +12,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
 import CmsPopupModal from './components/CmsPopupModal';
+import ErrorBoundary from './components/ErrorBoundary';
 
 import HomePage from './pages/HomePage';
 import ProductsPage from './pages/ProductsPage';
@@ -63,7 +64,9 @@ function App() {
                     <div className="min-h-screen flex flex-col bg-[#FAFAFA] text-slate-900 selection:bg-slate-900 selection:text-white">
                       <Navbar />
                       <CartDrawer />
-                      <CmsPopupModal />
+                      <ErrorBoundary fallback={null}>
+                        <CmsPopupModal />
+                      </ErrorBoundary>
                       <PageTransition>
                         <Routes>
                           <Route path="/" element={<HomePage />} />

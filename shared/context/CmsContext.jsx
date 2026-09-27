@@ -52,11 +52,11 @@ export function CmsProvider({ children }) {
         setCmsData({
           settings: { ...DEFAULT_SETTINGS, ...(d.settings || {}) },
           menus: d.menus || {},
-          homepageSections: d.homepage_sections || [],
-          banners: d.banners || [],
-          popups: d.popups || [],
+          homepageSections: Array.isArray(d.homepage_sections) ? d.homepage_sections : [],
+          banners: Array.isArray(d.banners) ? d.banners : [],
+          popups: Array.isArray(d.popups) ? d.popups : [],
           footer: d.footer || null,
-          pagesNav: d.pages_nav || [],
+          pagesNav: Array.isArray(d.pages_nav) ? d.pages_nav : [],
         });
       }
     } catch (error) {

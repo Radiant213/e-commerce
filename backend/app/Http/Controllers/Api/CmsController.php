@@ -43,7 +43,9 @@ class CmsController extends Controller
         $data = Cache::remember("cms_api_homepage_{$locale}", 1800, function () use ($locale) {
             $sections = HomepageSection::active()
                 ->get()
-                ->map(fn (HomepageSection $section) => $section->toApiArray($locale));
+                ->map(fn (HomepageSection $section) => $section->toApiArray($locale))
+                ->values()
+                ->all();
 
             return [
                 'sections' => $sections,
@@ -123,7 +125,9 @@ class CmsController extends Controller
                         'show_in_nav' => $page->show_in_nav,
                         'show_in_footer' => $page->show_in_footer,
                     ];
-                });
+                })
+                ->values()
+                ->all();
         });
 
         return response()->json([
@@ -144,7 +148,9 @@ class CmsController extends Controller
                 ->forPlacement($placement)
                 ->orderBy('sort_order')
                 ->get()
-                ->map(fn (Banner $banner) => $banner->toApiArray($locale));
+                ->map(fn (Banner $banner) => $banner->toApiArray($locale))
+                ->values()
+                ->all();
         });
 
         return response()->json([
@@ -171,7 +177,8 @@ class CmsController extends Controller
                         $value = json_decode($value, true);
                     }
                     return [$setting->key => $value];
-                });
+                })
+                ->all();
 
             $footerMenus = [];
             foreach (['footer_col_1', 'footer_col_2', 'footer_col_3'] as $location) {
@@ -203,7 +210,9 @@ class CmsController extends Controller
         $popups = Cache::remember("cms_api_popups_{$locale}", 1800, function () use ($locale) {
             return Popup::active()
                 ->get()
-                ->map(fn (Popup $popup) => $popup->toApiArray($locale));
+                ->map(fn (Popup $popup) => $popup->toApiArray($locale))
+                ->values()
+                ->all();
         });
 
         return response()->json([
@@ -231,7 +240,8 @@ class CmsController extends Controller
                         $value = json_decode($value, true);
                     }
                     return [$setting->key => $value];
-                });
+                })
+                ->all();
 
             $footerMenus = [];
             foreach (['footer_col_1', 'footer_col_2', 'footer_col_3'] as $location) {
@@ -251,22 +261,32 @@ class CmsController extends Controller
                 ],
                 'homepage_sections' => HomepageSection::active()
                     ->get()
-                    ->map(fn (HomepageSection $s) => $s->toApiArray($locale)),
+                    ->map(fn (HomepageSection $s) => $s->toApiArray($locale))
+                    ->values()
+                    ->all(),
                 'banners' => Banner::active()
                     ->forPlacement('homepage')
                     ->orderBy('sort_order')
                     ->get()
-                    ->map(fn (Banner $b) => $b->toApiArray($locale)),
+                    ->map(fn (Banner $b) => $b->toApiArray($locale))
+                    ->values()
+                    ->all(),
                 'footer' => [
                     'settings' => $footerSettings,
                     'menus' => $footerMenus,
                 ],
-                'popups' => Popup::active()->get()->map(fn (Popup $p) => $p->toApiArray($locale)),
+                'popups' => Popup::active()
+                    ->get()
+                    ->map(fn (Popup $p) => $p->toApiArray($locale))
+                    ->values()
+                    ->all(),
                 'pages_nav' => Page::published()
                     ->where('show_in_nav', true)
                     ->orderBy('sort_order')
                     ->get()
-                    ->map(fn (Page $p) => ['title' => $p->getTitle($locale), 'slug' => $p->slug]),
+                    ->map(fn (Page $p) => ['title' => $p->getTitle($locale), 'slug' => $p->slug])
+                    ->values()
+                    ->all(),
             ];
         });
 

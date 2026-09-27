@@ -9,33 +9,52 @@ export default function CmsPopupModal() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    if (!popups || popups.length === 0) return;
+    if (!popups || !Array.isArray(popups) || popups.length === 0) return;
 
-    // Pick first active popup that hasn't been closed in this session
-    const popup = popups.find((p) => {
-      const alreadyShown = sessionStorage.getItem(`cms_popup_dismissed_${p.id}`);
-      return !alreadyShown;
-    });
+    try {
+      // Pick first active popup that hasn't been closed in this session
+      const popup = popups.find((p) => {
+        if (!p || typeof p !== 'object' || !p.id) return false;
+        try {
+          const alreadyShown = sessionStorage.getItem(`cms_popup_dismissed_${p.id}`);
+          return !alreadyShown;
+        } catch {
+          return false;
+        }
+      });
 
-    if (!popup) return;
+      if (!popup) return;
 
-    setActivePopup(popup);
+      setActivePopup(popup);
 
-    const timer = setTimeout(() => {
-      setIsOpen(true);
-    }, (popup.delay_seconds || 3) * 1000);
+      const delayMs = Math.max(1, parseInt(popup.delay_seconds, 10) || 2) * 1000;
+      const timer = setTimeout(() => {
+        setIsOpen(true);
+      }, delayMs);
 
-    return () => clearTimeout(timer);
+      return () => clearTimeout(timer);
+    } catch (err) {
+      console.warn('Error evaluating CMS popup:', err);
+    }
   }, [popups]);
 
   const handleClose = () => {
-    if (activePopup) {
-      sessionStorage.setItem(`cms_popup_dismissed_${activePopup.id}`, 'true');
+    if (activePopup?.id) {
+      try {
+        sessionStorage.setItem(`cms_popup_dismissed_${activePopup.id}`, 'true');
+      } catch {
+        // Ignore storage errors
+      }
     }
     setIsOpen(false);
   };
 
   if (!isOpen || !activePopup) return null;
+
+  const isExternalCta = activePopup.cta_link && (
+    activePopup.cta_link.startsWith('http://') || 
+    activePopup.cta_link.startsWith('https://')
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in">
@@ -81,14 +100,27 @@ export default function CmsPopupModal() {
 
           <div className="flex flex-col gap-2.5">
             {activePopup.cta_link && (
-              <Link
-                to={activePopup.cta_link}
-                onClick={handleClose}
-                className="w-full py-3.5 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all shadow-md shadow-slate-900/10"
-              >
-                <span>{activePopup.cta_text || 'Lihat Promo'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+              isExternalCta ? (
+                <a
+                  href={activePopup.cta_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={handleClose}
+                  className="w-full py-3.5 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all shadow-md shadow-slate-900/10"
+                >
+                  <span>{activePopup.cta_text || 'Lihat Promo'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+              ) : (
+                <Link
+                  to={activePopup.cta_link}
+                  onClick={handleClose}
+                  className="w-full py-3.5 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all shadow-md shadow-slate-900/10"
+                >
+                  <span>{activePopup.cta_text || 'Lihat Promo'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              )
             )}
 
             <button
