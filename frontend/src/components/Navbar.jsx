@@ -66,6 +66,13 @@ const Navbar = () => {
     window.location.href = panel === 'cms' ? '/cms' : '/admin';
   };
 
+  // Role resolution with email fallbacks for guaranteed detection
+  const userRole = (user?.role || '').toLowerCase();
+  const userEmail = (user?.email || '').toLowerCase();
+  const isAdmin = userRole === 'admin' || userEmail.startsWith('admin@');
+  const isEditor = userRole === 'content_editor' || userRole === 'editor' || userEmail === 'cms@radiantcode.web.id' || userEmail.startsWith('editor@') || userEmail.startsWith('cms@');
+  const canAccessCms = isAdmin || isEditor;
+
   // Outside click listener for Profile & Search
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -512,18 +519,18 @@ const Navbar = () => {
 
                   {/* Dropdown Menu */}
                   {isProfileOpen && (
-                    <div className="absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-2 z-50 animate-fade-in divide-y divide-slate-100">
+                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-2 z-50 animate-fade-in divide-y divide-slate-100">
                       <div className="px-4 py-3 text-left">
                         <p className="text-xs font-bold text-slate-900 truncate">{user?.name}</p>
                         <p className="text-[11px] text-slate-400 truncate">{user?.email}</p>
-                        <span className="inline-block mt-1 px-2 py-0.5 text-[9px] font-bold rounded-full border">
-                          {user?.role === 'admin' ? (
-                            <span className="text-amber-800 bg-amber-50">Administrator</span>
-                          ) : user?.role === 'content_editor' ? (
-                            <span className="text-indigo-800 bg-indigo-50">Editor Konten</span>
-                          ) : (
-                            <span className="text-emerald-800 bg-emerald-50">{t('nav_member_badge')}</span>
-                          )}
+                        <span className={`inline-block mt-1 px-2.5 py-0.5 text-[9px] font-extrabold tracking-wide uppercase rounded-full border ${
+                          isAdmin 
+                            ? 'text-amber-800 bg-amber-50 border-amber-200' 
+                            : isEditor 
+                            ? 'text-indigo-800 bg-indigo-50 border-indigo-200' 
+                            : 'text-emerald-800 bg-emerald-50 border-emerald-200'
+                        }`}>
+                          {isAdmin ? 'Administrator' : isEditor ? 'Editor Konten' : t('nav_member_badge')}
                         </span>
                       </div>
 
@@ -531,37 +538,37 @@ const Navbar = () => {
                         <Link
                           to="/dashboard"
                           onClick={() => setIsProfileOpen(false)}
-                          className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:text-slate-950 hover:bg-slate-50 hover:translate-x-1.5 transition-all duration-200 group cursor-pointer"
+                          className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-700 hover:text-slate-950 hover:bg-slate-50 hover:translate-x-1.5 transition-all duration-200 group cursor-pointer"
                         >
                           <LayoutDashboard size={15} className="group-hover:scale-110 group-hover:text-emerald-700 transition-all duration-200" />
                           <span>{t('nav_dashboard')}</span>
                         </Link>
 
-                        {/* SSO: Panel Admin Button */}
-                        {user?.role === 'admin' && (
-                          <button
-                            type="button"
-                            onClick={() => handleOpenPanel('admin')}
-                            className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 hover:translate-x-1 transition-all duration-200 group cursor-pointer text-left"
-                          >
-                            <span className="flex items-center gap-2">
-                              <span>⚙️</span>
-                              <span>Panel Admin Toko</span>
-                            </span>
-                            <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform duration-200" />
-                          </button>
-                        )}
-
                         {/* SSO: Panel CMS Button */}
-                        {(user?.role === 'admin' || user?.role === 'content_editor') && (
+                        {canAccessCms && (
                           <button
                             type="button"
                             onClick={() => handleOpenPanel('cms')}
-                            className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-bold text-indigo-700 bg-indigo-50/70 hover:bg-indigo-100 hover:translate-x-1 transition-all duration-200 group cursor-pointer text-left"
+                            className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-bold text-indigo-700 bg-indigo-50/90 hover:bg-indigo-100 hover:translate-x-1 transition-all duration-200 group cursor-pointer text-left border-y border-indigo-100 my-1"
                           >
                             <span className="flex items-center gap-2">
-                              <span>🎨</span>
-                              <span>Studio Konten (CMS)</span>
+                              <span className="w-5 h-5 rounded-md bg-indigo-600 text-white flex items-center justify-center text-[11px] shadow-xs">🎨</span>
+                              <span>Masuk ke Filament CMS</span>
+                            </span>
+                            <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform duration-200 text-indigo-600" />
+                          </button>
+                        )}
+
+                        {/* SSO: Panel Admin Button */}
+                        {isAdmin && (
+                          <button
+                            type="button"
+                            onClick={() => handleOpenPanel('admin')}
+                            className="w-full flex items-center justify-between px-4 py-2 text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 hover:translate-x-1 transition-all duration-200 group cursor-pointer text-left border-b border-slate-200/80 mb-1"
+                          >
+                            <span className="flex items-center gap-2">
+                              <span className="w-5 h-5 rounded-md bg-slate-800 text-white flex items-center justify-center text-[11px] shadow-xs">⚙️</span>
+                              <span>Panel Admin Toko</span>
                             </span>
                             <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform duration-200" />
                           </button>
