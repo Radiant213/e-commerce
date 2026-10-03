@@ -9,21 +9,21 @@ use App\Models\Cms\HomepageSection;
 use App\Models\Cms\Menu;
 use App\Models\Cms\Page;
 use App\Models\Cms\Popup;
+use App\Support\CmsCache;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 
 class CmsController extends Controller
 {
     /**
      * Get all CMS settings for the frontend.
-     * Cached for performance.
+     * Cached for performance (versioned: invalidated on every CMS save).
      */
     public function settings(Request $request): JsonResponse
     {
         $locale = $request->query('lang', 'id');
 
-        $settings = Cache::remember("cms_api_settings_{$locale}", 3600, function () use ($locale) {
+        $settings = CmsCache::remember("api_settings_{$locale}", function () use ($locale) {
             return CmsSetting::getAllForApi($locale);
         });
 
@@ -40,7 +40,7 @@ class CmsController extends Controller
     {
         $locale = $request->query('lang', 'id');
 
-        $data = Cache::remember("cms_api_homepage_{$locale}", 1800, function () use ($locale) {
+        $data = CmsCache::remember("api_homepage_{$locale}", function () use ($locale) {
             $sections = HomepageSection::active()
                 ->get()
                 ->map(fn (HomepageSection $section) => $section->toApiArray($locale))
@@ -65,7 +65,7 @@ class CmsController extends Controller
     {
         $locale = $request->query('lang', 'id');
 
-        $menu = Cache::remember("cms_api_menu_{$location}_{$locale}", 3600, function () use ($location, $locale) {
+        $menu = CmsCache::remember("api_menu_{$location}_{$locale}", function () use ($location, $locale) {
             return Menu::getByLocation($location, $locale);
         });
 
@@ -82,7 +82,7 @@ class CmsController extends Controller
     {
         $locale = $request->query('lang', 'id');
 
-        $page = Cache::remember("cms_api_page_{$slug}_{$locale}", 3600, function () use ($slug, $locale) {
+        $page = CmsCache::remember("api_page_{$slug}_{$locale}", function () use ($slug, $locale) {
             $page = Page::with(['blocks' => function ($q) {
                 $q->where('is_visible', true)->orderBy('sort_order');
             }, 'seoMeta'])
@@ -113,7 +113,7 @@ class CmsController extends Controller
     {
         $locale = $request->query('lang', 'id');
 
-        $pages = Cache::remember("cms_api_pages_{$locale}", 3600, function () use ($locale) {
+        $pages = CmsCache::remember("api_pages_{$locale}", function () use ($locale) {
             return Page::published()
                 ->orderBy('sort_order')
                 ->get()
@@ -139,18 +139,12 @@ class CmsController extends Controller
     /**
      * Get banners for a specific placement.
      */
-    public function banners(Request $request, string $placement = 'homepage'): JsonResponse
+    public function banners(Request $request, string $placement = 'promo_strip'): JsonResponse
     {
         $locale = $request->query('lang', 'id');
 
-        $banners = Cache::remember("cms_api_banners_{$placement}_{$locale}", 1800, function () use ($placement, $locale) {
-            return Banner::active()
-                ->forPlacement($placement)
-                ->orderBy('sort_order')
-                ->get()
-                ->map(fn (Banner $banner) => $banner->toApiArray($locale))
-                ->values()
-                ->all();
+        $banners = CmsCache::remember("api_banners_{$placement}_{$locale}", function () use ($placement, $locale) {
+            return $this->bannersFor($placement, $locale);
         });
 
         return response()->json([
@@ -166,32 +160,8 @@ class CmsController extends Controller
     {
         $locale = $request->query('lang', 'id');
 
-        $data = Cache::remember("cms_api_footer_{$locale}", 3600, function () use ($locale) {
-            $footerSettings = CmsSetting::where('group', 'footer')
-                ->orWhere('group', 'social')
-                ->orWhere('group', 'general')
-                ->get()
-                ->mapWithKeys(function ($setting) {
-                    $value = $setting->value;
-                    if ($setting->type === 'json') {
-                        $value = json_decode($value, true);
-                    }
-                    return [$setting->key => $value];
-                })
-                ->all();
-
-            $footerMenus = [];
-            foreach (['footer_col_1', 'footer_col_2', 'footer_col_3'] as $location) {
-                $menu = Menu::getByLocation($location, $locale);
-                if ($menu) {
-                    $footerMenus[] = $menu;
-                }
-            }
-
-            return [
-                'settings' => $footerSettings,
-                'menus' => $footerMenus,
-            ];
+        $data = CmsCache::remember("api_footer_{$locale}", function () use ($locale) {
+            return $this->footerData($locale);
         });
 
         return response()->json([
@@ -207,7 +177,7 @@ class CmsController extends Controller
     {
         $locale = $request->query('lang', 'id');
 
-        $popups = Cache::remember("cms_api_popups_{$locale}", 1800, function () use ($locale) {
+        $popups = CmsCache::remember("api_popups_{$locale}", function () use ($locale) {
             return Popup::active()
                 ->get()
                 ->map(fn (Popup $popup) => $popup->toApiArray($locale))
@@ -229,27 +199,8 @@ class CmsController extends Controller
     {
         $locale = $request->query('lang', 'id');
 
-        $data = Cache::remember("cms_api_bootstrap_{$locale}", 1800, function () use ($locale) {
-            $footerSettings = CmsSetting::where('group', 'footer')
-                ->orWhere('group', 'social')
-                ->orWhere('group', 'general')
-                ->get()
-                ->mapWithKeys(function ($setting) {
-                    $value = $setting->value;
-                    if ($setting->type === 'json') {
-                        $value = json_decode($value, true);
-                    }
-                    return [$setting->key => $value];
-                })
-                ->all();
-
-            $footerMenus = [];
-            foreach (['footer_col_1', 'footer_col_2', 'footer_col_3'] as $location) {
-                $menu = Menu::getByLocation($location, $locale);
-                if ($menu) {
-                    $footerMenus[] = $menu;
-                }
-            }
+        $data = CmsCache::remember("api_bootstrap_{$locale}", function () use ($locale) {
+            $promoBanners = $this->bannersFor(Banner::PLACEMENT_PROMO_STRIP, $locale);
 
             return [
                 'settings' => CmsSetting::getAllForApi($locale),
@@ -264,17 +215,11 @@ class CmsController extends Controller
                     ->map(fn (HomepageSection $s) => $s->toApiArray($locale))
                     ->values()
                     ->all(),
-                'banners' => Banner::active()
-                    ->forPlacement('homepage')
-                    ->orderBy('sort_order')
-                    ->get()
-                    ->map(fn (Banner $b) => $b->toApiArray($locale))
-                    ->values()
-                    ->all(),
-                'footer' => [
-                    'settings' => $footerSettings,
-                    'menus' => $footerMenus,
-                ],
+                'hero_banners' => $this->bannersFor(Banner::PLACEMENT_HERO_SLIDER, $locale),
+                'promo_banners' => $promoBanners,
+                // Kept for backward compatibility with older frontend builds.
+                'banners' => $promoBanners,
+                'footer' => $this->footerData($locale),
                 'popups' => Popup::active()
                     ->get()
                     ->map(fn (Popup $p) => $p->toApiArray($locale))
@@ -294,5 +239,51 @@ class CmsController extends Controller
             'success' => true,
             'data' => $data,
         ]);
+    }
+
+    /**
+     * Active (and currently scheduled) banners for a placement.
+     */
+    private function bannersFor(string $placement, string $locale): array
+    {
+        return Banner::active()
+            ->forPlacement($placement)
+            ->orderBy('sort_order')
+            ->get()
+            ->map(fn (Banner $b) => $b->toApiArray($locale))
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Footer settings + footer column menus.
+     */
+    private function footerData(string $locale): array
+    {
+        $footerSettings = CmsSetting::where('group', 'footer')
+            ->orWhere('group', 'social')
+            ->orWhere('group', 'general')
+            ->get()
+            ->mapWithKeys(function ($setting) {
+                $value = $setting->value;
+                if ($setting->type === 'json') {
+                    $value = json_decode($value, true);
+                }
+                return [$setting->key => $value];
+            })
+            ->all();
+
+        $footerMenus = [];
+        foreach (['footer_col_1', 'footer_col_2', 'footer_col_3'] as $location) {
+            $menu = Menu::getByLocation($location, $locale);
+            if ($menu) {
+                $footerMenus[] = $menu;
+            }
+        }
+
+        return [
+            'settings' => $footerSettings,
+            'menus' => $footerMenus,
+        ];
     }
 }

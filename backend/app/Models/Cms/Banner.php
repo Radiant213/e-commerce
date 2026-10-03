@@ -2,10 +2,31 @@
 
 namespace App\Models\Cms;
 
+use App\Support\CmsCache;
 use Illuminate\Database\Eloquent\Model;
 
 class Banner extends Model
 {
+    /** Right side of the homepage hero (portrait slider). */
+    public const PLACEMENT_HERO_SLIDER = 'hero_slider';
+
+    /** Wide promo strip in the middle of the homepage. */
+    public const PLACEMENT_PROMO_STRIP = 'promo_strip';
+
+    public static function placementOptions(): array
+    {
+        return [
+            self::PLACEMENT_HERO_SLIDER => 'Slider Hero (kanan atas)',
+            self::PLACEMENT_PROMO_STRIP => 'Strip Promo (tengah beranda)',
+        ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => CmsCache::bump());
+        static::deleted(fn () => CmsCache::bump());
+    }
+
     protected $fillable = [
         'title',
         'title_translations',

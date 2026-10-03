@@ -2,11 +2,21 @@
 
 namespace App\Models\Cms;
 
+use App\Support\CmsCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
 class CmsSetting extends Model
 {
+    protected static function booted(): void
+    {
+        static::saved(function (self $setting) {
+            Cache::forget("cms_setting_{$setting->key}");
+            CmsCache::bump();
+        });
+        static::deleted(fn () => CmsCache::bump());
+    }
+
     protected $fillable = [
         'key',
         'label',
@@ -101,7 +111,7 @@ class CmsSetting extends Model
      */
     public static function getAllForApi(?string $locale = null): array
     {
-        return Cache::remember("cms_settings_api_{$locale}", 3600, function () use ($locale) {
+        return Cache::remember(CmsCache::key("settings_api_{$locale}"), 3600, function () use ($locale) {
             return self::all()->mapWithKeys(function ($setting) use ($locale) {
                 $value = $setting->value;
 
@@ -114,7 +124,9 @@ class CmsSetting extends Model
                     'number' => (float) $value,
                     'boolean' => filter_var($value, FILTER_VALIDATE_BOOLEAN),
                     'json' => json_decode($value, true),
-                    'image' => $value ? url('storage/' . ltrim($value, '/')) : null,
+                    'image' => $value
+                        ? (str_starts_with($value, 'http') ? $value : url('storage/' . ltrim($value, '/')))
+                        : null,
                     default => $value,
                 };
 
@@ -142,5 +154,7 @@ class CmsSetting extends Model
         foreach ($groups as $group) {
             Cache::forget("cms_settings_group_{$group}");
         }
+
+        CmsCache::bump();
     }
 }

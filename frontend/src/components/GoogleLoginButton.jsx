@@ -111,11 +111,13 @@ const GoogleLoginButton = ({ onError, onSuccess }) => {
 
       if (onSuccess) onSuccess(res);
 
-      // If user is admin, redirect to Filament admin panel
-      if (res?.user?.role === 'admin' || res?.redirect_url) {
-        const apiUrl = import.meta.env.VITE_API_URL || 'https://api-ecommerce.radiantcode.web.id/api';
-        const adminUrl = res?.redirect_url || apiUrl.replace(/\/api\/?$/, '/admin');
-        window.location.href = adminUrl;
+      // If user is admin or editor, redirect to their panel
+      if (res?.user?.role === 'admin' || res?.user?.role === 'content_editor' || res?.redirect_url) {
+        if (res?.redirect_url) {
+          window.location.href = res.redirect_url;
+          return;
+        }
+        window.location.href = res?.user?.role === 'content_editor' ? '/cms' : '/admin';
         return;
       }
 

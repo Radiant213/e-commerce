@@ -42,7 +42,13 @@ Route::get('/auth/google/callback', function () {
         $token = $user->createToken('google-oauth-token')->plainTextToken;
 
         if ($user->role === 'admin') {
+            \Illuminate\Support\Facades\Auth::login($user);
             return redirect('/admin');
+        }
+
+        if ($user->role === 'content_editor') {
+            \Illuminate\Support\Facades\Auth::login($user);
+            return redirect('/cms');
         }
 
         $frontendUrl = config('app.frontend_url');
@@ -55,6 +61,32 @@ Route::get('/auth/google/callback', function () {
 });
 
 Route::middleware(['web'])->group(function () {
+    Route::get('/auth/panel-sso', function (\Illuminate\Http\Request $request) {
+        $token = $request->query('token');
+        if (! $token) {
+            return redirect('/');
+        }
+
+        $data = \Illuminate\Support\Facades\Cache::pull("panel_sso:{$token}");
+        if (! $data || empty($data['user_id'])) {
+            return redirect('/');
+        }
+
+        $user = User::find($data['user_id']);
+        if (! $user) {
+            return redirect('/');
+        }
+
+        \Illuminate\Support\Facades\Auth::guard('web')->login($user);
+        $request->session()->regenerate();
+
+        if (($data['panel'] ?? 'admin') === 'cms') {
+            return redirect('/cms');
+        }
+
+        return redirect('/admin');
+    })->name('auth.panel-sso');
+
     Route::get('/admin/orders/{order}/invoice', [\App\Http\Controllers\Admin\ReportPrintController::class, 'invoice'])->name('admin.orders.invoice');
     Route::get('/admin/reports/print/sales', [\App\Http\Controllers\Admin\ReportPrintController::class, 'salesReport'])->name('admin.reports.print.sales');
     Route::get('/admin/reports/print/inventory', [\App\Http\Controllers\Admin\ReportPrintController::class, 'inventoryReport'])->name('admin.reports.print.inventory');

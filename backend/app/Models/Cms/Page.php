@@ -3,6 +3,7 @@
 namespace App\Models\Cms;
 
 use App\Models\User;
+use App\Support\CmsCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -40,6 +41,9 @@ class Page extends Model
                 $page->slug = Str::slug($page->title);
             }
         });
+
+        static::saved(fn () => CmsCache::bump());
+        static::deleted(fn () => CmsCache::bump());
     }
 
     // --- Relationships ---

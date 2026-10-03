@@ -180,6 +180,8 @@ class SocialAuthController extends Controller
             $redirectUrl = null;
             if ($user->role === 'admin') {
                 $redirectUrl = config('app.url') . '/admin';
+            } elseif ($user->role === 'content_editor') {
+                $redirectUrl = config('app.url') . '/cms';
             }
 
             return response()->json([

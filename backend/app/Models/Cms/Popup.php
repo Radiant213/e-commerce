@@ -2,10 +2,17 @@
 
 namespace App\Models\Cms;
 
+use App\Support\CmsCache;
 use Illuminate\Database\Eloquent\Model;
 
 class Popup extends Model
 {
+    protected static function booted(): void
+    {
+        static::saved(fn () => CmsCache::bump());
+        static::deleted(fn () => CmsCache::bump());
+    }
+
     protected $fillable = [
         'name',
         'title',
@@ -22,6 +29,7 @@ class Popup extends Model
         'is_active',
         'starts_at',
         'ends_at',
+        'show_on',
     ];
 
     protected $casts = [
@@ -69,6 +77,7 @@ class Popup extends Model
             'cta_link' => $this->cta_link,
             'delay_seconds' => $this->delay_seconds,
             'show_once_per_session' => $this->show_once_per_session,
+            'show_on' => $this->show_on ?: 'all',
         ];
     }
 }

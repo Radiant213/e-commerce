@@ -22,11 +22,11 @@ class BannerResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Tampilan & Promo';
 
-    protected static ?string $navigationLabel = 'Banner Promo Beranda';
+    protected static ?string $navigationLabel = 'Banner & Slider';
 
-    protected static ?string $modelLabel = 'Banner Promo';
+    protected static ?string $modelLabel = 'Banner';
 
-    protected static ?string $pluralModelLabel = 'Banner Promo Beranda';
+    protected static ?string $pluralModelLabel = 'Banner & Slider';
 
     protected static ?int $navigationSort = 1;
 

@@ -3,9 +3,11 @@
 namespace App\Filament\Cms\Pages;
 
 use App\Models\Cms\CmsSetting;
+use App\Support\CmsCache;
 use BackedEnum;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -17,7 +19,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Cache;
 use UnitEnum;
 
 class SiteSettings extends Page
@@ -33,7 +34,8 @@ class SiteSettings extends Page
 
     public function mount(): void
     {
-        $this->settings = $this->loadSettings();
+        $data = $this->loadSettings();
+        $this->form->fill($data);
     }
 
     protected function loadSettings(): array
@@ -46,16 +48,22 @@ class SiteSettings extends Page
             $result[$key] = $saved[$key] ?? $default;
         }
 
+        if (isset($result['footer_trust_pillars']) && is_string($result['footer_trust_pillars'])) {
+            $result['footer_trust_pillars'] = json_decode($result['footer_trust_pillars'], true) ?: [];
+        }
+
         return $result;
     }
 
     protected function getDefaultSettings(): array
     {
         return [
-            // General
+            // General & Branding
             'site_name' => 'Radiant Studio',
             'site_tagline' => 'Premium E-Commerce Experience',
-            'site_email' => 'hello@radiantstudio.com',
+            'site_logo' => null,
+            'site_favicon' => null,
+            'site_email' => 'hello@radiantcode.web.id',
             'site_phone' => '+6287878444402',
             'site_whatsapp' => '+6287878444402',
             'site_address' => '',
@@ -64,11 +72,6 @@ class SiteSettings extends Page
             'powered_by_text' => 'Powered by Laravel 11 API & React',
             'maintenance_mode' => '0',
 
-            // Branding
-            'primary_color' => '#0f172a',
-            'accent_color' => '#059669',
-            'font_family' => 'Plus Jakarta Sans',
-
             // Announcement Bar
             'announcement_active' => '1',
             'announcement_text' => '🚚 Gratis Ongkir ke Seluruh Indonesia — Belanja Sekarang!',
@@ -76,14 +79,6 @@ class SiteSettings extends Page
             'announcement_link' => '/products',
             'announcement_bg_color' => '#0f172a',
             'announcement_text_color' => '#ffffff',
-
-            // SEO
-            'seo_title_template' => '{page} | Radiant Studio',
-            'seo_default_description' => 'Radiant Studio - Temukan koleksi premium berkualitas tinggi dengan harga terbaik.',
-            'seo_default_description_en' => 'Radiant Studio - Discover premium quality collections at the best prices.',
-            'google_analytics_id' => '',
-            'facebook_pixel_id' => '',
-            'custom_head_scripts' => '',
 
             // Social Links
             'social_whatsapp' => 'https://wa.me/+6287878444402',
@@ -96,16 +91,15 @@ class SiteSettings extends Page
             // Footer
             'footer_about_desc' => 'Marketplace premium Indonesia dengan koleksi produk berkualitas tinggi. Kami mengutamakan kualitas, keaslian, dan pengalaman belanja yang menyenangkan.',
             'footer_about_desc_en' => 'Premium Indonesian marketplace with high-quality product collections. We prioritize quality, authenticity, and a delightful shopping experience.',
-            'footer_verified_payment' => 'Verified Payment Methods',
             'footer_payment_methods' => 'MIDTRANS,QRIS,BCA / MANDIRI,GOPAY / OVO',
 
-            // Trust Pillars (JSON)
-            'footer_trust_pillars' => json_encode([
+            // Trust Pillars
+            'footer_trust_pillars' => [
                 ['icon' => 'Truck', 'title' => 'Gratis Ongkir', 'title_en' => 'Free Shipping', 'subtitle' => 'Seluruh Indonesia', 'subtitle_en' => 'Across Indonesia'],
                 ['icon' => 'ShieldCheck', 'title' => '100% Original', 'title_en' => '100% Authentic', 'subtitle' => 'Produk Terverifikasi', 'subtitle_en' => 'Verified Products'],
                 ['icon' => 'RotateCcw', 'title' => 'Garansi 30 Hari', 'title_en' => '30-Day Guarantee', 'subtitle' => 'Uang Kembali', 'subtitle_en' => 'Money Back'],
                 ['icon' => 'Headphones', 'title' => 'CS 24/7', 'title_en' => 'CS 24/7', 'subtitle' => 'Siap Membantu', 'subtitle_en' => 'Ready to Help'],
-            ]),
+            ],
         ];
     }
 
@@ -117,10 +111,34 @@ class SiteSettings extends Page
                 Tabs::make('Pengaturan CMS')
                     ->columnSpanFull()
                     ->tabs([
-                        // Tab 1: General
-                        Tab::make('Profil & Kontak Toko')
+                        // Tab 1: General & Logo
+                        Tab::make('Profil & Logo Toko')
                             ->icon('heroicon-o-building-storefront')
                             ->schema([
+                                Section::make('Logo & Ikon Toko')
+                                    ->description('Upload logo untuk ditampilkan di navbar dan favicon tab browser.')
+                                    ->schema([
+                                        Grid::make(2)->schema([
+                                            FileUpload::make('site_logo')
+                                                ->label('Logo Toko (Navbar)')
+                                                ->image()
+                                                ->disk('public')
+                                                ->directory('cms/branding')
+                                                ->visibility('public')
+                                                ->maxSize(2048)
+                                                ->helperText('Format PNG/SVG/WebP latar transparan. Ideal: 250 × 60 px.'),
+
+                                            FileUpload::make('site_favicon')
+                                                ->label('Favicon (Tab Browser)')
+                                                ->image()
+                                                ->disk('public')
+                                                ->directory('cms/branding')
+                                                ->visibility('public')
+                                                ->maxSize(512)
+                                                ->helperText('Format PNG/ICO persegi. Ideal: 32 × 32 px atau 64 × 64 px.'),
+                                        ]),
+                                    ]),
+
                                 Section::make('Informasi Dasar Toko')
                                     ->description('Pengaturan nama, slogan, dan kontak resmi yang tampil di website.')
                                     ->schema([
@@ -178,7 +196,7 @@ class SiteSettings extends Page
                                     ]),
                             ]),
 
-                        // Tab 4: Social Media
+                        // Tab 3: Social Media
                         Tab::make('Sosial Media')
                             ->icon('heroicon-o-share')
                             ->schema([
@@ -218,10 +236,58 @@ class SiteSettings extends Page
                                     ]),
                             ]),
 
-                        // Tab 4: Footer
+                        // Tab 4: Footer & Trust Pillars
                         Tab::make('Tampilan Footer')
                             ->icon('heroicon-o-queue-list')
                             ->schema([
+                                Section::make('Keunggulan Toko (Trust Pillars)')
+                                    ->description('4 poin garansi / keunggulan yang tampil di bagian atas footer.')
+                                    ->schema([
+                                        Repeater::make('footer_trust_pillars')
+                                            ->label('Poin Keunggulan')
+                                            ->schema([
+                                                Grid::make(3)->schema([
+                                                    Select::make('icon')
+                                                        ->label('Ikon')
+                                                        ->options([
+                                                            'Truck' => '🚚 Truk / Pengiriman',
+                                                            'ShieldCheck' => '🛡️ Perisai / 100% Original',
+                                                            'RotateCcw' => '🔄 Putar / Garansi Retur',
+                                                            'Headphones' => '🎧 Headphone / CS 24/7',
+                                                            'Award' => '🏅 Penghargaan / Kualitas',
+                                                            'Star' => '⭐ Bintang / Terpercaya',
+                                                            'Lock' => '🔒 Gembok / Belanja Aman',
+                                                            'CreditCard' => '💳 Kartu / Pembayaran Mudah',
+                                                            'Gift' => '🎁 Hadiah / Bonus Promo',
+                                                            'Clock' => '⏱️ Jam / Pengiriman Cepat',
+                                                        ])
+                                                        ->default('Truck')
+                                                        ->native(false)
+                                                        ->required(),
+
+                                                    TextInput::make('title')
+                                                        ->label('Judul (ID)')
+                                                        ->required()
+                                                        ->placeholder('Gratis Ongkir'),
+
+                                                    TextInput::make('subtitle')
+                                                        ->label('Keterangan (ID)')
+                                                        ->placeholder('Seluruh Indonesia'),
+                                                ]),
+                                                Grid::make(2)->schema([
+                                                    TextInput::make('title_en')
+                                                        ->label('Judul (EN opsional)')
+                                                        ->placeholder('Free Shipping'),
+                                                    TextInput::make('subtitle_en')
+                                                        ->label('Keterangan (EN opsional)')
+                                                        ->placeholder('Across Indonesia'),
+                                                ]),
+                                            ])
+                                            ->defaultItems(4)
+                                            ->collapsible()
+                                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? null),
+                                    ]),
+
                                 Section::make('Konten Bagian Bawah (Footer)')
                                     ->description('Informasi singkat toko dan metode pembayaran resmi.')
                                     ->schema([
@@ -241,23 +307,33 @@ class SiteSettings extends Page
 
     public function save(): void
     {
+        $data = $this->form->getState();
+
         $settingTypes = [
             'maintenance_mode' => 'boolean',
             'announcement_active' => 'boolean',
             'footer_trust_pillars' => 'json',
-            'primary_color' => 'color',
-            'accent_color' => 'color',
+            'site_logo' => 'image',
+            'site_favicon' => 'image',
             'announcement_bg_color' => 'color',
             'announcement_text_color' => 'color',
         ];
 
-        foreach ($this->settings as $key => $value) {
+        foreach ($data as $key => $value) {
             $type = $settingTypes[$key] ?? 'text';
+
+            if ($type === 'json' && is_array($value)) {
+                $savedValue = json_encode($value);
+            } elseif (is_bool($value)) {
+                $savedValue = $value ? '1' : '0';
+            } else {
+                $savedValue = $value !== null ? (string) $value : '';
+            }
 
             CmsSetting::updateOrCreate(
                 ['key' => $key],
                 [
-                    'value' => is_bool($value) ? ($value ? '1' : '0') : (string) $value,
+                    'value' => $savedValue,
                     'type' => $type,
                     'group' => $this->getGroupForKey($key),
                 ]
@@ -265,10 +341,11 @@ class SiteSettings extends Page
         }
 
         CmsSetting::clearCache();
+        CmsCache::bump();
 
         Notification::make()
             ->title('Pengaturan Berhasil Disimpan!')
-            ->body('Semua perubahan pengaturan toko telah disimpan.')
+            ->body('Semua perubahan pengaturan toko telah langsung aktif di website.')
             ->success()
             ->send();
     }

@@ -12,6 +12,7 @@ use App\Models\Cms\Page;
 use App\Models\Cms\PageBlock;
 use App\Models\Cms\Popup;
 use App\Models\User;
+use App\Support\CmsCache;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -19,23 +20,35 @@ class CmsSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Create a Content Editor test account
-        User::firstOrCreate(
-            ['email' => 'editor@radiantstudio.com'],
-            [
+        // 1. Create or migrate Content Editor test account
+        // Migrate legacy editor email if present
+        $legacyEditor = User::where('email', 'editor@radiantstudio.com')->first();
+        if ($legacyEditor) {
+            $legacyEditor->update([
+                'email' => 'cms@radiantcode.web.id',
                 'name' => 'Content Editor',
                 'password' => Hash::make('password'),
                 'role' => 'content_editor',
                 'email_verified_at' => now(),
-            ]
-        );
+            ]);
+        } else {
+            User::firstOrCreate(
+                ['email' => 'cms@radiantcode.web.id'],
+                [
+                    'name' => 'Content Editor',
+                    'password' => Hash::make('password'),
+                    'role' => 'content_editor',
+                    'email_verified_at' => now(),
+                ]
+            );
+        }
 
-        // 2. Default CMS Settings
+        // 2. Default CMS Settings (non-destructive: firstOrCreate preserves existing user edits)
         $settings = [
             // General
             ['key' => 'site_name', 'label' => 'Nama Toko', 'value' => 'Radiant Studio', 'type' => 'text', 'group' => 'general'],
             ['key' => 'site_tagline', 'label' => 'Tagline', 'value' => 'Premium E-Commerce Experience', 'type' => 'text', 'group' => 'general'],
-            ['key' => 'site_email', 'label' => 'Email Toko', 'value' => 'hello@radiantstudio.com', 'type' => 'text', 'group' => 'general'],
+            ['key' => 'site_email', 'label' => 'Email Toko', 'value' => 'hello@radiantcode.web.id', 'type' => 'text', 'group' => 'general'],
             ['key' => 'site_phone', 'label' => 'No. Telepon', 'value' => '+62 878-7844-4402', 'type' => 'text', 'group' => 'general'],
             ['key' => 'site_whatsapp', 'label' => 'WhatsApp CS', 'value' => '+6287878444402', 'type' => 'text', 'group' => 'general'],
             ['key' => 'site_address', 'label' => 'Alamat Toko', 'value' => 'Jl. Boulevard Raya Blok M No. 21, Jakarta Selatan, Indonesia', 'type' => 'textarea', 'group' => 'general'],
@@ -90,11 +103,11 @@ class CmsSeeder extends Seeder
         ];
 
         foreach ($settings as $setting) {
-            CmsSetting::updateOrCreate(['key' => $setting['key']], $setting);
+            CmsSetting::firstOrCreate(['key' => $setting['key']], $setting);
         }
 
         // 3. Navigation Menus
-        $headerMenu = Menu::updateOrCreate(
+        $headerMenu = Menu::firstOrCreate(
             ['location' => 'header'],
             ['name' => 'Navigasi Utama (Header)', 'is_active' => true]
         );
@@ -108,14 +121,14 @@ class CmsSeeder extends Seeder
         ];
 
         foreach ($headerItems as $item) {
-            MenuItem::updateOrCreate(
+            MenuItem::firstOrCreate(
                 ['menu_id' => $headerMenu->id, 'url' => $item['url']],
                 array_merge($item, ['menu_id' => $headerMenu->id, 'type' => 'custom', 'is_visible' => true])
             );
         }
 
         // Footer Column 1: Produk & Belanja
-        $footerCol1 = Menu::updateOrCreate(
+        $footerCol1 = Menu::firstOrCreate(
             ['location' => 'footer_col_1'],
             ['name' => 'Footer Kolom 1 (Belanja)', 'is_active' => true]
         );
@@ -125,14 +138,14 @@ class CmsSeeder extends Seeder
             ['label' => 'Paling Populer', 'label_translations' => ['id' => 'Paling Populer', 'en' => 'Best Sellers'], 'url' => '/products?sort=popular', 'sort_order' => 3],
         ];
         foreach ($col1Items as $item) {
-            MenuItem::updateOrCreate(
+            MenuItem::firstOrCreate(
                 ['menu_id' => $footerCol1->id, 'url' => $item['url']],
                 array_merge($item, ['menu_id' => $footerCol1->id, 'type' => 'custom', 'is_visible' => true])
             );
         }
 
         // Footer Column 2: Layanan & Informasi
-        $footerCol2 = Menu::updateOrCreate(
+        $footerCol2 = Menu::firstOrCreate(
             ['location' => 'footer_col_2'],
             ['name' => 'Footer Kolom 2 (Bantuan)', 'is_active' => true]
         );
@@ -143,14 +156,14 @@ class CmsSeeder extends Seeder
             ['label' => 'Lacak Pesanan', 'label_translations' => ['id' => 'Lacak Pesanan', 'en' => 'Track Order'], 'url' => '/orders', 'sort_order' => 4],
         ];
         foreach ($col2Items as $item) {
-            MenuItem::updateOrCreate(
+            MenuItem::firstOrCreate(
                 ['menu_id' => $footerCol2->id, 'url' => $item['url']],
                 array_merge($item, ['menu_id' => $footerCol2->id, 'type' => 'custom', 'is_visible' => true])
             );
         }
 
         // Footer Column 3: Perusahaan & Legal
-        $footerCol3 = Menu::updateOrCreate(
+        $footerCol3 = Menu::firstOrCreate(
             ['location' => 'footer_col_3'],
             ['name' => 'Footer Kolom 3 (Perusahaan)', 'is_active' => true]
         );
@@ -161,7 +174,7 @@ class CmsSeeder extends Seeder
             ['label' => 'Kebijakan Privasi', 'label_translations' => ['id' => 'Kebijakan Privasi', 'en' => 'Privacy Policy'], 'url' => '/pages/privacy', 'sort_order' => 4],
         ];
         foreach ($col3Items as $item) {
-            MenuItem::updateOrCreate(
+            MenuItem::firstOrCreate(
                 ['menu_id' => $footerCol3->id, 'url' => $item['url']],
                 array_merge($item, ['menu_id' => $footerCol3->id, 'type' => 'custom', 'is_visible' => true])
             );
@@ -322,7 +335,7 @@ class CmsSeeder extends Seeder
                     ],
                     [
                         'type' => 'text',
-                        'content' => ['body' => 'Ada pertanyaan, saran, atau kendala dalam berbelanja? Tim kami siap melayani Anda melalui WhatsApp di +62 878-7844-4402 atau email ke hello@radiantstudio.com.'],
+                        'content' => ['body' => 'Ada pertanyaan, saran, atau kendala dalam berbelanja? Tim kami siap melayani Anda melalui WhatsApp di +62 878-7844-4402 atau email ke hello@radiantcode.web.id.'],
                     ],
                 ],
             ],
@@ -332,26 +345,27 @@ class CmsSeeder extends Seeder
             $blocks = $p['blocks'];
             unset($p['blocks']);
 
-            $page = Page::updateOrCreate(
+            $page = Page::firstOrCreate(
                 ['slug' => $p['slug']],
                 array_merge($p, ['published_at' => now()])
             );
 
-            // Recreate blocks
-            $page->blocks()->delete();
-            foreach ($blocks as $idx => $block) {
-                PageBlock::create([
-                    'page_id' => $page->id,
-                    'type' => $block['type'],
-                    'content' => $block['content'],
-                    'content_translations' => $block['content_translations'] ?? null,
-                    'sort_order' => $idx + 1,
-                    'is_visible' => true,
-                ]);
+            // Create blocks only if page is new or has no blocks
+            if ($page->blocks()->count() === 0) {
+                foreach ($blocks as $idx => $block) {
+                    PageBlock::create([
+                        'page_id' => $page->id,
+                        'type' => $block['type'],
+                        'content' => $block['content'],
+                        'content_translations' => $block['content_translations'] ?? null,
+                        'sort_order' => $idx + 1,
+                        'is_visible' => true,
+                    ]);
+                }
             }
         }
 
-        // 5. Homepage Sections
+        // 5. Homepage Sections (Hero, Categories, Showcase, Promo Strip, Brand Story, Newsletter)
         $sections = [
             [
                 'type' => 'hero',
@@ -405,14 +419,31 @@ class CmsSeeder extends Seeder
                 ],
             ],
             [
+                'type' => 'promo_strip',
+                'title' => 'Banner Promo Beranda',
+                'sort_order' => 4,
+                'is_active' => true,
+                'config' => [
+                    'badge' => 'PENAWARAN SPESIAL',
+                    'title' => 'Flash Sale & Promo Terbatas',
+                    'subtitle' => 'Dapatkan diskon eksklusif untuk berbagai produk pilihan minggu ini.',
+                ],
+            ],
+            [
                 'type' => 'brand_story',
                 'title' => 'Kisah Brand & Keunggulan',
-                'sort_order' => 4,
+                'sort_order' => 5,
                 'is_active' => true,
                 'config' => [
                     'badge' => 'Kenapa Radiant Studio?',
                     'title' => 'Belanja Lebih Nyaman, Aman, dan Menguntungkan',
                     'subtitle' => 'Kami berkomitmen memberikan standar pelayanan bintang lima bagi seluruh pelanggan kami di seluruh Indonesia.',
+                    'image' => 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1000&q=80',
+                    'points' => [
+                        ['title' => '100% Original Terjamin', 'description' => 'Seluruh produk lolos kurasi ketat dan bergaransi resmi distributor.'],
+                        ['title' => 'Pengiriman Cepat & Aman', 'description' => 'Didukung ekspedisi nasional terpercaya dengan asuransi gratis.'],
+                        ['title' => 'Layanan Pelanggan 24/7', 'description' => 'Tim support kami siap membantu kebutuhan belanja Anda kapan saja.'],
+                    ],
                     'cta_text' => 'Tentang Kami',
                     'cta_link' => '/pages/about',
                 ],
@@ -420,7 +451,7 @@ class CmsSeeder extends Seeder
             [
                 'type' => 'newsletter',
                 'title' => 'Langganan Newsletter',
-                'sort_order' => 5,
+                'sort_order' => 6,
                 'is_active' => true,
                 'config' => [
                     'title' => 'Dapatkan Diskon 15% untuk Pesanan Pertama Anda',
@@ -431,14 +462,58 @@ class CmsSeeder extends Seeder
         ];
 
         foreach ($sections as $section) {
-            HomepageSection::updateOrCreate(
-                ['type' => $section['type']],
-                $section
-            );
+            $existing = HomepageSection::where('type', $section['type'])->first();
+            if (!$existing) {
+                HomepageSection::create($section);
+            } else {
+                // If brand_story exists but has no points array, enrich it safely
+                if ($section['type'] === 'brand_story' && empty($existing->config['points'])) {
+                    $mergedConfig = array_merge($existing->config ?? [], [
+                        'points' => $section['config']['points'],
+                        'image' => $existing->config['image'] ?? $section['config']['image'],
+                    ]);
+                    $existing->update(['config' => $mergedConfig]);
+                }
+            }
         }
 
-        // 6. Promotional Banners
-        Banner::updateOrCreate(
+        // 6. Promotional Banners (Hero Slider + Promo Strip)
+        // Hero Slider Banner 1: Sony Headphone
+        Banner::firstOrCreate(
+            ['title' => 'Sony WH-1000XM5 Special Edition'],
+            [
+                'title_translations' => ['en' => 'Sony WH-1000XM5 Special Edition'],
+                'subtitle' => 'Wireless Noise Canceling • Baterai Hingga 30 Jam • Audio Resolusi Tinggi',
+                'subtitle_translations' => ['en' => 'Wireless Noise Canceling • Up to 30 Hours Battery • High-Res Audio'],
+                'image' => 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80',
+                'link' => '/products',
+                'placement' => Banner::PLACEMENT_HERO_SLIDER,
+                'cta_text' => 'Beli Sekarang',
+                'cta_text_translations' => ['en' => 'Shop Now'],
+                'sort_order' => 1,
+                'is_active' => true,
+            ]
+        );
+
+        // Hero Slider Banner 2: Smartwatch
+        Banner::firstOrCreate(
+            ['title' => 'Smartwatch Ultra Series'],
+            [
+                'title_translations' => ['en' => 'Smartwatch Ultra Series'],
+                'subtitle' => 'Layar AMOLED Retina • Tahan Air 50M • Sensor Kesehatan Akurat',
+                'subtitle_translations' => ['en' => 'Retina AMOLED Display • 50M Water Resistant • Precision Health Sensors'],
+                'image' => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80',
+                'link' => '/products',
+                'placement' => Banner::PLACEMENT_HERO_SLIDER,
+                'cta_text' => 'Lihat Koleksi',
+                'cta_text_translations' => ['en' => 'Explore Collection'],
+                'sort_order' => 2,
+                'is_active' => true,
+            ]
+        );
+
+        // Promo Strip Banner: Mega Mid-Year Sale
+        Banner::firstOrCreate(
             ['title' => 'Mega Mid-Year Sale 2026'],
             [
                 'title_translations' => ['en' => 'Mega Mid-Year Sale 2026'],
@@ -446,7 +521,7 @@ class CmsSeeder extends Seeder
                 'subtitle_translations' => ['en' => 'Up to 50% off selected categories. Limited time offer!'],
                 'image' => 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1600&q=80',
                 'link' => '/products',
-                'placement' => 'homepage',
+                'placement' => Banner::PLACEMENT_PROMO_STRIP,
                 'cta_text' => 'Beli Sekarang',
                 'cta_text_translations' => ['en' => 'Shop Now'],
                 'sort_order' => 1,
@@ -455,23 +530,24 @@ class CmsSeeder extends Seeder
         );
 
         // 7. Popups
-        Popup::updateOrCreate(
+        Popup::firstOrCreate(
             ['name' => 'welcome_modal'],
             [
                 'title' => 'Selamat Datang di Radiant Studio! 🎉',
                 'title_translations' => ['en' => 'Welcome to Radiant Studio! 🎉'],
                 'description' => 'Gunakan kode voucher RADIANT10 saat checkout untuk mendapatkan potongan harga Rp 25.000 pada pembelian pertama Anda.',
                 'type' => 'welcome',
+                'show_on' => 'home',
                 'cta_text' => 'Gunakan Voucher',
                 'cta_link' => '/products',
                 'delay_seconds' => 5,
                 'show_once_per_session' => true,
-                'is_active' => false, // Default inactive so it doesn't annoy user during dev
+                'is_active' => false, // Default inactive so it can be turned on whenever needed
             ]
         );
 
         // 8. Email Templates
-        EmailTemplate::updateOrCreate(
+        EmailTemplate::firstOrCreate(
             ['slug' => 'order_confirmation'],
             [
                 'name' => 'Konfirmasi Pesanan',
@@ -483,5 +559,8 @@ class CmsSeeder extends Seeder
                 'is_active' => true,
             ]
         );
+
+        // 9. Invalidate CMS cache
+        CmsCache::bump();
     }
 }

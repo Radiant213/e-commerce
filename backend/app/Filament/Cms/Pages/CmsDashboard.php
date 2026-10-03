@@ -28,18 +28,16 @@ class CmsDashboard extends BaseDashboard
     {
         return [
             Action::make('visit_store')
-                ->label('Buka Toko Online')
-                ->icon('heroicon-o-arrow-top-right-on-square')
+                ->label('Buka Toko')
+                ->icon('heroicon-o-home')
                 ->color('primary')
-                ->url(url('/'))
-                ->openUrlInNewTab(),
+                ->url(config('app.frontend_url', '/')),
 
             Action::make('go_to_admin')
-                ->label('Admin Toko (Pesanan & Produk)')
+                ->label('Panel Admin (Pesanan & Stok)')
                 ->icon('heroicon-o-shopping-bag')
                 ->color('gray')
-                ->url(url('/admin'))
-                ->openUrlInNewTab()
+                ->url('/admin')
                 ->visible(fn () => auth()->user()?->isAdmin() ?? false),
         ];
     }

@@ -2,6 +2,7 @@
 
 namespace App\Models\Cms;
 
+use App\Support\CmsCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,6 +10,22 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class MenuItem extends Model
 {
+    protected static function booted(): void
+    {
+        static::saving(function (self $item) {
+            // The CMS form edits the Indonesian label directly. Drop the stale
+            // 'id' translation so it no longer overrides the edited label.
+            if ($item->exists && $item->isDirty('label') && is_array($item->label_translations)) {
+                $translations = $item->label_translations;
+                unset($translations['id']);
+                $item->label_translations = $translations ?: null;
+            }
+        });
+
+        static::saved(fn () => CmsCache::bump());
+        static::deleted(fn () => CmsCache::bump());
+    }
+
     protected $fillable = [
         'menu_id',
         'parent_id',

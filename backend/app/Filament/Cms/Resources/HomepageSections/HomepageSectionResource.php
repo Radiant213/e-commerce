@@ -19,15 +19,20 @@ class HomepageSectionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-view-columns';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Konten Homepage';
+    protected static string|UnitEnum|null $navigationGroup = 'Tampilan & Promo';
 
-    protected static ?string $navigationLabel = 'Urutan & Section';
+    protected static ?string $navigationLabel = 'Atur Beranda';
 
-    protected static ?string $modelLabel = 'Section Homepage';
+    protected static ?string $modelLabel = 'Section Beranda';
 
-    protected static ?string $pluralModelLabel = 'Section Homepage';
+    protected static ?string $pluralModelLabel = 'Atur Beranda';
 
-    protected static bool $shouldRegisterNavigation = false;
+    protected static ?int $navigationSort = 2;
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
 
     public static function form(Schema $schema): Schema
     {

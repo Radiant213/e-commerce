@@ -7,7 +7,7 @@ const CmsContext = createContext();
 const DEFAULT_SETTINGS = {
   site_name: 'Radiant Studio',
   site_tagline: 'Premium E-Commerce Experience',
-  site_email: 'hello@radiantstudio.com',
+  site_email: 'hello@radiantcode.web.id',
   site_phone: '+6287878444402',
   site_whatsapp: '+6287878444402',
   site_currency: 'IDR',
@@ -38,6 +38,8 @@ export function CmsProvider({ children }) {
     menus: {},
     homepageSections: [],
     banners: [],
+    heroBanners: [],
+    promoBanners: [],
     popups: [],
     footer: null,
     pagesNav: [],
@@ -49,11 +51,16 @@ export function CmsProvider({ children }) {
       const response = await cmsApi.getBootstrap(language || 'id');
       if (response.data && response.data.success) {
         const d = response.data.data;
+        const heroBanners = Array.isArray(d.hero_banners) ? d.hero_banners : [];
+        const promoBanners = Array.isArray(d.promo_banners) ? d.promo_banners : (Array.isArray(d.banners) ? d.banners : []);
+
         setCmsData({
           settings: { ...DEFAULT_SETTINGS, ...(d.settings || {}) },
           menus: d.menus || {},
           homepageSections: Array.isArray(d.homepage_sections) ? d.homepage_sections : [],
-          banners: Array.isArray(d.banners) ? d.banners : [],
+          banners: promoBanners,
+          heroBanners,
+          promoBanners,
           popups: Array.isArray(d.popups) ? d.popups : [],
           footer: d.footer || null,
           pagesNav: Array.isArray(d.pages_nav) ? d.pages_nav : [],
@@ -69,6 +76,19 @@ export function CmsProvider({ children }) {
   useEffect(() => {
     fetchCmsData();
   }, [fetchCmsData]);
+
+  // Update document favicon if provided by CMS settings
+  useEffect(() => {
+    if (cmsData.settings?.site_favicon) {
+      let link = document.querySelector("link[rel*='icon']");
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'shortcut icon';
+        document.getElementsByTagName('head')[0].appendChild(link);
+      }
+      link.href = cmsData.settings.site_favicon;
+    }
+  }, [cmsData.settings?.site_favicon]);
 
   const getSetting = (key, fallback = '') => {
     return cmsData.settings[key] ?? fallback;

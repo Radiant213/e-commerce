@@ -1,23 +1,37 @@
+@php
+    $frontendUrl = config('app.frontend_url', '/');
+    $isAdmin = auth()->user()?->role === 'admin';
+@endphp
 <div style="border-top: 1px solid var(--rc-border, #e2e8f0); margin-top: auto;">
-    {{-- Expanded Mode: Full Rich Footer --}}
-    <div x-show="$store.sidebar.isOpen" style="padding: 12px 16px 16px;">
-        <a href="https://demo1-ecommerce.radiantcode.web.id" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--rc-surface-2, #0f172a); color: var(--rc-text, #ffffff); border: 1px solid var(--rc-border, rgba(255,255,255,0.1)); border-radius: 10px; font-size: 0.8rem; font-weight: 600; text-decoration: none; box-shadow: var(--rc-shadow-sm); transition: all 0.2s ease;">
+    {{-- Expanded Mode --}}
+    <div x-show="$store.sidebar.isOpen" style="padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 8px;">
+        <a href="{{ $frontendUrl }}" style="display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; background: #0f172a; color: #ffffff; border-radius: 9px; font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: background 0.15s ease;">
             <span style="display: flex; align-items: center; gap: 8px;">
-                <span style="display: inline-block; width: 7px; height: 7px; background: var(--rc-emerald, #10b981); border-radius: 9999px; box-shadow: 0 0 6px var(--rc-emerald, #10b981);"></span>
-                <span>Buka Web Toko</span>
+                <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                <span>Kembali ke Toko</span>
             </span>
-            <span style="font-size: 0.95rem; opacity: 0.75;">↗</span>
+            <span style="font-size: 0.85rem; opacity: 0.8;">←</span>
         </a>
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding: 0 4px; font-size: 0.7rem; color: var(--rc-text-subtle, #94a3b8); font-weight: 500;">
-            <span>Payment Gateway</span>
-            <span style="background: var(--rc-surface-2, #f1f5f9); color: var(--rc-text-muted, #475569); border: 1px solid var(--rc-border, #e2e8f0); padding: 2px 7px; border-radius: 9999px; font-weight: 600; font-size: 0.65rem;">Midtrans Snap</span>
-        </div>
+
+        @if($isAdmin)
+        <a href="/cms" style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; border-radius: 9px; font-size: 0.75rem; font-weight: 600; text-decoration: none; transition: all 0.15s ease;">
+            <span style="display: flex; align-items: center; gap: 6px;">
+                <span style="display: inline-block; width: 6px; height: 6px; background: #6366f1; border-radius: 9999px;"></span>
+                <span>Buka Studio Konten (CMS)</span>
+            </span>
+            <span style="font-size: 0.75rem; opacity: 0.7;">✎</span>
+        </a>
+        @endif
     </div>
 
-    {{-- Collapsed Mode: Clean Centered Mini Icon --}}
-    <div x-show="! $store.sidebar.isOpen" style="padding: 12px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-        <a href="https://demo1-ecommerce.radiantcode.web.id" target="_blank" rel="noopener noreferrer" title="Buka Web Toko" style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: var(--rc-surface-2); color: var(--rc-emerald); border: 1px solid var(--rc-border); border-radius: 10px; text-decoration: none; transition: all 0.2s ease;">
-            <span style="display: inline-block; width: 8px; height: 8px; background: var(--rc-emerald); border-radius: 9999px; box-shadow: 0 0 6px var(--rc-emerald);"></span>
+    {{-- Collapsed Mode --}}
+    <div x-show="! $store.sidebar.isOpen" style="padding: 10px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;">
+        <a href="{{ $frontendUrl }}" title="Kembali ke Toko" style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: #0f172a; color: #ffffff; border-radius: 8px; text-decoration: none;">
+            <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
         </a>
     </div>
 </div>

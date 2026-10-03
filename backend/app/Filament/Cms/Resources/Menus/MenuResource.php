@@ -19,15 +19,20 @@ class MenuResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-bars-3';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Halaman & Navigasi';
+    protected static string|UnitEnum|null $navigationGroup = 'Tampilan & Promo';
 
     protected static ?string $navigationLabel = 'Menu Navigasi';
 
-    protected static ?string $modelLabel = 'Menu Navigasi';
+    protected static ?string $modelLabel = 'Menu';
 
     protected static ?string $pluralModelLabel = 'Menu Navigasi';
 
-    protected static bool $shouldRegisterNavigation = false;
+    protected static ?int $navigationSort = 3;
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
 
     public static function form(Schema $schema): Schema
     {

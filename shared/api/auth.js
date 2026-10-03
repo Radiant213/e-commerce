@@ -75,6 +75,11 @@ export const authApi = {
     const response = await apiClient.post('/auth/email/resend');
     return response.data;
   },
+
+  getPanelLink: async (panel = 'admin') => {
+    const response = await apiClient.post('/auth/panel-link', { panel });
+    return response.data;
+  },
 };
 
 export default authApi;

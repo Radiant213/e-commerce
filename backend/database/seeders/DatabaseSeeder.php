@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
         $admin = User::create([
             'name' => 'Admin Radiant',
             'email' => 'admin@radiantcode.web.id',
-            'password' => Hash::make('password123'),
+            'password' => Hash::make('password'),
             'phone' => '081234567890',
             'address' => 'Jl. Sudirman No. 45, Jakarta Pusat',
             'role' => 'admin',
@@ -33,7 +33,7 @@ class DatabaseSeeder extends Seeder
         $customer1 = User::create([
             'name' => 'Budi Santoso',
             'email' => 'budi@example.com',
-            'password' => Hash::make('password123'),
+            'password' => Hash::make('password'),
             'phone' => '082198765432',
             'address' => 'Jl. Melati Blok C2 No. 12, Bandung',
             'role' => 'customer',
@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
         $customer2 = User::create([
             'name' => 'Siti Nurhaliza',
             'email' => 'siti@example.com',
-            'password' => Hash::make('password123'),
+            'password' => Hash::make('password'),
             'phone' => '085712345678',
             'address' => 'Jl. Kebon Jeruk No. 88, Surabaya',
             'role' => 'customer',
@@ -56,7 +56,7 @@ class DatabaseSeeder extends Seeder
             User::create([
                 'name' => 'Reza Pratama',
                 'email' => 'reza@example.com',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('password'),
                 'phone' => '081399887766',
                 'address' => 'Jl. Diponegoro No. 10, Yogyakarta',
                 'role' => 'customer',
@@ -65,7 +65,7 @@ class DatabaseSeeder extends Seeder
             User::create([
                 'name' => 'Dewi Lestari',
                 'email' => 'dewi@example.com',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('password'),
                 'phone' => '081233445566',
                 'address' => 'Jl. Gajah Mada No. 23, Semarang',
                 'role' => 'customer',
@@ -74,7 +74,7 @@ class DatabaseSeeder extends Seeder
             User::create([
                 'name' => 'Dimas Anggara',
                 'email' => 'dimas@example.com',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('password'),
                 'phone' => '087811223344',
                 'address' => 'Jl. Thamrin No. 99, Medan',
                 'role' => 'customer',
@@ -612,5 +612,8 @@ class DatabaseSeeder extends Seeder
             'status' => 'settlement',
             'gross_amount' => $sampleOrder->total,
         ]);
+
+        // Call CMS Seeder
+        $this->call(CmsSeeder::class);
     }
 }

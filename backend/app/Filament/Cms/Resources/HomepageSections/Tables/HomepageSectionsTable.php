@@ -2,8 +2,8 @@
 
 namespace App\Filament\Cms\Resources\HomepageSections\Tables;
 
+use App\Models\Cms\HomepageSection;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
@@ -14,17 +14,13 @@ class HomepageSectionsTable
     {
         return $table
             ->defaultSort('sort_order', 'asc')
+            ->reorderable('sort_order')
             ->columns([
-                TextColumn::make('sort_order')
-                    ->label('Urutan')
-                    ->sortable()
-                    ->badge()
-                    ->color('gray'),
-
                 TextColumn::make('title')
-                    ->label('Nama Section')
+                    ->label('Bagian Beranda')
                     ->weight('bold')
-                    ->searchable(),
+                    ->searchable()
+                    ->description(fn (HomepageSection $record) => HomepageSection::TYPES[$record->type] ?? ucfirst($record->type)),
 
                 TextColumn::make('type')
                     ->label('Tipe')
@@ -33,28 +29,29 @@ class HomepageSectionsTable
                         'hero' => 'primary',
                         'categories' => 'warning',
                         'product_showcase' => 'success',
-                        'brand_story' => 'info',
+                        'promo_strip' => 'info',
+                        'brand_story' => 'violet',
                         'newsletter' => 'danger',
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'hero' => 'Hero Banner Utama',
-                        'categories' => 'Kategori Unggulan',
-                        'product_showcase' => 'Showcase Produk',
-                        'brand_story' => 'Kisah Brand & USP',
-                        'newsletter' => 'Formulir Newsletter',
-                        'custom_banner' => 'Custom Banner Promo',
+                        'hero' => 'Hero Banner Atas',
+                        'categories' => 'Kategori Pilihan',
+                        'product_showcase' => 'Etalase Produk',
+                        'promo_strip' => 'Strip Promo',
+                        'brand_story' => 'Cerita Brand',
+                        'newsletter' => 'Newsletter',
                         default => ucfirst($state),
                     }),
 
                 ToggleColumn::make('is_active')
-                    ->label('Tampilkan di Web'),
+                    ->label('Tampilkan'),
 
-                TextColumn::make('updated_at')
-                    ->label('Terakhir Diedit')
-                    ->dateTime('d M Y, H:i')
-                    ->color('gray')
-                    ->sortable(),
+                TextColumn::make('sort_order')
+                    ->label('Urutan')
+                    ->numeric()
+                    ->sortable()
+                    ->color('gray'),
             ])
             ->recordActions([
                 EditAction::make(),

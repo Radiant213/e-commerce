@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Lock, Mail, UserCheck, ArrowRight } from 'lucide-react';
 import { useAuth } from '@shared/context/AuthContext';
 import { useLanguage } from '@shared/context/LanguageContext';
+import authApi from '@shared/api/auth';
 import GoogleLoginButton from '../components/GoogleLoginButton';
 
 const LoginPage = () => {
@@ -46,11 +47,20 @@ const LoginPage = () => {
     try {
       const res = await login({ email, password });
       
-      // If admin, redirect directly to Filament Admin Panel
-      if (res?.user?.role === 'admin') {
-        const apiUrl = import.meta.env.VITE_API_URL || 'https://api-ecommerce.radiantcode.web.id/api';
-        const adminUrl = apiUrl.replace(/\/api\/?$/, '/admin');
-        window.location.href = adminUrl;
+      // If admin or content editor, redirect with SSO directly to their panel
+      const role = res?.user?.role;
+      if (role === 'admin' || role === 'content_editor') {
+        const panel = role === 'content_editor' ? 'cms' : 'admin';
+        try {
+          const ssoRes = await authApi.getPanelLink(panel);
+          if (ssoRes?.data?.url) {
+            window.location.href = ssoRes.data.url;
+            return;
+          }
+        } catch (ssoErr) {
+          console.error('SSO error, fallback to direct panel:', ssoErr);
+        }
+        window.location.href = panel === 'cms' ? '/cms' : '/admin';
         return;
       }
 
@@ -98,14 +108,30 @@ const LoginPage = () => {
           <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block text-center">
             {t('auth_demo_title')}
           </span>
-          <div className="grid grid-cols-1 gap-2">
+          <div className="grid grid-cols-3 gap-1.5">
             <button
               type="button"
-              onClick={() => fillDemoAccount('budi@example.com', 'password123')}
-              className="px-2.5 py-2 bg-white border border-slate-200 hover:border-slate-400 rounded-xl text-xs font-bold text-slate-800 text-left transition-colors flex items-center justify-center gap-1.5 shadow-2xs w-full"
+              onClick={() => fillDemoAccount('budi@example.com', 'password')}
+              className="px-2 py-2 bg-white border border-slate-200 hover:border-slate-400 rounded-xl text-[11px] font-bold text-slate-800 text-center transition-colors shadow-2xs cursor-pointer truncate"
+              title="Customer: budi@example.com / password"
             >
-              <UserCheck size={14} className="text-emerald-700" />
-              <span>Customer Demo Account</span>
+              Customer
+            </button>
+            <button
+              type="button"
+              onClick={() => fillDemoAccount('cms@radiantcode.web.id', 'password')}
+              className="px-2 py-2 bg-indigo-50 border border-indigo-200 hover:border-indigo-400 rounded-xl text-[11px] font-bold text-indigo-800 text-center transition-colors shadow-2xs cursor-pointer truncate"
+              title="CMS: cms@radiantcode.web.id / password"
+            >
+              CMS Editor
+            </button>
+            <button
+              type="button"
+              onClick={() => fillDemoAccount('admin@radiantcode.web.id', 'password')}
+              className="px-2 py-2 bg-slate-900 text-white border border-slate-900 hover:bg-slate-800 rounded-xl text-[11px] font-bold text-center transition-colors shadow-2xs cursor-pointer truncate"
+              title="Admin: admin@radiantcode.web.id / password"
+            >
+              Admin
             </button>
           </div>
         </div>

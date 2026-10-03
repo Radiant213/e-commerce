@@ -7,6 +7,7 @@ import { useWishlist } from '@shared/context/WishlistContext';
 import { useLanguage } from '@shared/context/LanguageContext';
 import { useCms } from '@shared/context/CmsContext';
 import productsApi from '@shared/api/products';
+import authApi from '@shared/api/auth';
 import { formatCurrency } from '@shared/utils/formatCurrency';
 
 const Navbar = () => {
@@ -48,6 +49,21 @@ const Navbar = () => {
     } finally {
       navigate('/', { replace: true });
     }
+  };
+
+  const handleOpenPanel = async (panel = 'admin') => {
+    setIsProfileOpen(false);
+    setIsMenuOpen(false);
+    try {
+      const res = await authApi.getPanelLink(panel);
+      if (res?.data?.url) {
+        window.location.href = res.data.url;
+        return;
+      }
+    } catch (err) {
+      console.error('Failed to get panel SSO link:', err);
+    }
+    window.location.href = panel === 'cms' ? '/cms' : '/admin';
   };
 
   // Outside click listener for Profile & Search
@@ -229,17 +245,27 @@ const Navbar = () => {
           {/* Brand Logo (Always visible on mobile) */}
           <div className="flex-shrink-0 flex items-center">
             <Link to="/" className="flex items-center gap-2 sm:gap-2.5 group cursor-pointer hover-pop-lift select-none">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-white flex items-center justify-center font-bold text-base sm:text-lg tracking-tighter shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:-rotate-6 group-hover:bg-gradient-to-br group-hover:from-emerald-950 group-hover:to-emerald-800">
-                R
-              </div>
-              <div className="flex flex-col text-left">
-                <span className="font-extrabold text-base sm:text-lg tracking-tight text-slate-900 leading-none group-hover:text-emerald-950 transition-colors duration-200">
-                  RADIANT
-                </span>
-                <span className="text-[9px] sm:text-[10px] tracking-[0.22em] text-slate-400 uppercase font-semibold mt-0.5 group-hover:text-emerald-700 transition-all duration-300">
-                  STUDIO
-                </span>
-              </div>
+              {settings?.site_logo ? (
+                <img
+                  src={settings.site_logo}
+                  alt={settings.site_name || 'Radiant Studio'}
+                  className="h-8 sm:h-9 max-w-[160px] object-contain"
+                />
+              ) : (
+                <>
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-white flex items-center justify-center font-bold text-base sm:text-lg tracking-tighter shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:-rotate-6 group-hover:bg-gradient-to-br group-hover:from-emerald-950 group-hover:to-emerald-800">
+                    R
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="font-extrabold text-base sm:text-lg tracking-tight text-slate-900 leading-none group-hover:text-emerald-950 transition-colors duration-200">
+                      {settings?.site_name ? settings.site_name.split(' ')[0] : 'RADIANT'}
+                    </span>
+                    <span className="text-[9px] sm:text-[10px] tracking-[0.22em] text-slate-400 uppercase font-semibold mt-0.5 group-hover:text-emerald-700 transition-all duration-300">
+                      {settings?.site_name && settings.site_name.split(' ').length > 1 ? settings.site_name.split(' ').slice(1).join(' ') : 'STUDIO'}
+                    </span>
+                  </div>
+                </>
+              )}
             </Link>
           </div>
 
@@ -490,8 +516,14 @@ const Navbar = () => {
                       <div className="px-4 py-3 text-left">
                         <p className="text-xs font-bold text-slate-900 truncate">{user?.name}</p>
                         <p className="text-[11px] text-slate-400 truncate">{user?.email}</p>
-                        <span className="inline-block mt-1 px-2 py-0.5 bg-emerald-50 text-emerald-800 text-[9px] font-bold rounded-full border border-emerald-200">
-                          {t('nav_member_badge')}
+                        <span className="inline-block mt-1 px-2 py-0.5 text-[9px] font-bold rounded-full border">
+                          {user?.role === 'admin' ? (
+                            <span className="text-amber-800 bg-amber-50">Administrator</span>
+                          ) : user?.role === 'content_editor' ? (
+                            <span className="text-indigo-800 bg-indigo-50">Editor Konten</span>
+                          ) : (
+                            <span className="text-emerald-800 bg-emerald-50">{t('nav_member_badge')}</span>
+                          )}
                         </span>
                       </div>
 
@@ -504,19 +536,35 @@ const Navbar = () => {
                           <LayoutDashboard size={15} className="group-hover:scale-110 group-hover:text-emerald-700 transition-all duration-200" />
                           <span>{t('nav_dashboard')}</span>
                         </Link>
+
+                        {/* SSO: Panel Admin Button */}
                         {user?.role === 'admin' && (
-                          <a
-                            href={import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '/admin') || 'https://api-ecommerce.radiantcode.web.id/admin'}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-between px-4 py-2.5 text-xs font-bold text-indigo-700 bg-indigo-50/70 hover:bg-indigo-100 hover:translate-x-1 transition-all duration-200 group cursor-pointer"
+                          <button
+                            type="button"
+                            onClick={() => handleOpenPanel('admin')}
+                            className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 hover:translate-x-1 transition-all duration-200 group cursor-pointer text-left"
                           >
                             <span className="flex items-center gap-2">
-                              <span className="group-hover:scale-125 transition-transform duration-200">👑</span>
-                              <span>Panel Admin Filament</span>
+                              <span>⚙️</span>
+                              <span>Panel Admin Toko</span>
                             </span>
                             <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform duration-200" />
-                          </a>
+                          </button>
+                        )}
+
+                        {/* SSO: Panel CMS Button */}
+                        {(user?.role === 'admin' || user?.role === 'content_editor') && (
+                          <button
+                            type="button"
+                            onClick={() => handleOpenPanel('cms')}
+                            className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-bold text-indigo-700 bg-indigo-50/70 hover:bg-indigo-100 hover:translate-x-1 transition-all duration-200 group cursor-pointer text-left"
+                          >
+                            <span className="flex items-center gap-2">
+                              <span>🎨</span>
+                              <span>Studio Konten (CMS)</span>
+                            </span>
+                            <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform duration-200" />
+                          </button>
                         )}
                         <Link
                           to="/dashboard?tab=orders"

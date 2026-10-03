@@ -21,51 +21,42 @@ class MenuForm
                     // Left 2 cols: Menu Items
                     Grid::make(1)->columnSpan(2)->schema([
                         Section::make('Daftar Tautan Menu')
-                            ->description('Tambah, ubah, atau hapus link tautan dalam menu ini.')
+                            ->description('Atur daftar link navigasi yang muncul di menu ini.')
                             ->schema([
                                 Repeater::make('allItems')
                                     ->relationship('allItems')
-                                    ->label('Item Tautan')
+                                    ->label('Daftar Link')
                                     ->orderColumn('sort_order')
                                     ->reorderable()
                                     ->schema([
-                                        Grid::make(3)->schema([
+                                        Grid::make(2)->schema([
                                             TextInput::make('label')
-                                                ->label('Label Teks')
+                                                ->label('Nama Link (Teks)')
                                                 ->required()
-                                                ->placeholder('Contoh: Beranda'),
+                                                ->placeholder('Contoh: Produk'),
 
                                             TextInput::make('url')
-                                                ->label('URL Tautan')
+                                                ->label('Tujuan Link (URL)')
                                                 ->required()
                                                 ->placeholder('/products atau https://...'),
-
-                                            Select::make('target')
-                                                ->label('Buka di')
-                                                ->options([
-                                                    '_self' => 'Tab Saat Ini (_self)',
-                                                    '_blank' => 'Tab Baru (_blank)',
-                                                ])
-                                                ->default('_self'),
                                         ]),
 
                                         Grid::make(3)->schema([
-                                            TextInput::make('label_translations.en')
-                                                ->label('Label (Inggris - EN)')
-                                                ->placeholder('Contoh: Home'),
-
-                                            Select::make('type')
-                                                ->label('Tipe Link')
+                                            Select::make('target')
+                                                ->label('Buka Link di')
                                                 ->options([
-                                                    'custom' => 'Kustom URL',
-                                                    'page' => 'Halaman Statis',
-                                                    'category' => 'Kategori Produk',
-                                                    'product' => 'Detail Produk',
+                                                    '_self' => 'Tab Saat Ini',
+                                                    '_blank' => 'Tab Baru (Halaman Baru)',
                                                 ])
-                                                ->default('custom'),
+                                                ->default('_self')
+                                                ->native(false),
+
+                                            TextInput::make('label_translations.en')
+                                                ->label('Nama (Inggris/EN)')
+                                                ->placeholder('Contoh: Products'),
 
                                             Toggle::make('is_visible')
-                                                ->label('Tampilkan Link')
+                                                ->label('Tampilkan Link Ini')
                                                 ->default(true),
                                         ]),
                                     ])
@@ -85,12 +76,12 @@ class MenuForm
                                     ->placeholder('Navigasi Utama'),
 
                                 TextInput::make('location')
-                                    ->label('Kode Penempatan')
+                                    ->label('Lokasi Menu')
                                     ->disabled()
-                                    ->helperText('Lokasi penempatan menu di sistem frontend'),
+                                    ->helperText('Lokasi penempatan menu ini di website'),
 
                                 Toggle::make('is_active')
-                                    ->label('Menu Aktif')
+                                    ->label('Aktifkan Menu Ini')
                                     ->default(true),
                             ]),
                     ]),

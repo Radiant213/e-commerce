@@ -2,11 +2,18 @@
 
 namespace App\Models\Cms;
 
+use App\Support\CmsCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Menu extends Model
 {
+    protected static function booted(): void
+    {
+        static::saved(fn () => CmsCache::bump());
+        static::deleted(fn () => CmsCache::bump());
+    }
+
     protected $fillable = [
         'name',
         'location',

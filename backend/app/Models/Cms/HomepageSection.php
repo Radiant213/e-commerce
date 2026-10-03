@@ -2,10 +2,17 @@
 
 namespace App\Models\Cms;
 
+use App\Support\CmsCache;
 use Illuminate\Database\Eloquent\Model;
 
 class HomepageSection extends Model
 {
+    protected static function booted(): void
+    {
+        static::saved(fn () => CmsCache::bump());
+        static::deleted(fn () => CmsCache::bump());
+    }
+
     protected $fillable = [
         'type',
         'title',
@@ -26,11 +33,12 @@ class HomepageSection extends Model
      * Available section types.
      */
     public const TYPES = [
-        'hero' => 'Hero Banner',
-        'categories' => 'Featured Categories',
-        'product_showcase' => 'Product Showcase (Tabs)',
-        'brand_story' => 'Brand Story / Promo',
-        'newsletter' => 'Newsletter Subscription',
+        'hero' => 'Hero (bagian paling atas)',
+        'categories' => 'Kategori Pilihan',
+        'product_showcase' => 'Etalase Produk',
+        'promo_strip' => 'Strip Promo (banner tengah)',
+        'brand_story' => 'Cerita Brand',
+        'newsletter' => 'Langganan Newsletter',
         'custom_banner' => 'Custom Banner',
         'custom_html' => 'Custom HTML/Content',
     ];
@@ -54,6 +62,11 @@ class HomepageSection extends Model
         if ($locale && $this->config_translations) {
             $translations = $this->config_translations[$locale] ?? [];
             $config = array_merge($config, $translations);
+        }
+
+        // Uploaded images are stored as relative paths on the public disk.
+        if (! empty($config['image']) && is_string($config['image']) && ! str_starts_with($config['image'], 'http')) {
+            $config['image'] = url('storage/' . ltrim($config['image'], '/'));
         }
 
         return $config;

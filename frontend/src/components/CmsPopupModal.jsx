@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useCms } from '@shared/context/CmsContext';
 import { X, Sparkles, ArrowRight } from 'lucide-react';
 
 export default function CmsPopupModal() {
   const { popups } = useCms();
+  const location = useLocation();
   const [activePopup, setActivePopup] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -12,9 +13,10 @@ export default function CmsPopupModal() {
     if (!popups || !Array.isArray(popups) || popups.length === 0) return;
 
     try {
-      // Pick first active popup that hasn't been closed in this session
+      // Pick first active popup that matches current page and hasn't been closed in this session
       const popup = popups.find((p) => {
         if (!p || typeof p !== 'object' || !p.id) return false;
+        if (p.show_on === 'home' && location.pathname !== '/') return false;
         try {
           const alreadyShown = sessionStorage.getItem(`cms_popup_dismissed_${p.id}`);
           return !alreadyShown;

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Cms\Resources\Banners\Tables;
 
+use App\Models\Cms\Banner;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\ImageColumn;
@@ -16,9 +17,12 @@ class BannersTable
     {
         return $table
             ->defaultSort('sort_order', 'asc')
+            ->reorderable('sort_order')
             ->columns([
                 ImageColumn::make('image')
                     ->label('Pratinjau')
+                    ->disk('public')
+                    ->getStateUsing(fn (Banner $record) => $record->getImageUrl())
                     ->square()
                     ->size(70),
 
@@ -29,39 +33,33 @@ class BannersTable
                     ->description(fn ($record) => $record->subtitle),
 
                 TextColumn::make('placement')
-                    ->label('Penempatan')
+                    ->label('Tampil di')
                     ->badge()
-                    ->color('info')
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'homepage' => 'Beranda Utama',
-                        'category' => 'Halaman Kategori',
-                        'product' => 'Detail Produk',
-                        'sidebar' => 'Sidebar',
-                        default => ucfirst($state),
-                    }),
+                    ->color(fn (?string $state): string => $state === Banner::PLACEMENT_HERO_SLIDER ? 'primary' : 'info')
+                    ->formatStateUsing(fn (?string $state): string => Banner::placementOptions()[$state] ?? ucfirst((string) $state)),
 
-                TextColumn::make('link')
-                    ->label('Link Tujuan')
+                TextColumn::make('schedule')
+                    ->label('Jadwal')
+                    ->getStateUsing(function (Banner $record): string {
+                        if (! $record->starts_at && ! $record->ends_at) {
+                            return 'Tayang terus';
+                        }
+
+                        $from = $record->starts_at?->translatedFormat('d M Y H:i') ?? 'sekarang';
+                        $to = $record->ends_at?->translatedFormat('d M Y H:i') ?? 'seterusnya';
+
+                        return "{$from} → {$to}";
+                    })
                     ->color('gray')
-                    ->limit(25),
+                    ->size('sm'),
 
                 ToggleColumn::make('is_active')
                     ->label('Aktif'),
-
-                TextColumn::make('sort_order')
-                    ->label('Urutan')
-                    ->numeric()
-                    ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('placement')
-                    ->label('Penempatan')
-                    ->options([
-                        'homepage' => 'Beranda Utama',
-                        'category' => 'Halaman Kategori',
-                        'product' => 'Detail Produk',
-                        'sidebar' => 'Sidebar',
-                    ]),
+                    ->label('Tampil di')
+                    ->options(Banner::placementOptions()),
             ])
             ->recordActions([
                 EditAction::make(),

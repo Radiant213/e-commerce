@@ -1,14 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, Truck, RotateCcw, Headphones, Globe, Check, MessageCircle } from 'lucide-react';
+import { ShieldCheck, Truck, RotateCcw, Headphones, Globe, Check, MessageCircle, Award, Star, Lock, CreditCard, Gift, Clock } from 'lucide-react';
 import { useLanguage } from '@shared/context/LanguageContext';
 import { useCms } from '@shared/context/CmsContext';
 
 const ICON_MAP = {
-  Truck: Truck,
-  ShieldCheck: ShieldCheck,
-  RotateCcw: RotateCcw,
-  Headphones: Headphones,
+  Truck,
+  ShieldCheck,
+  RotateCcw,
+  Headphones,
+  Award,
+  Star,
+  Lock,
+  CreditCard,
+  Gift,
+  Clock,
 };
 
 const Footer = () => {

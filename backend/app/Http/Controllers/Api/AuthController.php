@@ -128,4 +128,43 @@ class AuthController extends Controller
             'message' => 'Kata sandi berhasil diperbarui.',
         ]);
     }
+
+    public function createPanelLink(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'panel' => 'required|string|in:admin,cms',
+        ]);
+
+        $user = $request->user();
+        $panel = $validated['panel'];
+
+        if ($panel === 'admin' && ! $user->isAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses ditolak: Hanya admin yang dapat mengakses panel admin.',
+            ], 403);
+        }
+
+        if ($panel === 'cms' && ! $user->canManageCms()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses ditolak: Anda tidak memiliki akses ke studio konten.',
+            ], 403);
+        }
+
+        $token = \Illuminate\Support\Str::random(64);
+        \Illuminate\Support\Facades\Cache::put("panel_sso:{$token}", [
+            'user_id' => $user->id,
+            'panel' => $panel,
+        ], now()->addSeconds(60));
+
+        $url = url("/auth/panel-sso?token={$token}");
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'url' => $url,
+            ],
+        ]);
+    }
 }

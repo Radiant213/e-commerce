@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, CheckCircle2, Mail, Send, ExternalLink } from 'lucide-react';
+import { ArrowRight, Sparkles, CheckCircle2, Mail, Send } from 'lucide-react';
 import productsApi from '@shared/api/products';
 import categoriesApi from '@shared/api/categories';
 import { useLanguage } from '@shared/context/LanguageContext';
@@ -8,10 +8,103 @@ import { useCms } from '@shared/context/CmsContext';
 import ProductCard from '../components/ProductCard';
 import { useToast } from '../components/Toast';
 
+const HeroSlider = ({ heroBanners, t }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (!heroBanners || heroBanners.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % heroBanners.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [heroBanners]);
+
+  if (!heroBanners || heroBanners.length === 0) {
+    // Fallback to Sony Spotlight card
+    return (
+      <Link
+        to="/products/sony-wh-1000xm5-wireless-noise-cancelling-headphones"
+        className="product-card relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl bg-slate-100 border border-slate-200 group block cursor-pointer"
+      >
+        <img
+          src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1000&q=80"
+          alt="Product Spotlight"
+          className="product-img w-full h-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/25 to-transparent transition-opacity group-hover:opacity-90" />
+        <div className="absolute bottom-8 left-8 right-8 text-white text-left space-y-2">
+          <span className="text-[10px] uppercase tracking-widest text-emerald-300 font-bold bg-emerald-950/80 backdrop-blur-xs px-3 py-1 rounded-lg inline-block border border-emerald-500/30 shadow-xs">
+            {t('hero_spotlight')}
+          </span>
+          <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight group-hover:text-emerald-300 transition-colors">
+            {t('hero_spotlight_title')}
+          </h3>
+          <p className="text-xs text-slate-300">{t('hero_spotlight_desc')}</p>
+          <div className="inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-300 group-hover:text-emerald-200 group-hover:translate-x-1 transition-all pt-1">
+            <span>{t('hero_buy_now')}</span>
+            <ArrowRight size={14} />
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
+  const current = heroBanners[currentIndex] || heroBanners[0];
+
+  return (
+    <div className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl bg-slate-900 border border-slate-200 group">
+      <Link to={current.link || '/products'} className="block w-full h-full">
+        <img
+          src={current.image}
+          alt={current.alt_text || current.title || 'Hero Banner'}
+          className="w-full h-full object-cover object-center transition-all duration-700"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent" />
+        <div className="absolute bottom-8 left-8 right-8 text-white text-left space-y-2">
+          {current.title && (
+            <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white group-hover:text-emerald-300 transition-colors">
+              {current.title}
+            </h3>
+          )}
+          {current.subtitle && (
+            <p className="text-xs text-slate-300 line-clamp-2">{current.subtitle}</p>
+          )}
+          {current.cta_text && (
+            <div className="inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-300 group-hover:text-emerald-200 group-hover:translate-x-1 transition-all pt-1">
+              <span>{current.cta_text}</span>
+              <ArrowRight size={14} />
+            </div>
+          )}
+        </div>
+      </Link>
+
+      {/* Slider dots indicator */}
+      {heroBanners.length > 1 && (
+        <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1.5 rounded-full z-10">
+          {heroBanners.map((_, dotIdx) => (
+            <button
+              key={dotIdx}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                setCurrentIndex(dotIdx);
+              }}
+              className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                dotIdx === currentIndex ? 'w-5 bg-emerald-400' : 'w-1.5 bg-white/50 hover:bg-white'
+              }`}
+              aria-label={`Slide ${dotIdx + 1}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const HomePage = () => {
   const { addToast } = useToast();
   const { t } = useLanguage();
-  const { homepageSections, banners } = useCms();
+  const { homepageSections, banners, heroBanners, promoBanners } = useCms();
 
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [bestSellers, setBestSellers] = useState([]);
@@ -72,6 +165,7 @@ const HomePage = () => {
         { type: 'hero', config: {} },
         { type: 'categories', config: {} },
         { type: 'product_showcase', config: {} },
+        { type: 'promo_strip', config: {} },
         { type: 'brand_story', config: {} },
         { type: 'newsletter', config: {} },
       ];
@@ -132,32 +226,9 @@ const HomePage = () => {
                   </div>
                 </div>
 
-                {/* Right Hero Image Card */}
+                {/* Right Hero Image Card / Banner Slider */}
                 <div className="lg:col-span-5 relative">
-                  <Link
-                    to="/products/sony-wh-1000xm5-wireless-noise-cancelling-headphones"
-                    className="product-card relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl bg-slate-100 border border-slate-200 group block cursor-pointer"
-                  >
-                    <img
-                      src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1000&q=80"
-                      alt="Product Spotlight"
-                      className="product-img w-full h-full object-cover object-center"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/25 to-transparent transition-opacity group-hover:opacity-90" />
-                    <div className="absolute bottom-8 left-8 right-8 text-white text-left space-y-2">
-                      <span className="text-[10px] uppercase tracking-widest text-emerald-300 font-bold bg-emerald-950/80 backdrop-blur-xs px-3 py-1 rounded-lg inline-block border border-emerald-500/30 shadow-xs">
-                        {t('hero_spotlight')}
-                      </span>
-                      <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight group-hover:text-emerald-300 transition-colors">
-                        {t('hero_spotlight_title')}
-                      </h3>
-                      <p className="text-xs text-slate-300">{t('hero_spotlight_desc')}</p>
-                      <div className="inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-300 group-hover:text-emerald-200 group-hover:translate-x-1 transition-all pt-1">
-                        <span>{t('hero_buy_now')}</span>
-                        <ArrowRight size={14} />
-                      </div>
-                    </div>
-                  </Link>
+                  <HeroSlider heroBanners={heroBanners} t={t} />
                 </div>
               </div>
             </div>
@@ -278,8 +349,57 @@ const HomePage = () => {
         );
       }
 
-      // 4. Brand Story Section
+      // 4. Promo Strip Banners Section
+      case 'promo_strip': {
+        const activeBanners = (promoBanners && promoBanners.length > 0) ? promoBanners : banners;
+        if (!activeBanners || activeBanners.length === 0) return null;
+
+        return (
+          <section key={section.id || idx} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {activeBanners.slice(0, 2).map((banner) => (
+                <Link
+                  key={banner.id}
+                  to={banner.link || '/products'}
+                  className="group relative rounded-3xl overflow-hidden h-64 sm:h-72 border border-slate-200 shadow-sm block text-left"
+                >
+                  <img
+                    src={banner.image}
+                    alt={banner.alt_text || banner.title || 'Promo'}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
+                  <div className="absolute bottom-6 left-6 right-6 text-white space-y-2">
+                    <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight group-hover:text-emerald-300 transition-colors">
+                      {banner.title}
+                    </h3>
+                    {banner.subtitle && (
+                      <p className="text-xs sm:text-sm text-slate-300 max-w-sm line-clamp-2">
+                        {banner.subtitle}
+                      </p>
+                    )}
+                    {banner.cta_text && (
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 group-hover:text-emerald-300 group-hover:translate-x-1 transition-all pt-1">
+                        <span>{banner.cta_text}</span>
+                        <ArrowRight size={14} />
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        );
+      }
+
+      // 5. Brand Story Section
       case 'brand_story': {
+        const points = (config.points && config.points.length > 0)
+          ? config.points.map((p) => (typeof p === 'string' ? p : p.text))
+          : [t('story_point_1'), t('story_point_2'), t('story_point_3')];
+
+        const brandImage = config.image || 'https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?auto=format&fit=crop&w=1000&q=80';
+
         return (
           <section key={section.id || idx} className="bg-slate-950 text-white rounded-3xl mx-4 sm:mx-6 lg:mx-8 overflow-hidden shadow-2xl">
             <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 py-16 lg:py-20">
@@ -295,18 +415,12 @@ const HomePage = () => {
                     {config.subtitle || t('story_desc')}
                   </p>
                   <div className="space-y-3 pt-2">
-                    <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-200">
-                      <CheckCircle2 size={18} className="text-emerald-400 flex-shrink-0" />
-                      <span>{t('story_point_1')}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-200">
-                      <CheckCircle2 size={18} className="text-emerald-400 flex-shrink-0" />
-                      <span>{t('story_point_2')}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-200">
-                      <CheckCircle2 size={18} className="text-emerald-400 flex-shrink-0" />
-                      <span>{t('story_point_3')}</span>
-                    </div>
+                    {points.map((pointText, pIdx) => (
+                      <div key={pIdx} className="flex items-center gap-3 text-xs sm:text-sm text-slate-200">
+                        <CheckCircle2 size={18} className="text-emerald-400 flex-shrink-0" />
+                        <span>{pointText}</span>
+                      </div>
+                    ))}
                   </div>
 
                   {config.cta_link && (
@@ -324,7 +438,7 @@ const HomePage = () => {
 
                 <div className="relative rounded-2xl overflow-hidden aspect-[16/10] bg-slate-900 border border-slate-800 shadow-xl">
                   <img
-                    src="https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?auto=format&fit=crop&w=1000&q=80"
+                    src={brandImage}
                     alt="Artisan Craftsmanship"
                     className="w-full h-full object-cover"
                   />
@@ -335,7 +449,7 @@ const HomePage = () => {
         );
       }
 
-      // 5. Newsletter Section
+      // 6. Newsletter Section
       case 'newsletter': {
         return (
           <section key={section.id || idx} className="max-w-4xl mx-auto px-4 text-center">
@@ -381,44 +495,6 @@ const HomePage = () => {
     <div className="space-y-16 lg:space-y-24 pb-20 animate-fade-in">
       {/* Dynamic Sections from CMS */}
       {activeSections.map((section, idx) => renderSection(section, idx))}
-
-      {/* Promotional Banners Strip from CMS */}
-      {banners && banners.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {banners.slice(0, 2).map((banner) => (
-              <Link
-                key={banner.id}
-                to={banner.link || '/products'}
-                className="group relative rounded-3xl overflow-hidden h-64 sm:h-72 border border-slate-200 shadow-sm block text-left"
-              >
-                <img
-                  src={banner.image}
-                  alt={banner.alt_text || banner.title || 'Promo'}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
-                <div className="absolute bottom-6 left-6 right-6 text-white space-y-2">
-                  <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight group-hover:text-emerald-300 transition-colors">
-                    {banner.title}
-                  </h3>
-                  {banner.subtitle && (
-                    <p className="text-xs sm:text-sm text-slate-300 max-w-sm line-clamp-2">
-                      {banner.subtitle}
-                    </p>
-                  )}
-                  {banner.cta_text && (
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 group-hover:text-emerald-300 group-hover:translate-x-1 transition-all pt-1">
-                      <span>{banner.cta_text}</span>
-                      <ArrowRight size={14} />
-                    </span>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
     </div>
   );
 };

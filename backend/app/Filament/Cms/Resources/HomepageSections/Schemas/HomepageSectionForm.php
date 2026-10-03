@@ -2,15 +2,14 @@
 
 namespace App\Filament\Cms\Resources\HomepageSections\Schemas;
 
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 
 class HomepageSectionForm
@@ -26,6 +25,12 @@ class HomepageSectionForm
                         Section::make('Konten Section')
                             ->description('Kustomisasi teks, tombol, dan isi section ini.')
                             ->schema([
+                                Callout::make('info_promo_strip')
+                                    ->info()
+                                    ->title('Tentang Strip Promo')
+                                    ->description('Gambar dan link banner pada section ini diatur di menu "Banner & Slider" dengan memilih penempatan "Strip Promo (tengah beranda)".')
+                                    ->visible(fn ($record) => $record?->type === 'promo_strip'),
+
                                 TextInput::make('config.badge')
                                     ->label('Badge / Label Atas')
                                     ->placeholder('Contoh: ✨ New Season 2026')
@@ -45,23 +50,50 @@ class HomepageSectionForm
                                     ->visible(fn ($record) => $record?->type === 'hero')
                                     ->schema([
                                         TextInput::make('config.cta_primary_text')
-                                            ->label('Tombol Utama (Teks)'),
+                                            ->label('Tombol Utama (Teks)')
+                                            ->placeholder('Jelajahi Koleksi'),
                                         TextInput::make('config.cta_primary_link')
                                             ->label('Tombol Utama (Link URL)')
                                             ->placeholder('/products'),
                                         TextInput::make('config.cta_secondary_text')
-                                            ->label('Tombol Kedua (Teks)'),
+                                            ->label('Tombol Kedua (Teks)')
+                                            ->placeholder('Produk Unggulan'),
                                         TextInput::make('config.cta_secondary_link')
                                             ->label('Tombol Kedua (Link URL)')
-                                            ->placeholder('/products?promo=1'),
+                                            ->placeholder('/products?is_featured=1'),
                                     ]),
+
+                                // Brand Story specific: Image and Points
+                                FileUpload::make('config.image')
+                                    ->label('Gambar Cerita Brand')
+                                    ->image()
+                                    ->disk('public')
+                                    ->directory('cms/brand')
+                                    ->visibility('public')
+                                    ->maxSize(3072)
+                                    ->imageEditor()
+                                    ->helperText('Ukuran ideal 1000 × 625 px (rasio 16:10). Format JPG/PNG/WebP, maks 3 MB.')
+                                    ->visible(fn ($record) => $record?->type === 'brand_story'),
+
+                                Repeater::make('config.points')
+                                    ->label('Poin Keunggulan Brand')
+                                    ->visible(fn ($record) => $record?->type === 'brand_story')
+                                    ->schema([
+                                        TextInput::make('text')
+                                            ->label('Poin')
+                                            ->required()
+                                            ->placeholder('Contoh: 100% Produk Original & Bergaransi Resmi'),
+                                    ])
+                                    ->defaultItems(3)
+                                    ->collapsible(),
 
                                 // CTA for Brand Story
                                 Grid::make(2)
                                     ->visible(fn ($record) => $record?->type === 'brand_story')
                                     ->schema([
                                         TextInput::make('config.cta_text')
-                                            ->label('Teks Tombol CTA'),
+                                            ->label('Teks Tombol CTA')
+                                            ->placeholder('Pelajari Lebih Lanjut'),
                                         TextInput::make('config.cta_link')
                                             ->label('Link Tombol CTA')
                                             ->placeholder('/pages/about'),
@@ -114,27 +146,17 @@ class HomepageSectionForm
 
                     // Right 1 col: Settings
                     Grid::make(1)->columnSpan(1)->schema([
-                        Section::make('Status & Pengaturan')
+                        Section::make('Status Penayangan')
                             ->schema([
-                                TextInput::make('title')
-                                    ->label('Nama Internal Section')
-                                    ->required()
-                                    ->helperText('Hanya terlihat di CMS untuk identifikasi'),
-
-                                TextInput::make('type')
-                                    ->label('Tipe Section')
-                                    ->disabled()
-                                    ->helperText('Tipe section telah dikonfigurasi sistem'),
-
-                                TextInput::make('sort_order')
-                                    ->label('Nomor Urutan Tampil')
-                                    ->numeric()
-                                    ->required()
-                                    ->helperText('Angka lebih kecil tampil lebih atas (1, 2, 3...)'),
-
                                 Toggle::make('is_active')
                                     ->label('Aktif & Tampil di Web')
-                                    ->helperText('Matikan untuk menyembunyikan section ini dari web'),
+                                    ->helperText('Matikan untuk menyembunyikan section ini dari beranda')
+                                    ->default(true),
+
+                                TextInput::make('title')
+                                    ->label('Nama Bagian')
+                                    ->required()
+                                    ->helperText('Nama pengenal di CMS'),
                             ]),
                     ]),
                 ]),
