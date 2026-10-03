@@ -66,11 +66,11 @@ const Navbar = () => {
     window.location.href = panel === 'cms' ? '/cms' : '/admin';
   };
 
-  // Role resolution with email fallbacks for guaranteed detection
+  // Role resolution with email and role fallbacks for guaranteed detection
   const userRole = (user?.role || '').toLowerCase();
   const userEmail = (user?.email || '').toLowerCase();
-  const isAdmin = userRole === 'admin' || userEmail.startsWith('admin@');
-  const isEditor = userRole === 'content_editor' || userRole === 'editor' || userEmail === 'cms@radiantcode.web.id' || userEmail.startsWith('editor@') || userEmail.startsWith('cms@');
+  const isAdmin = userRole === 'admin' || userRole === 'superadmin' || userRole === 'super_admin' || userEmail.startsWith('admin@') || userEmail.includes('admin@');
+  const isEditor = userRole === 'content_editor' || userRole === 'editor' || userEmail === 'cms@radiantcode.web.id' || userEmail.startsWith('editor@') || userEmail.startsWith('cms@') || userEmail.includes('cms@');
   const canAccessCms = isAdmin || isEditor;
 
   // Outside click listener for Profile & Search
@@ -544,7 +544,22 @@ const Navbar = () => {
                           <span>{t('nav_dashboard')}</span>
                         </Link>
 
-                        {/* SSO: Panel CMS Button */}
+                        {/* SSO: Panel Admin Button (Khusus Admin) */}
+                        {isAdmin && (
+                          <button
+                            type="button"
+                            onClick={() => handleOpenPanel('admin')}
+                            className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 hover:translate-x-1 transition-all duration-200 group cursor-pointer text-left border-y border-slate-200/90 my-1"
+                          >
+                            <span className="flex items-center gap-2">
+                              <span className="w-5 h-5 rounded-md bg-slate-900 text-white flex items-center justify-center text-[11px] shadow-xs">⚙️</span>
+                              <span>Panel Admin Toko</span>
+                            </span>
+                            <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform duration-200 text-slate-700" />
+                          </button>
+                        )}
+
+                        {/* SSO: Panel CMS Button (Untuk Admin & Content Editor) */}
                         {canAccessCms && (
                           <button
                             type="button"
@@ -556,21 +571,6 @@ const Navbar = () => {
                               <span>Masuk ke Filament CMS</span>
                             </span>
                             <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform duration-200 text-indigo-600" />
-                          </button>
-                        )}
-
-                        {/* SSO: Panel Admin Button */}
-                        {isAdmin && (
-                          <button
-                            type="button"
-                            onClick={() => handleOpenPanel('admin')}
-                            className="w-full flex items-center justify-between px-4 py-2 text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 hover:translate-x-1 transition-all duration-200 group cursor-pointer text-left border-b border-slate-200/80 mb-1"
-                          >
-                            <span className="flex items-center gap-2">
-                              <span className="w-5 h-5 rounded-md bg-slate-800 text-white flex items-center justify-center text-[11px] shadow-xs">⚙️</span>
-                              <span>Panel Admin Toko</span>
-                            </span>
-                            <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform duration-200" />
                           </button>
                         )}
                         <Link
@@ -706,6 +706,38 @@ const Navbar = () => {
               {link.name}
             </Link>
           ))}
+
+          {/* Quick Mobile Access to Admin & CMS */}
+          {isAuthenticated && (isAdmin || canAccessCms) && (
+            <div className="pt-2 border-t border-slate-100 space-y-1.5">
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => handleOpenPanel('admin')}
+                  className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <span>⚙️</span>
+                    <span>Panel Admin Toko</span>
+                  </span>
+                  <ArrowRight size={13} />
+                </button>
+              )}
+              {canAccessCms && (
+                <button
+                  type="button"
+                  onClick={() => handleOpenPanel('cms')}
+                  className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-xl cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <span>🎨</span>
+                    <span>Masuk ke Filament CMS</span>
+                  </span>
+                  <ArrowRight size={13} />
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
     </header>
