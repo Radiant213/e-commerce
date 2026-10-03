@@ -416,6 +416,10 @@ class CmsSeeder extends Seeder
                     'badge' => 'Trending Sekarang',
                     'title' => 'Produk Pilihan Minggu Ini',
                     'limit' => 8,
+                    'selection_mode' => 'auto',
+                    'show_tabs' => true,
+                    'pinned_product_ids' => [],
+                    'manual_tab_label' => 'Pilihan Kami',
                 ],
             ],
             [

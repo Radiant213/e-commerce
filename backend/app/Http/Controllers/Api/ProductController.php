@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Cms\HomepageSection;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -116,15 +117,47 @@ class ProductController extends Controller
 
     /**
      * Get featured products for homepage.
+     * Supports manual product pinning configured from CMS Atur Beranda.
      */
     public function featured(): JsonResponse
     {
+        $showcase = HomepageSection::where('type', 'product_showcase')->first();
+        $config = $showcase?->config ?? [];
+        $selectionMode = $config['selection_mode'] ?? 'auto';
+        $pinnedIds = $config['pinned_product_ids'] ?? [];
+
+        if ($selectionMode === 'manual' && !empty($pinnedIds) && is_array($pinnedIds)) {
+            $products = Product::whereIn('id', $pinnedIds)
+                ->active()
+                ->with(['primaryImage', 'category'])
+                ->get()
+                ->sortBy(fn ($p) => array_search($p->id, $pinnedIds))
+                ->values();
+
+            if ($products->isNotEmpty()) {
+                return response()->json(['data' => $products]);
+            }
+        }
+
+        $limit = (int) ($config['limit'] ?? 8);
+        if ($limit < 1) {
+            $limit = 8;
+        }
+
         $products = Product::active()
             ->featured()
-            ->with('primaryImage')
+            ->with(['primaryImage', 'category'])
             ->orderBy('total_sold', 'desc')
-            ->take(8)
+            ->take($limit)
             ->get();
+
+        if ($products->isEmpty()) {
+            $products = Product::active()
+                ->with(['primaryImage', 'category'])
+                ->orderBy('total_sold', 'desc')
+                ->take($limit)
+                ->get();
+        }
 
         return response()->json(['data' => $products]);
     }

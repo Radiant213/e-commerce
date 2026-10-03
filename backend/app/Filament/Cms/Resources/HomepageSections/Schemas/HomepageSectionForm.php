@@ -2,8 +2,11 @@
 
 namespace App\Filament\Cms\Resources\HomepageSections\Schemas;
 
+use App\Models\Product;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -104,6 +107,41 @@ class HomepageSectionForm
                                     ->label('Teks Tombol Submit')
                                     ->visible(fn ($record) => $record?->type === 'newsletter'),
 
+                                // Product Showcase specific: Mode selection, pinned products, and tabs
+                                Radio::make('config.selection_mode')
+                                    ->label('Mode Penentuan Produk')
+                                    ->options([
+                                        'auto' => 'Otomatis (Berdasarkan Produk Paling Populer / Featured)',
+                                        'manual' => 'Pilih Manual (Pin Produk Pilihan Sendiri)',
+                                    ])
+                                    ->default('auto')
+                                    ->inline()
+                                    ->live()
+                                    ->helperText('Pilih "Pilih Manual" jika ingin menentukan produk spesifik yang ditampilkan di etalase beranda.')
+                                    ->visible(fn ($record) => $record?->type === 'product_showcase'),
+
+                                Select::make('config.pinned_product_ids')
+                                    ->label('Pilih & Urutkan Produk Unggulan')
+                                    ->multiple()
+                                    ->reorderable()
+                                    ->searchable()
+                                    ->preload()
+                                    ->options(fn () => Product::where('is_active', true)->pluck('name', 'id')->toArray())
+                                    ->helperText('Pilih produk yang ingin dipin. Anda dapat mengubah urutan tampilan produk dengan menggeser (drag & drop) item.')
+                                    ->visible(fn ($record, $get) => $record?->type === 'product_showcase' && $get('config.selection_mode') === 'manual'),
+
+                                TextInput::make('config.manual_tab_label')
+                                    ->label('Label Tab Produk Pilihan')
+                                    ->placeholder('Contoh: Pilihan Kami / Spotlight')
+                                    ->default('Pilihan Kami')
+                                    ->visible(fn ($record, $get) => $record?->type === 'product_showcase' && $get('config.selection_mode') === 'manual'),
+
+                                Toggle::make('config.show_tabs')
+                                    ->label('Tampilkan Tab Filter (Pilihan, Terlaris, Terbaru)')
+                                    ->helperText('Jika dimatikan, hanya produk unggulan yang ditampilkan tanpa tombol pemilih tab.')
+                                    ->default(true)
+                                    ->visible(fn ($record) => $record?->type === 'product_showcase'),
+
                                 // Limit for Products / Categories
                                 TextInput::make('config.limit')
                                     ->label('Jumlah Item Ditampilkan')
@@ -138,6 +176,9 @@ class HomepageSectionForm
                                 Textarea::make('config_translations.en.subtitle')
                                     ->label('Subjudul (EN)')
                                     ->rows(3),
+                                TextInput::make('config_translations.en.manual_tab_label')
+                                    ->label('Manual Tab Label (EN)')
+                                    ->visible(fn ($record) => $record?->type === 'product_showcase'),
                                 TextInput::make('config_translations.en.cta_primary_text')
                                     ->label('Primary CTA Text (EN)')
                                     ->visible(fn ($record) => $record?->type === 'hero'),

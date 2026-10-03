@@ -287,7 +287,11 @@ const HomePage = () => {
 
       // 3. Product Showcase Section
       case 'product_showcase': {
-        const limit = config.limit || 8;
+        const limit = config.limit ? Number(config.limit) : 8;
+        const showTabs = config.show_tabs !== false;
+        const isManual = config.selection_mode === 'manual' && Array.isArray(config.pinned_product_ids) && config.pinned_product_ids.length > 0;
+        const manualTabLabel = config.manual_tab_label || 'Pilihan Kami';
+
         return (
           <section key={section.id || idx} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 text-left border-b border-slate-200 pb-4 gap-4">
@@ -298,38 +302,43 @@ const HomePage = () => {
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">
                   {config.title || t('showcase_title')}
                 </h2>
+                {config.subtitle && (
+                  <p className="text-xs text-slate-500 mt-1 max-w-2xl">{config.subtitle}</p>
+                )}
               </div>
 
               {/* Interactive Filter Pills */}
-              <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('featured')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    activeTab === 'featured' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  {t('tab_featured')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('bestsellers')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    activeTab === 'bestsellers' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  {t('tab_bestsellers')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('new')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    activeTab === 'new' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  {t('tab_new')}
-                </button>
-              </div>
+              {showTabs && (
+                <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('featured')}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      activeTab === 'featured' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    {isManual ? manualTabLabel : t('tab_featured')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('bestsellers')}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      activeTab === 'bestsellers' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    {t('tab_bestsellers')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('new')}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      activeTab === 'new' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    {t('tab_new')}
+                  </button>
+                </div>
+              )}
             </div>
 
             {isLoading ? (
